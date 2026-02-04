@@ -14,7 +14,7 @@ export const Login: React.FC = () => {
   const [isBlurred, setIsBlurred] = useState(false);
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  // const haveWorkspace = localStorage.getItem("workspace");
+  const haveWorkspace = localStorage.getItem("workspace");
   const { setUser } = useAuth();
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export const Login: React.FC = () => {
     event.preventDefault();
     setError(null);
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch("/api/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -112,7 +112,7 @@ export const Login: React.FC = () => {
             type="email"
             id="email"
             name="email"
-            className="bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-300"
             onChange={handleEmailChange}
           />
         </div>
@@ -130,7 +130,7 @@ export const Login: React.FC = () => {
             type="password"
             id="password"
             name="password"
-            className="bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-300"
             onChange={handlePasswordChange}
           />
         </div>

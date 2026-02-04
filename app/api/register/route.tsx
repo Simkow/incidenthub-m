@@ -11,7 +11,8 @@ export async function POST(req: Request) {
 
         // check if user exists
         const [existingUser] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        if(existingUser.length > 0) {
+        const users = existingUser as any[]
+        if(users.length > 0) {
             return Response.json({ message: 'User already exists' }, { status: 400 });
         }
 
