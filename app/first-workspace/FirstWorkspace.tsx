@@ -3,18 +3,27 @@
 import Link from "next/link";
 import Image from "next/image";
 import Arrow from "../../public/assets/down-arrow.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { useAuth } from "../AuthProvider";
 
 export const FirstWorkspace: React.FC = () => {
-  const userEmail = localStorage.getItem("userEmail");
-  const userName = localStorage.getItem("users")?.split('"').join("");
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [isClicked, setIsClicked] = useState(false);
   const [projectName, setProjectName] = useState("");
   const { user } = useAuth();
   const username = user?.name;
   const id = user?.id;
+
+  useEffect(() => {
+    setUserName(window.localStorage.getItem("users")?.split('"').join(""));
+  }, []);
+
+  useEffect(() => {
+    setUserEmail(window.localStorage.getItem("userEmail"));
+  }, [])
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +114,7 @@ export const FirstWorkspace: React.FC = () => {
                   type="text"
                   id="projectName"
                   name="projectName"
-                  className="bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                  className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
                   placeholder="Enter project name"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
@@ -117,11 +126,12 @@ export const FirstWorkspace: React.FC = () => {
                   Workspace URL
                 </label>
                 <input
+                  readOnly
                   type="text"
                   id="workspaceUrl"
                   value={`http://localhost:5173/${userName}/${projectName}`}
                   name="workspaceUrl"
-                  className="bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                  className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
                   placeholder="Enter workspace name"
                 />
               </div>

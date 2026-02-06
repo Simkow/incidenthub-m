@@ -19,11 +19,9 @@ export async function POST(req: Request) {
         //hash password
         const hashedPassword = await bcrypt.hash(password, 10);
        
-        await pool.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, hashedPassword]);
+        await pool.query('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)', [name, email, hashedPassword]);
 
-        if (!existingUser && {status: 201}) {
-            return Response.json({ message: 'User registered successfully' }, { status: 201 });
-        } 
+        return Response.json({ message: 'User registered successfully' }, { status: 201 });
         
     } catch (error) {
         console.error(error);

@@ -12,7 +12,7 @@ import Image from "next/image";
 export const Hero: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
   const { user } = useAuth();
-  const workspace = localStorage.getItem("workspace");
+  const workspace = window.localStorage.getItem("workspace");
   const MotionImage = motion(Image);
 
   useEffect(() => {

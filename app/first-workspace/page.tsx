@@ -1,16 +1,16 @@
-// "use client";
+"use client";
 
-// import { FirstWorkspace } from './FirstWorkspace'
+import { FirstWorkspace } from './FirstWorkspace'
 
-// const FirstWorkspace = () => {
+const First = () => {
 
-//   return(
-//     <div>
-//       <FirstWorkspace />
-//     </div>
-//   )
+  return(
+    <div>
+      <FirstWorkspace />
+    </div>
+  )
 
-// }
+};
 
-// export default FirstWorkspace
+export default First
 

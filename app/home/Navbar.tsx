@@ -6,8 +6,8 @@ import { useAuth } from "../AuthProvider";
 import Image from "next/image";
 
 export const Navbar: React.FC = () => {
-  const token = localStorage.getItem("users");
-  const workspace = localStorage.getItem("workspace");
+  const token = window.localStorage.getItem("users");
+  const workspace = window.localStorage.getItem("workspace");
   const { user } = useAuth();
 
   return (

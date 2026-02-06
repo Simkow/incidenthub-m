@@ -20,6 +20,7 @@ import { useAuth } from "../AuthProvider";
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState<string[]>([]);
+  const [currentWorkspace, setCurrentWorkspace] = useState("");
   const { user } = useAuth();
   const Workspace_Links = [
     { name: "Projects", to: "/app/projects", icon: Projects },
@@ -55,7 +56,11 @@ export const Sidebar: React.FC = () => {
     fetchWorkspaces();
   }, []);
 
-  const currentWorkspace = localStorage.getItem("workspace") || "No Workspace";
+  useEffect (() => {
+    if (typeof window !== "undefined") {
+      setCurrentWorkspace(window.localStorage.getItem("workspace") || "No Workspace");
+    }
+  })
 
   return (
     <div className="fixed flex flex-col items-start justify-start gap-6 left-0 top-0 p-3 w-48 h-full bg-[#121212] manrope">

@@ -34,7 +34,7 @@ export const Register: React.FC = () => {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:3000/register", {
+      const response = await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export const Register: React.FC = () => {
             type="text"
             id="name"
             name="name"
-            className="bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
             onChange={handleNameChange}
           />
         </div>
@@ -109,7 +109,7 @@ export const Register: React.FC = () => {
             type="email"
             id="email"
             name="email"
-            className="bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
             onChange={handleEmailChange}
           />
         </div>
@@ -127,7 +127,7 @@ export const Register: React.FC = () => {
             type="password"
             id="password"
             name="password"
-            className="bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
             onChange={handlePasswordChange}
           />
         </div>
