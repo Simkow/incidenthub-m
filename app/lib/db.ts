@@ -1,11 +1,28 @@
 import { neon } from '@neondatabase/serverless';
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL env var is not set');
+export type SqlTag = (
+  strings: TemplateStringsArray,
+  ...values: unknown[]
+) => Promise<any[]>;
+
+let cachedSql: ReturnType<typeof neon> | null = null;
+
+function getSql() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL env var is not set');
+  }
+
+  if (!cachedSql) {
+    cachedSql = neon(databaseUrl);
+  }
+
+  return cachedSql;
 }
 
-const link = 'postgresql://neondb_owner:npg_D0arJmP6cHUw@ep-delicate-tooth-agfl0bpg-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
-
-const sql = neon(link);
+const sql: SqlTag = (strings: TemplateStringsArray, ...values: unknown[]) => {
+  const tag = getSql() as unknown as SqlTag;
+  return tag(strings, ...values);
+};
 
 export { sql };
