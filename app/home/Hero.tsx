@@ -1,19 +1,27 @@
 "use client";
 
 import { motion } from "motion/react";
-import React from "react";
 import BgImage from "../../public/assets/hero-bg.png";
 import BgImage2 from "../../public/assets/hero-bg2.png";
-import { useEffect, useState } from "react";
-import { useAuth } from "../AuthProvider";
+import { useEffect, useState, type FC } from "react";
 import Link from "next/link";
+import { useAuth } from '../AuthProvider'
 import Image from "next/image";
+import { useCurrentWorkspace } from "./CurrentWorkspace";
 
-export const Hero: React.FC = () => {
+const MotionImage = motion(Image);
+
+export const Hero: FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [username] = useState<string | null>(() => {
+    if (typeof window === "undefined") return "";
+    const usr = window.localStorage.getItem("users");
+    return usr ? usr.replace(/"/g, "") : "";
+  });
   const { user } = useAuth();
-  const workspace = window.localStorage.getItem("workspace");
-  const MotionImage = motion(Image);
+
+  const workspace = useCurrentWorkspace(user?.name);
+  const hasDashboard = !!user?.name && !!workspace;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -23,17 +31,17 @@ export const Hero: React.FC = () => {
   }, [isVisible]);
 
   return (
-    <main className="w-full min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-32 px-56 manrope text-center text-neutral-100 pb-40">
+    <main className="w-full min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-32 px-56 body-text text-center text-neutral-100 pb-40">
       <div className="w-full h-full z-0">
-        <div className="w-[150px] h-[150px] rounded-full bg-[#dceef6] absolute blur-3xl right-0 top-32 opacity-50"></div>
-        <div className="w-[200px] h-[300px] rounded-full bg-[#dceef6] absolute blur-3xl left-40 bottom-20 opacity-50 -rotate-10"></div>
+        <div className="w-37.5 h-37.5 rounded-full bg-[#dceef6] absolute blur-3xl right-0 top-32 opacity-50"></div>
+        <div className="w-50 h-75 rounded-full bg-[#dceef6] absolute blur-3xl left-40 bottom-20 opacity-50 -rotate-10"></div>
       </div>
       <div className="justify-start flex flex-col gap-4 mt-20 z-40 relative pl-5">
         <motion.div
           initial={{ opacity: 0, filter: "blur(10px)" }}
           animate={{ opacity: 1, filter: "blur(0px)" }}
           transition={{ duration: 1 }}
-          className="w-[1px] h-full bg-white/30 absolute left-0 top-1/2 -translate-y-1/2"
+          className="w-px h-full bg-white/30 absolute left-0 top-1/2 -translate-y-1/2"
         ></motion.div>
         <motion.h1
           initial={{ opacity: 0, filter: "blur(10px)" }}
@@ -48,7 +56,7 @@ export const Hero: React.FC = () => {
             transition={{ duration: 1.3 }}
           >
             handle{" "}
-            <span className="text-transparent bg-gradient-to-l from-neutral-400 to-white bg-clip-text">
+            <span className="text-transparent bg-linear-to-l from-neutral-400 to-white bg-clip-text">
               incidents.
             </span>
           </motion.span>
@@ -63,7 +71,7 @@ export const Hero: React.FC = () => {
           <br /> frontend-first workflow designed for real-world scenarios.
         </motion.h2>
         <div className="justify-start flex gap-8">
-          <Link href={`/dashboard/${user?.name}/${workspace}`}>
+          <Link href={hasDashboard ? `/${username}/${workspace}` : "/login"}>
             <motion.button
               initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
@@ -90,14 +98,14 @@ export const Hero: React.FC = () => {
           transition={{ duration: 0.8 }}
           src={BgImage}
           alt="Hero Background"
-          className="w-[1200px] h-[500px] -rotate-10 scale-110 hover:scale-115 transition-all duration-1000"
+          className="w-300 h-125 -rotate-10 scale-110 hover:scale-115 transition-all duration-1000"
         />
         <MotionImage
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2 }}
           src={BgImage2}
           alt="Hero Background 2"
-          className="w-[1200px] h-[500px] absolute top-5 left-40 -rotate-10 scale-110 hover:scale-115 transition-all duration-1000 blur-[0.5px] hover:blur-none"
+          className="w-300 h-125 absolute top-5 left-40 -rotate-10 scale-110 hover:scale-115 transition-all duration-1000 blur-[0.5px] hover:blur-none"
         />
       </div>
     </main>

@@ -9,10 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.2.6",
+    "@neondatabase/neon-js": "^0.2.0-beta.1",
+    "@neondatabase/serverless": "^1.0.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "motion": "^12.31.0",
+    "mysql2": "^3.16.3",
+    "neondatabase": "^0.0.1-security",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

@@ -14,8 +14,12 @@ export const Login: React.FC = () => {
   const [isBlurred, setIsBlurred] = useState(false);
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const haveWorkspace = localStorage.getItem("workspace");
   const { setUser } = useAuth();
+  const [workspace] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const works = window.localStorage.getItem("workspace");
+    return works ? works.replace(/"/g, "") : "";
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -48,14 +52,40 @@ export const Login: React.FC = () => {
       if (response.ok) {
         console.log("Login successful");
         localStorage.setItem("authToken", "logged-in");
-        localStorage.setItem("users", JSON.stringify(data.user.name)); // Store token in localStorage
+        localStorage.setItem("users", JSON.stringify(data.user.name));
         localStorage.setItem("userEmail", JSON.stringify(data.user.email));
         setUser(data.user);
-        if (!haveWorkspace) {
+
+        // sprawdź w bazie, czy user ma już workspace
+        try {
+          const wsRes = await fetch("/api/get-workspace", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: data.user.name }),
+          });
+
+          if (wsRes.ok) {
+            const wsData = await wsRes.json();
+            const workspaceName = wsData.workspace as string | null;
+
+            if (workspace) {
+              router.push(`/${data.user.name}/${workspace}`);
+              return;
+            }
+
+            if (workspaceName) {
+              localStorage.setItem("workspace", JSON.stringify(workspaceName));
+              router.push(`/${data.user.name}/${workspaceName}`);
+              return;
+            }
+          }
+
+          // brak workspace w bazie lub błąd API -> first-workspace
           router.push("/first-workspace");
           return;
-        } else {
-          router.push(`/dashboard/${data.user.name}/${haveWorkspace}`); // Navigate to dashboard with user ID
+        } catch {
+          router.push("/first-workspace");
+          return;
         }
       }
       if (response.status === 400) {

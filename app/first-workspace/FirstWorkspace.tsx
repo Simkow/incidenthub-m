@@ -3,42 +3,42 @@
 import Link from "next/link";
 import Image from "next/image";
 import Arrow from "../../public/assets/down-arrow.png";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
-import { useAuth } from "../AuthProvider";
 
 export const FirstWorkspace: React.FC = () => {
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
+  const [userName] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    const storedUser = window.localStorage.getItem("users");
+    return storedUser ? storedUser.replace(/"/g, "") : "";
+  });
+  const [userEmail] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const storedMail = window.localStorage.getItem("userEmail");
+    return storedMail ? storedMail.replace(/"/g, "") : "";
+  });
   const [isClicked, setIsClicked] = useState(false);
   const [projectName, setProjectName] = useState("");
-  const { user } = useAuth();
-  const username = user?.name;
-  const id = user?.id;
-
-  useEffect(() => {
-    setUserName(window.localStorage.getItem("users")?.split('"').join(""));
-  }, []);
-
-  useEffect(() => {
-    setUserEmail(window.localStorage.getItem("userEmail"));
-  }, [])
-
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:3000/add-workspace", {
+      const response = await fetch("/api/first-workspace", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          workspace_name: projectName,
-          owner_id: id,
-          owner: username,
+          workspace: projectName,
+          username: userName,
         }),
       });
+      if (!projectName || !userName) {
+        console.error("Missing project name");
+        setError("Missing project name");
+        return;
+      }
       localStorage.setItem("workspace", projectName);
       if (localStorage.getItem("workspace")?.includes(" ") === true) {
         const trimmedWorkspace = localStorage
@@ -48,7 +48,7 @@ export const FirstWorkspace: React.FC = () => {
       }
       if (response.ok) {
         console.log("Workspace created successfully");
-        window.location.href = `/dashboard/${username}/${projectName}`;
+        window.location.href = `/${userName}/${projectName}`;
       }
       if (!response.ok) {
         console.error("Failed to create workspace");
@@ -85,7 +85,7 @@ export const FirstWorkspace: React.FC = () => {
             Welcome to your first workspace!
           </h1>
           <p className="text-neutral-400 text-center w-1/2">
-            It looks like you haven't set up any projects or teams yet. Get
+            It looks like you haven&apos;t set up any projects or teams yet. Get
             started by creating your first project and inviting team members to
             collaborate.
           </p>
@@ -135,6 +135,7 @@ export const FirstWorkspace: React.FC = () => {
                   placeholder="Enter workspace name"
                 />
               </div>
+              <span className="text-red-400 text-sm">{error}</span>
               <button
                 type="submit"
                 className="bg-black text-white rounded-lg px-6 py-3 hover:bg-neutral-800 transition cursor-pointer"

@@ -1,32 +1,63 @@
 "use client";
 
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import Logo from "../../public/assets/IncidentHub-logo-white.png";
-import Inbox from "../../public/assets/inbox.png";
-import Incidents from "../../public/assets/issues.png";
-import Add from "../../public/assets/add.png";
-import Projects from "../../public/assets/projects.png";
-import Views from "../../public/assets/views.png";
-import Teams from "../../public/assets/teams.png";
-import Friends from "../../public/assets/friends.png";
-import Settings from "../../public/assets/settings.png";
-import Project from "../../public/assets/current-project.png";
-import Arrow from "../../public/assets/down-arrow.png";
-import { useAuth } from "../AuthProvider";
+import { usePathname } from "next/navigation";
+import Logo from "../../../public/assets/IncidentHub-logo-white.png";
+import Inbox from "../../../public/assets/inbox.png";
+import Incidents from "../../../public/assets/issues.png";
+import Add from "../../../public/assets/add.png";
+import Projects from "../../../public/assets/projects.png";
+import Views from "../../../public/assets/views.png";
+import Teams from "../../../public/assets/teams.png";
+import Friends from "../../../public/assets/friends.png";
+import Settings from "../../../public/assets/settings.png";
+import Project from "../../../public/assets/current-project.png";
+import Arrow from "../../../public/assets/down-arrow.png";
+import Tasks from "../../../public/assets/tasks.png";
 
 export const Sidebar: React.FC = () => {
+  const pathname = usePathname();
+
+  const isActiveLink = (href: string) => {
+    const current = (pathname ?? "").replace(/\/$/, "");
+    const target = href.replace(/\/$/, "");
+
+    if (!current || !target) return false;
+    return current === target || current.startsWith(`${target}/`);
+  };
+
   const [isOpen, setIsOpen] = useState(false);
-  const [workspaces, setWorkspaces] = useState<string[]>([]);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [currentWorkspace, setCurrentWorkspace] = useState("");
-  const { user } = useAuth();
+  const [user, setUser] = useState("");
   const Workspace_Links = [
-    { name: "Projects", to: "/app/projects", icon: Projects },
+    { name: "Tasks", to: `/${user}/${currentWorkspace}/tasks`, icon: Tasks },
+    { name: "Project", to: "/app/project", icon: Projects },
     { name: "Views", to: "/app/views", icon: Views },
     { name: "Teams", to: "/app/teams", icon: Teams },
   ];
+
+  type Workspace = {
+    workspace_name: string;
+  };
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const usr = window.localStorage.getItem("users");
+    const work = window.localStorage.getItem("workspace");
+
+    const nextUser = usr ? usr.replace(/"/g, "") : "";
+    const nextWorkspace = work ? work.replace(/"/g, "") || "No Workspace" : "";
+
+    queueMicrotask(() => {
+      setUser(nextUser);
+      setCurrentWorkspace(nextWorkspace);
+    });
+  }, []);
 
   const Teams_Links = [
     { name: "Friends", to: "/dashboard", icon: Friends },
@@ -37,15 +68,13 @@ export const Sidebar: React.FC = () => {
   React.useEffect(() => {
     const fetchWorkspaces = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/workspaces/${localStorage.getItem("users")?.split('"').join("")}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+        const response = await fetch(`/api/workspace`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        );
+          body: JSON.stringify({ owner: user }),
+        });
         const data = await response.json();
         setWorkspaces(data.workspaces);
       } catch (error) {
@@ -53,17 +82,12 @@ export const Sidebar: React.FC = () => {
       }
     };
 
+    if (!user) return;
     fetchWorkspaces();
-  }, []);
-
-  useEffect (() => {
-    if (typeof window !== "undefined") {
-      setCurrentWorkspace(window.localStorage.getItem("workspace") || "No Workspace");
-    }
-  })
+  }, [user]);
 
   return (
-    <div className="fixed flex flex-col items-start justify-start gap-6 left-0 top-0 p-3 w-48 h-full bg-[#121212] manrope">
+    <div className="fixed flex flex-col items-start justify-start gap-6 left-0 top-0 p-3 w-48 h-full bg-[#121212] manrope z-50">
       <Link href={"/"}>
         <Image
           src={Logo}
@@ -103,7 +127,7 @@ export const Sidebar: React.FC = () => {
                   className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs"
                   onClick={() => {
                     localStorage.setItem("workspace", workspace.workspace_name);
-                    window.location.href = `/dashboard/${user?.name}/${workspace.workspace_name}`;
+                    window.location.href = `/${user}/${workspace.workspace_name}/tasks`;
                   }}
                 >
                   {workspace.workspace_name}
@@ -132,7 +156,7 @@ export const Sidebar: React.FC = () => {
             width={16}
             height={16}
           />
-          <span className="text-white text-xs font-medium">My issues</span>
+          <span className="text-white text-xs font-medium">My tasks</span>
         </div>
       </section>
       <section className="flex flex-col items-start gap-2 text-white">
@@ -142,7 +166,10 @@ export const Sidebar: React.FC = () => {
             <Link
               key={link.name}
               href={link.to}
-              className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 hover:bg-white/10 cursor-pointer"
+              className={
+                "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 cursor-pointer " +
+                (isActiveLink(link.to) ? "bg-white/10" : "hover:bg-white/10")
+              }
             >
               <Image
                 src={link.icon}
@@ -173,7 +200,10 @@ export const Sidebar: React.FC = () => {
             <Link
               key={link.name}
               href={link.to}
-              className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 hover:bg-white/10 cursor-pointer"
+              className={
+                "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 cursor-pointer " +
+                (isActiveLink(link.to) ? "bg-white/10" : "hover:bg-white/10")
+              }
             >
               <Image
                 src={link.icon}

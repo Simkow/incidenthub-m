@@ -2,19 +2,28 @@
 
 import Logo from "../../public/assets/IncidentHub-logo-white.png";
 import Link from "next/link";
+import { useState } from "react";
 import { useAuth } from "../AuthProvider";
 import Image from "next/image";
+import { useCurrentWorkspace } from "./CurrentWorkspace";
 
 export const Navbar: React.FC = () => {
-  const token = window.localStorage.getItem("users");
-  const workspace = window.localStorage.getItem("workspace");
   const { user } = useAuth();
+  const [token] = useState(() => {
+    if (typeof window === "undefined") return;
+
+    const storedToken = window.localStorage.getItem("authToken");
+    return storedToken ? storedToken.replace(/"/g, "") : "";
+  });
+
+  const workspace = useCurrentWorkspace(user?.name);
+  const hasDashboard = !!user?.name && !!workspace;
 
   return (
-    <div className="w-full h-18 fixed px-56 py-4 bg-[#090909]/70 text-gray-400 flex items-center justify-between jost border-b border-white/30 z-50 backdrop-blur-sm">
-      <div className="flex gap-4 flex items-center justify-center">
+    <div className="w-full h-18 fixed px-56 py-4 bg-[#090909]/70 text-gray-400 flex items-center justify-between heading border-b border-white/30 z-50 backdrop-blur-sm">
+      <div className="flex gap-4 items-center justify-center">
         <Image src={Logo} alt="IncidentHub Logo" className="h-12 w-12" />
-        <span className="font-medium text-lg text-transparent bg-gradient-to-r from-neutral-200 to-neutral-300 bg-clip-text">
+        <span className="font-medium text-lg text-transparent bg-linear-to-r from-neutral-200 to-neutral-300 bg-clip-text">
           IncidentHub
         </span>
       </div>
@@ -26,7 +35,7 @@ export const Navbar: React.FC = () => {
           Product
         </Link>
         <Link
-          href={`/dashboard/${user?.name}/${workspace}`}
+          href={hasDashboard ? `/${user!.name}/${workspace}` : "/login"}
           className=" hover:text-neutral-300 transition-all duration-300"
         >
           Dashboard
@@ -39,17 +48,17 @@ export const Navbar: React.FC = () => {
         </Link>
       </div>
       <div>
-        {token === null ? (
+        {!token ? (
           <div className="flex gap-4 text-base">
             <Link
               href="/login"
-              className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border-[1px] border-white/50 transition-all duration-300"
+              className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-white/50 transition-all duration-300"
             >
               Login
             </Link>
             <Link
               href="/login"
-              className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white/100 rounded-xl border-[1px] border-white/50 transition-all duration-300"
+              className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-white/50 transition-all duration-300"
             >
               Open App
             </Link>
@@ -59,13 +68,13 @@ export const Navbar: React.FC = () => {
             <Link
               href="/login"
               onClick={() => localStorage.removeItem("authToken")}
-              className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border-[1px] border-white/50 transition-all duration-300"
+              className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-white/50 transition-all duration-300"
             >
               Logout
             </Link>
             <Link
-              href={`/dashboard/${user?.name}/${workspace}`}
-              className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white/100 rounded-xl border-[1px] border-white/50 transition-all duration-300"
+              href={hasDashboard ? `/${user!.name}/${workspace}` : "/login"}
+              className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-white/50 transition-all duration-300"
             >
               Open App
             </Link>
