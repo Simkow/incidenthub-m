@@ -75,7 +75,7 @@ export const Login: React.FC = () => {
 
             if (workspaceName) {
               localStorage.setItem("workspace", JSON.stringify(workspaceName));
-              router.push(`/${data.user.name}/${workspaceName}`);
+              router.push(`/${data.user.name}/${workspaceName}/tasks`);
               return;
             }
           }
@@ -173,7 +173,10 @@ export const Login: React.FC = () => {
           </button>
           {error && <p className="text-red-300 text-sm">{error}</p>}
           <Link href="/register">
-            <button className="text-neutral-400 hover:underline text-sm cursor-pointer">
+            <button
+              type="button"
+              className="text-neutral-400 hover:underline text-sm cursor-pointer"
+            >
               Register...
             </button>
           </Link>

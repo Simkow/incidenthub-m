@@ -12,6 +12,7 @@ export const Register: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isBlurred, setIsBlurred] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export const Register: React.FC = () => {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError(null);
     try {
       const response = await fetch("/api/register", {
         method: "POST",
@@ -41,13 +43,19 @@ export const Register: React.FC = () => {
         },
         body: JSON.stringify({ name, email, password }),
       });
+
+      const data = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+
       if (response.ok) {
         router.push("/login");
       } else {
-        console.error("Registration failed");
+        setError(data?.message || "Registration failed");
       }
     } catch (error) {
       console.error("Error during registration:", error);
+      setError("Registration failed");
     }
   }
 
@@ -61,7 +69,6 @@ export const Register: React.FC = () => {
         height={1080}
       />
       <form
-        action="submit"
         onSubmit={handleSubmit}
         className="rounded-xl bg-neutral-900/30 px-8 py-5 flex justify-center items-center flex-col gap-4 shadow-lg shadow-black/30 backdrop-blur-[1px] border border-white/20 z-20"
       >
@@ -92,6 +99,7 @@ export const Register: React.FC = () => {
             id="name"
             name="name"
             className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            value={name}
             onChange={handleNameChange}
           />
         </div>
@@ -110,6 +118,7 @@ export const Register: React.FC = () => {
             id="email"
             name="email"
             className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            value={email}
             onChange={handleEmailChange}
           />
         </div>
@@ -128,6 +137,7 @@ export const Register: React.FC = () => {
             id="password"
             name="password"
             className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            value={password}
             onChange={handlePasswordChange}
           />
         </div>
@@ -138,8 +148,12 @@ export const Register: React.FC = () => {
           >
             Register
           </button>
+          {error && <p className="text-red-300 text-sm">{error}</p>}
           <Link href="/login">
-            <button className="text-neutral-400 hover:underline text-sm cursor-pointer">
+            <button
+              type="button"
+              className="text-neutral-400 hover:underline text-sm cursor-pointer"
+            >
               Login...
             </button>
           </Link>
