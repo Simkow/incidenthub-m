@@ -2,7 +2,9 @@ import { sql } from "../../lib/db";
 
 export async function DELETE(req: Request) {
   try {
-    const body = (await req.json().catch(() => null)) as { id?: unknown } | null;
+    const body = (await req.json().catch(() => null)) as {
+      id?: unknown;
+    } | null;
 
     const idRaw = body?.id;
     const id = typeof idRaw === "number" ? idRaw : Number(idRaw);
