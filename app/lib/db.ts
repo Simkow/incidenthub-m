@@ -10,7 +10,9 @@ let cachedSql: ReturnType<typeof neon> | null = null;
 function getSql() {
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL env var is not set');
+    throw new Error(
+      "DATABASE_URL env var is not set (create .env.local with DATABASE_URL=...)",
+    );
   }
 
   if (!cachedSql) {
@@ -26,3 +28,4 @@ const sql: SqlTag = (strings: TemplateStringsArray, ...values: unknown[]) => {
 };
 
 export { sql };
+

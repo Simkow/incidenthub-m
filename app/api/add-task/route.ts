@@ -1,5 +1,7 @@
 import { sql } from "../../lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const {
@@ -19,8 +21,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const idRow =
-      await sql`SELECT id FROM users WHERE name = ${assignee} LIMIT 1`;
+    const idRow = await sql`SELECT id FROM users WHERE name = ${assignee} LIMIT 1`;
 
     if (!idRow.length) {
       return Response.json({ message: "Assignee not found" }, { status: 400 });
@@ -39,7 +40,10 @@ export async function POST(req: Request) {
       `;
 
       if (!createdRow.length) {
-        return Response.json({ message: "Creator not found" }, { status: 400 });
+        return Response.json(
+          { message: "Creator not found" },
+          { status: 400 },
+        );
       }
 
       createdById = createdRow[0].id as number;
@@ -50,11 +54,11 @@ export async function POST(req: Request) {
 
     if (workspaceName) {
       const wsRow = await sql`
-                SELECT id
-                FROM workspaces
-                WHERE workspace_name = ${workspaceName}
-                LIMIT 1
-            `;
+        SELECT id
+        FROM workspaces
+        WHERE workspace_name = ${workspaceName}
+        LIMIT 1
+      `;
 
       if (!wsRow.length) {
         return Response.json(
@@ -92,10 +96,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return Response.json(
-      { message: "Task added successfully" },
-      { status: 200 },
-    );
+    return Response.json({ message: "Task added successfully" }, { status: 200 });
   } catch (error) {
     console.error(error);
     return Response.json({ message: "Internal server error" }, { status: 500 });

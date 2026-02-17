@@ -1,5 +1,7 @@
 import { sql } from "../../lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as {
@@ -7,17 +9,14 @@ export async function POST(req: Request) {
       workspace?: unknown;
     } | null;
 
-    const username =
-      typeof body?.username === "string" ? body.username.trim() : "";
-    const workspace =
-      typeof body?.workspace === "string" ? body.workspace.trim() : "";
+    const username = typeof body?.username === "string" ? body.username.trim() : "";
+    const workspace = typeof body?.workspace === "string" ? body.workspace.trim() : "";
 
     if (!username) {
       return Response.json({ message: "username is invalid" }, { status: 400 });
     }
 
-    const userRow =
-      await sql`SELECT id FROM users WHERE name = ${username} LIMIT 1`;
+    const userRow = await sql`SELECT id FROM users WHERE name = ${username} LIMIT 1`;
     const userId = userRow[0]?.id as number | undefined;
 
     if (!userId) {
@@ -26,31 +25,27 @@ export async function POST(req: Request) {
 
     if (workspace) {
       const wsRow = await sql`
-                        SELECT id
-                        FROM workspaces
-                        WHERE workspace_name = ${workspace}
-                        LIMIT 1
-                    `;
+        SELECT id
+        FROM workspaces
+        WHERE workspace_name = ${workspace}
+        LIMIT 1
+      `;
 
       const workspaceId = wsRow[0]?.id as number | undefined;
       if (!workspaceId) {
-        return Response.json(
-          { message: "Workspace not found" },
-          { status: 404 },
-        );
+        return Response.json({ message: "Workspace not found" }, { status: 404 });
       }
 
       const data = await sql`
-                        SELECT *
-                        FROM tasks
-                        WHERE assignee_id = ${userId} AND workspace_id = ${workspaceId} AND is_finished = false
-                    `;
+        SELECT *
+        FROM tasks
+        WHERE assignee_id = ${userId} AND workspace_id = ${workspaceId}
+      `;
 
       return Response.json({ tasks: data ?? [] }, { status: 200 });
     }
 
-    const data =
-      await sql`SELECT * FROM tasks WHERE assignee_id = ${userId} AND is_finished = false`;
+    const data = await sql`SELECT * FROM tasks WHERE assignee_id = ${userId}`;
     return Response.json({ tasks: data ?? [] }, { status: 200 });
   } catch (error) {
     console.error(error);

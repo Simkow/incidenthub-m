@@ -1,5 +1,7 @@
 import { sql } from "../../lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const { username, workspace } = (await req.json()) as {
@@ -13,8 +15,7 @@ export async function POST(req: Request) {
 
     const workspaceName = typeof workspace === "string" ? workspace.trim() : "";
 
-    const user_id =
-      await sql`SELECT id FROM users WHERE name = ${username} LIMIT 1`;
+    const user_id = await sql`SELECT id FROM users WHERE name = ${username} LIMIT 1`;
     const id = user_id[0]?.id;
 
     if (!id) {
@@ -23,18 +24,18 @@ export async function POST(req: Request) {
 
     const data = workspaceName
       ? await sql`
-            SELECT id
-            FROM workspaces
-            WHERE workspace_name = ${workspaceName}
-            LIMIT 1
-          `.then(async (wsRow) => {
+          SELECT id
+          FROM workspaces
+          WHERE workspace_name = ${workspaceName}
+          LIMIT 1
+        `.then(async (wsRow) => {
           const workspaceId = wsRow[0]?.id as number | undefined;
           if (!workspaceId) return null;
           return sql`
-              SELECT *
-              FROM tasks
-              WHERE assignee_id = ${id} AND workspace_id = ${workspaceId} AND is_finished = true
-            `;
+            SELECT *
+            FROM tasks
+            WHERE assignee_id = ${id} AND workspace_id = ${workspaceId} AND is_finished = true
+          `;
         })
       : await sql`SELECT * FROM tasks WHERE assignee_id = ${id} AND is_finished = true`;
 

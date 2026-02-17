@@ -35,7 +35,7 @@ export const Navbar: React.FC = () => {
           Product
         </Link>
         <Link
-          href={hasDashboard ? `/${user!.name}/${workspace}` : "/login"}
+          href={hasDashboard ? `/${user!.name}/${workspace}/tasks` : "/login"}
           className=" hover:text-neutral-300 transition-all duration-300"
         >
           Dashboard

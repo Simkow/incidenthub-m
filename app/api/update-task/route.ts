@@ -1,5 +1,7 @@
 import { sql } from "../../lib/db";
 
+export const dynamic = "force-dynamic";
+
 type UpdateTaskBody = {
   id?: unknown;
   title?: unknown;
@@ -22,23 +24,18 @@ export async function PATCH(req: Request) {
     }
 
     const title = typeof body?.title === "string" ? body.title : null;
-    const description =
-      typeof body?.description === "string" ? body.description : null;
+    const description = typeof body?.description === "string" ? body.description : null;
     const priority = typeof body?.priority === "string" ? body.priority : null;
     const due_date = typeof body?.due_date === "string" ? body.due_date : null;
 
-    const is_finished =
-      typeof body?.is_finished === "boolean" ? body.is_finished : null;
+    const is_finished = typeof body?.is_finished === "boolean" ? body.is_finished : null;
 
     let assigneeName: string | null = null;
     let assigneeId: number | null = null;
     if (typeof body?.assignee === "string") {
       const nextAssignee = body.assignee.trim();
       if (!nextAssignee) {
-        return Response.json(
-          { message: "assignee is invalid" },
-          { status: 400 },
-        );
+        return Response.json({ message: "assignee is invalid" }, { status: 400 });
       }
 
       const idRow = await sql`
@@ -49,10 +46,7 @@ export async function PATCH(req: Request) {
       `;
 
       if (!idRow.length) {
-        return Response.json(
-          { message: "Assignee not found" },
-          { status: 400 },
-        );
+        return Response.json({ message: "Assignee not found" }, { status: 400 });
       }
 
       assigneeName = nextAssignee;

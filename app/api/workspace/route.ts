@@ -1,5 +1,7 @@
 import { sql } from "../../lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const { owner } = await req.json();

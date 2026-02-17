@@ -1,14 +1,13 @@
 import { sql } from "../../lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const { username } = await req.json();
 
     if (!username) {
-      return Response.json(
-        { message: "Username value needed" },
-        { status: 400 }
-      );
+      return Response.json({ message: "Username value needed" }, { status: 400 });
     }
 
     const users = await sql`
@@ -32,15 +31,9 @@ export async function POST(req: Request) {
       LIMIT 1
     `;
 
-    return Response.json(
-      { workspace: workspaces[0].workspace_name },
-      { status: 200 }
-    );
+    return Response.json({ workspace: workspaces[0].workspace_name }, { status: 200 });
   } catch (error) {
     console.error(error);
-    return Response.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return Response.json({ message: "Internal server error" }, { status: 500 });
   }
 }

@@ -48,7 +48,7 @@ export const FirstWorkspace: React.FC = () => {
       }
       if (response.ok) {
         console.log("Workspace created successfully");
-        window.location.href = `/${userName}/${projectName}`;
+        window.location.href = `/${userName}/${projectName}/tasks`;
       }
       if (!response.ok) {
         console.error("Failed to create workspace");

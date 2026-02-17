@@ -14,6 +14,16 @@ pnpm dev
 bun dev
 ```
 
+## Environment Variables
+
+Create a `.env.local` file in the project root with:
+
+```bash
+DATABASE_URL=postgres://...
+```
+
+You can copy `.env.example` as a starting point.
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

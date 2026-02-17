@@ -71,7 +71,7 @@ export const Hero: FC = () => {
           <br /> frontend-first workflow designed for real-world scenarios.
         </motion.h2>
         <div className="justify-start flex gap-8">
-          <Link href={hasDashboard ? `/${username}/${workspace}` : "/login"}>
+          <Link href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}>
             <motion.button
               initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}

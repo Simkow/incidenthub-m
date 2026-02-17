@@ -69,7 +69,7 @@ export const Login: React.FC = () => {
             const workspaceName = wsData.workspace as string | null;
 
             if (workspace) {
-              router.push(`/${data.user.name}/${workspace}`);
+              router.push(`/${data.user.name}/${workspace}/tasks`);
               return;
             }
 

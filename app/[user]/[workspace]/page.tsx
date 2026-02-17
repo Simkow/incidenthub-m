@@ -3,6 +3,8 @@ import { Dashboard } from "./Dashboard";
 import { sql } from "../../lib/db";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   params: Promise<{
     user: string;
