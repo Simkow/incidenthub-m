@@ -35,7 +35,7 @@ export const Sidebar: React.FC = () => {
   const [user, setUser] = useState("");
   const Workspace_Links = [
     { name: "Tasks", to: `/${user}/${currentWorkspace}/tasks`, icon: Tasks },
-    { name: "Project", to: "/app/project", icon: Projects },
+    { name: "Project", to: `/${user}/${currentWorkspace}/project`, icon: Projects },
     { name: "Views", to: "/app/views", icon: Views },
     { name: "Teams", to: "/app/teams", icon: Teams },
   ];
