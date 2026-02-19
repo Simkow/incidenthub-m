@@ -114,9 +114,9 @@ export const Project: React.FC = () => {
         return;
       }
 
-      const data = (await res.json().catch(() => null)) as
-        | { workspaces?: WorkspaceRow[] }
-        | null;
+      const data = (await res.json().catch(() => null)) as {
+        workspaces?: WorkspaceRow[];
+      } | null;
       const rows = data?.workspaces ?? [];
       const found = rows.find((w) => w.workspace_name === workspace) ?? null;
       setWorkspaceId(found?.id ?? null);
@@ -153,9 +153,9 @@ export const Project: React.FC = () => {
           });
 
           if (!res.ok) {
-            const data = (await res.json().catch(() => null)) as
-              | { message?: string }
-              | null;
+            const data = (await res.json().catch(() => null)) as {
+              message?: string;
+            } | null;
             console.error(
               "Failed to update project",
               data?.message ?? res.status,
@@ -281,7 +281,9 @@ export const Project: React.FC = () => {
 
           <div className="w-full max-w-3xl flex flex-col gap-5">
             <div className="flex flex-col items-center gap-2">
-              <div className="text-xs text-neutral-400 heading">Project Name</div>
+              <div className="text-xs text-neutral-400 heading">
+                Project Name
+              </div>
               <div className="w-full max-w-sm rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-6 py-5 text-center">
                 <input
                   value={draft?.workspace_name ?? ""}
@@ -307,7 +309,9 @@ export const Project: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="text-xs text-neutral-400 heading">Description</div>
+              <div className="text-xs text-neutral-400 heading">
+                Description
+              </div>
               <textarea
                 value={draft?.description ?? ""}
                 onChange={(e) => {
@@ -325,7 +329,9 @@ export const Project: React.FC = () => {
                     return next;
                   });
                 }}
-                placeholder={isLoading ? "Loading…" : "Define your project idea..."}
+                placeholder={
+                  isLoading ? "Loading…" : "Define your project idea..."
+                }
                 className="min-h-44 rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-5 py-4 text-sm text-neutral-200 whitespace-pre-wrap outline-none resize-none"
               />
             </div>
