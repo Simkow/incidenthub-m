@@ -3,7 +3,7 @@ import { neon } from '@neondatabase/serverless';
 export type SqlTag = (
   strings: TemplateStringsArray,
   ...values: unknown[]
-) => Promise<any[]>;
+) => Promise<unknown[]>;
 
 let cachedSql: ReturnType<typeof neon> | null = null;
 
