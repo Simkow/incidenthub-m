@@ -53,9 +53,9 @@ export const Sidebar: React.FC = () => {
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const routeUserRaw = (params as Record<string, string | string[] | undefined>)[
-      "user"
-    ];
+    const routeUserRaw = (
+      params as Record<string, string | string[] | undefined>
+    )["user"];
     const routeWorkspaceRaw = (
       params as Record<string, string | string[] | undefined>
     )["workspace"];
@@ -125,9 +125,9 @@ export const Sidebar: React.FC = () => {
         });
 
         if (!res.ok) return;
-        const data = (await res.json().catch(() => null)) as
-          | { workspace?: unknown }
-          | null;
+        const data = (await res.json().catch(() => null)) as {
+          workspace?: unknown;
+        } | null;
 
         const resolved =
           typeof data?.workspace === "string" ? (data.workspace as string) : "";
@@ -248,7 +248,9 @@ export const Sidebar: React.FC = () => {
             width={16}
             height={16}
           />
-          <span className="text-white text-xs font-medium opacity-50">Inbox</span>
+          <span className="text-white text-xs font-medium opacity-50">
+            Inbox
+          </span>
         </div>
         <Link
           href={`/${user}/${currentWorkspace}/my-tasks`}

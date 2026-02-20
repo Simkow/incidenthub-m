@@ -46,7 +46,7 @@ export default async function MyTasksPage({ params }: PageProps) {
 
     if (firstName) {
       redirect(
-        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/my-tasks`
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/my-tasks`,
       );
     }
 

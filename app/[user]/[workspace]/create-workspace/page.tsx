@@ -46,7 +46,7 @@ export default async function CreateWorkspacePage({ params }: PageProps) {
 
     if (firstName) {
       redirect(
-        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/create-workspace`
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/create-workspace`,
       );
     }
 

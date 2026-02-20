@@ -49,7 +49,7 @@ export default async function WorkspacePage({ params }: PageProps) {
     }
 
     redirect(
-      `/${encodeURIComponent(user)}/${encodeURIComponent(fallbackName)}/tasks`
+      `/${encodeURIComponent(user)}/${encodeURIComponent(fallbackName)}/tasks`,
     );
   }
 
