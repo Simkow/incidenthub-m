@@ -19,9 +19,20 @@ export const Hero: FC = () => {
     return usr ? usr.replace(/"/g, "") : "";
   });
   const { user } = useAuth();
-
-  const workspace = useCurrentWorkspace(user?.name);
-  const hasDashboard = !!user?.name && !!workspace;
+  const [workspace] = useState(() => {
+    if (typeof window === undefined) {
+      return;
+    }
+    const currentWorkspace = localStorage.getItem("workspace") as string;
+    if (!currentWorkspace.length) {
+      return;
+    }
+    const works = currentWorkspace.replace(/"/g, "");
+    return works
+  });
+  // const workspace = useCurrentWorkspace(user?.name);
+  // console.log(workspace);
+  const hasDashboard = !!username && !!workspace;
 
   useEffect(() => {
     const timer = setTimeout(() => {

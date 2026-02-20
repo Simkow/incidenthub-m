@@ -15,9 +15,23 @@ export const Navbar: React.FC = () => {
     const storedToken = window.localStorage.getItem("authToken");
     return storedToken ? storedToken.replace(/"/g, "") : "";
   });
-
-  const workspace = useCurrentWorkspace(user?.name);
-  const hasDashboard = !!user?.name && !!workspace;
+  const [username] = useState<string | null>(() => {
+    if (typeof window === "undefined") return "";
+    const usr = window.localStorage.getItem("users");
+    return usr ? usr.replace(/"/g, "") : "";
+  });
+  const [workspace] = useState(() => {
+    if (typeof window === undefined) {
+      return;
+    }
+    const currentWorkspace = localStorage.getItem("workspace") as string;
+    if (!currentWorkspace.length) {
+      return;
+    }
+    const works = currentWorkspace.replace(/"/g, "");
+    return works
+  });
+  const hasDashboard = !!username && !!workspace;
 
   return (
     <div className="w-full fixed px-6 md:px-12 lg:px-56 py-4 bg-[#090909]/70 text-gray-400 flex flex-col md:flex-row items-center md:justify-between gap-4 heading border-b border-white/30 z-50 backdrop-blur-sm">
