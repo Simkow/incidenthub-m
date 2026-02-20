@@ -118,10 +118,7 @@ export const FirstWorkspace: React.FC = () => {
         Back to IncidentHub
       </Link>
       <span className="flex flex-col items-start absolute right-4 md:right-8 top-5 gap-1 text-neutral-400 text-sm max-w-[60vw] md:max-w-none">
-        Logged in as{" "}
-        <span className="text-neutral-200">
-          {userEmail}
-        </span>
+        Logged in as <span className="text-neutral-200">{userEmail}</span>
       </span>
       <main>
         <section className="w-full h-full flex flex-col justify-center items-center gap-6">
