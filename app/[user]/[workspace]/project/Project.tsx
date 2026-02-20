@@ -265,16 +265,20 @@ export const Project: React.FC = () => {
             <div className="flex items-center justify-center">
               <Image src={ProjectIcon} alt="Project" className="w-32" />
             </div>
-
-            <div className="w-full flex items-center gap-4">
-              <div className="flex-1 h-2 rounded-full bg-[#2e2e2e] overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500"
-                  style={{ width: `${clampedPct}%` }}
-                />
+            <div className="w-full flex flex-col gap-2">
+              <div className="text-xs text-neutral-400 heading">
+                Progress bar
               </div>
-              <div className="text-xs text-neutral-300 tabular-nums">
-                {clampedPct}%
+              <div className="w-full flex items-center gap-4">
+                <div className="flex-1 h-2 rounded-full bg-[#2e2e2e] overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500"
+                    style={{ width: `${clampedPct}%` }}
+                  />
+                </div>
+                <div className="text-xs text-neutral-300 tabular-nums">
+                  {clampedPct}%
+                </div>
               </div>
             </div>
           </div>
@@ -287,6 +291,7 @@ export const Project: React.FC = () => {
               <div className="w-full max-w-sm rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-6 py-5 text-center">
                 <input
                   value={draft?.workspace_name ?? ""}
+                  spellCheck={false}
                   onChange={(e) => {
                     const value = e.target.value;
                     setDraft((prev) => {
@@ -309,7 +314,7 @@ export const Project: React.FC = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="text-xs text-neutral-400 heading">
+              <div className="text-xs text-neutral-400 heading text-center">
                 Description
               </div>
               <textarea

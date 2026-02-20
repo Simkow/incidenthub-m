@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     if (!idRow.length) {
       return Response.json({ message: "Assignee not found" }, { status: 400 });
     }
-    const id = idRow[0].id as number;
+    const id = (idRow[0] as { id: number }).id;
 
     let createdById: number | null = null;
     if (typeof created_by === "number" && Number.isFinite(created_by)) {
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
         );
       }
 
-      createdById = createdRow[0].id as number;
+      createdById = (createdRow[0] as { id: number }).id;
     }
 
     const workspaceName = String(workspace ?? "").trim();
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
         );
       }
 
-      workspaceId = wsRow[0].id as number;
+      workspaceId = (wsRow[0] as { id: number }).id;
     }
 
     if (workspaceId !== null) {

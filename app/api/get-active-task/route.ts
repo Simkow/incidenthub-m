@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     }
 
     const userRow = await sql`SELECT id FROM users WHERE name = ${username} LIMIT 1`;
-    const userId = userRow[0]?.id as number | undefined;
+  const userId = (userRow[0] as { id: number } | undefined)?.id;
 
     if (!userId) {
       return Response.json({ message: "User not found" }, { status: 404 });
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
         LIMIT 1
       `;
 
-      const workspaceId = wsRow[0]?.id as number | undefined;
+      const workspaceId = (wsRow[0] as { id: number } | undefined)?.id;
       if (!workspaceId) {
         return Response.json({ message: "Workspace not found" }, { status: 404 });
       }

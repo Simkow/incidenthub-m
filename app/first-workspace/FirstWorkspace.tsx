@@ -6,6 +6,9 @@ import Arrow from "../../public/assets/down-arrow.png";
 import { useState } from "react";
 import { motion } from "motion/react";
 
+const WORKSPACE_SPACE_MESSAGE =
+  'Workspace name cannot contain spaces. Example: "my-workspace" or "my_workspace".';
+
 export const FirstWorkspace: React.FC = () => {
   const [userName] = useState<string>(() => {
     if (typeof window === "undefined") return "";
@@ -21,40 +24,53 @@ export const FirstWorkspace: React.FC = () => {
   const [projectName, setProjectName] = useState("");
   const [error, setError] = useState("");
 
+  const trimmedProjectName = projectName.trim();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setError("");
+
+      if (!trimmedProjectName || !userName) {
+        console.error("Missing project name");
+        setError("Missing project name");
+        return;
+      }
+
+      if (/\s/.test(trimmedProjectName)) {
+        setError(WORKSPACE_SPACE_MESSAGE);
+        return;
+      }
+
       const response = await fetch("/api/first-workspace", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          workspace: projectName,
+          workspace: trimmedProjectName,
           username: userName,
         }),
       });
-      if (!projectName || !userName) {
-        console.error("Missing project name");
-        setError("Missing project name");
-        return;
-      }
-      localStorage.setItem("workspace", projectName);
-      if (localStorage.getItem("workspace")?.includes(" ") === true) {
-        const trimmedWorkspace = localStorage
-          .getItem("workspace")
-          ?.replace(" ", "-");
-        localStorage.setItem("workspace", trimmedWorkspace || "");
-      }
+
+      localStorage.setItem("workspace", trimmedProjectName);
       if (response.ok) {
         console.log("Workspace created successfully");
-        window.location.href = `/${userName}/${projectName}/tasks`;
+        window.location.href = `/${userName}/${trimmedProjectName}/tasks`;
       }
       if (!response.ok) {
-        console.error("Failed to create workspace");
+        const data: unknown = await response.json().catch(() => null);
+        const message =
+          (data as { message?: unknown })?.message &&
+          typeof (data as { message?: unknown }).message === "string"
+            ? ((data as { message: string }).message as string)
+            : "Failed to create workspace";
+        console.error(message);
+        setError(message);
       }
     } catch (error) {
       console.error("Error adding workspace:", error);
+      setError("Internal error");
     }
   };
 
@@ -129,7 +145,7 @@ export const FirstWorkspace: React.FC = () => {
                   readOnly
                   type="text"
                   id="workspaceUrl"
-                  value={`http://localhost:5173/${userName}/${projectName}`}
+                  value={`http://localhost:5173/${userName}/${trimmedProjectName || "<workspace>"}`}
                   name="workspaceUrl"
                   className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
                   placeholder="Enter workspace name"

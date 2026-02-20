@@ -31,7 +31,8 @@ export async function POST(req: Request) {
       LIMIT 1
     `;
 
-    return Response.json({ workspace: workspaces[0].workspace_name }, { status: 200 });
+    const first = (workspaces[0] as { workspace_name: string } | undefined) ?? null;
+    return Response.json({ workspace: first?.workspace_name ?? null }, { status: 200 });
   } catch (error) {
     console.error(error);
     return Response.json({ message: "Internal server error" }, { status: 500 });

@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         }
 
         const userIdRow = await sql`SELECT id FROM users WHERE name = ${username} LIMIT 1`;
-        const userId = userIdRow[0]?.id as number | undefined;
+        const userId = (userIdRow[0] as { id: number } | undefined)?.id;
         if (!userId) {
             return Response.json({ project: null }, { status: 404 });
         }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
             WHERE workspace_name = ${workspace}
             LIMIT 1
         `;
-        const workspaceId = workspaceIdRow[0]?.id as number | undefined;
+        const workspaceId = (workspaceIdRow[0] as { id: number } | undefined)?.id;
         if (!workspaceId) {
             return Response.json({ project: null }, { status: 404 });
         }

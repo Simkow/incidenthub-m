@@ -22,7 +22,12 @@ export async function POST(req: Request) {
       return Response.json({ message: "Invalid email or password" }, { status: 401 });
     }
 
-    const user = rows[0];
+    const user = rows[0] as {
+      id: number;
+      email: string;
+      name: string;
+      password_hash: string;
+    };
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 

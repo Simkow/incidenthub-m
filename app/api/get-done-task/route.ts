@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const workspaceName = typeof workspace === "string" ? workspace.trim() : "";
 
     const user_id = await sql`SELECT id FROM users WHERE name = ${username} LIMIT 1`;
-    const id = user_id[0]?.id;
+  const id = (user_id[0] as { id: number } | undefined)?.id;
 
     if (!id) {
       return Response.json({ message: "User not found" }, { status: 404 });
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
           WHERE workspace_name = ${workspaceName}
           LIMIT 1
         `.then(async (wsRow) => {
-          const workspaceId = wsRow[0]?.id as number | undefined;
+          const workspaceId = (wsRow[0] as { id: number } | undefined)?.id;
           if (!workspaceId) return null;
           return sql`
             SELECT *

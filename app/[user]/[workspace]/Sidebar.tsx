@@ -35,7 +35,11 @@ export const Sidebar: React.FC = () => {
   const [user, setUser] = useState("");
   const Workspace_Links = [
     { name: "Tasks", to: `/${user}/${currentWorkspace}/tasks`, icon: Tasks },
-    { name: "Project", to: `/${user}/${currentWorkspace}/project`, icon: Projects },
+    {
+      name: "Project",
+      to: `/${user}/${currentWorkspace}/project`,
+      icon: Projects,
+    },
     { name: "Views", to: "/app/views", icon: Views },
     { name: "Teams", to: "/app/teams", icon: Teams },
   ];
@@ -133,6 +137,24 @@ export const Sidebar: React.FC = () => {
                   {workspace.workspace_name}
                 </div>
               ))}
+              <div className="mx-2 my-1 border-t border-white/10" />
+              <div
+                className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs flex items-center gap-2"
+                onClick={() => {
+                  setIsOpen(false);
+                  if (!user || !currentWorkspace) return;
+                  window.location.href = `/${user}/${currentWorkspace}/create-workspace`;
+                }}
+              >
+                <Image
+                  src={Add}
+                  alt="Add"
+                  className="w-3 h-3"
+                  width={12}
+                  height={12}
+                />
+                Create workspace
+              </div>
             </div>
           )}
         </div>
@@ -181,7 +203,13 @@ export const Sidebar: React.FC = () => {
               <span>{link.name}</span>
             </Link>
           ))}
-          <button className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 hover:bg-white/10 cursor-pointer">
+          <button
+            onClick={() => {
+              if (!user || !currentWorkspace) return;
+              window.location.href = `/${user}/${currentWorkspace}/create-workspace`;
+            }}
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 hover:bg-white/10 cursor-pointer"
+          >
             <Image
               src={Add}
               alt="Add"

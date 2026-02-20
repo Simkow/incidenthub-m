@@ -50,7 +50,7 @@ export async function PATCH(req: Request) {
       }
 
       assigneeName = nextAssignee;
-      assigneeId = idRow[0].id as number;
+      assigneeId = (idRow[0] as { id: number }).id;
     }
 
     await sql`
