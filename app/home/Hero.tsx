@@ -29,7 +29,7 @@ export const Hero: FC = () => {
     } else {
       setUsername("");
     }
-  })
+  });
 
   return (
     <main className="w-full max-md:max-h-screen max-md:justify-center min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-40 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-32 md:pb-40">
@@ -72,7 +72,9 @@ export const Hero: FC = () => {
           <br /> frontend-first workflow designed for real-world scenarios.
         </motion.h2>
         <div className="justify-start flex flex-col sm:flex-row gap-4 sm:gap-8">
-          <Link href={hasDashboard ? `/${username}/${workspace}/tasks` : '/login'}>
+          <Link
+            href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
+          >
             <motion.button
               initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}

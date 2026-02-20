@@ -13,12 +13,28 @@ export const FirstWorkspace: React.FC = () => {
   const [userName] = useState<string>(() => {
     if (typeof window === "undefined") return "";
     const storedUser = window.localStorage.getItem("users");
-    return storedUser ? storedUser.replace(/"/g, "") : "";
+    if (!storedUser) return "";
+    try {
+      const parsed = JSON.parse(storedUser) as unknown;
+      return (typeof parsed === "string" ? parsed : storedUser)
+        .replace(/"/g, "")
+        .trim();
+    } catch {
+      return storedUser.replace(/"/g, "").trim();
+    }
   });
-  const [userEmail] = useState(() => {
+  const [userEmail] = useState<string>(() => {
     if (typeof window === "undefined") return "";
     const storedMail = window.localStorage.getItem("userEmail");
-    return storedMail ? storedMail.replace(/"/g, "") : "";
+    if (!storedMail) return "";
+    try {
+      const parsed = JSON.parse(storedMail) as unknown;
+      return (typeof parsed === "string" ? parsed : storedMail)
+        .replace(/"/g, "")
+        .trim();
+    } catch {
+      return storedMail.replace(/"/g, "").trim();
+    }
   });
   const [isClicked, setIsClicked] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -31,9 +47,20 @@ export const FirstWorkspace: React.FC = () => {
     try {
       setError("");
 
-      if (!trimmedProjectName || !userName) {
+      const normalizedUserName = userName.trim();
+      const normalizedUserEmail = userEmail.trim();
+
+      if (!trimmedProjectName || !normalizedUserName) {
         console.error("Missing project name");
         setError("Missing project name");
+        return;
+      }
+
+      if (
+        normalizedUserName.toLowerCase() === "undefined" ||
+        normalizedUserName.toLowerCase() === "null"
+      ) {
+        setError("Session expired. Please log in again.");
         return;
       }
 
@@ -49,14 +76,15 @@ export const FirstWorkspace: React.FC = () => {
         },
         body: JSON.stringify({
           workspace: trimmedProjectName,
-          username: userName,
+          username: normalizedUserName,
+          email: normalizedUserEmail,
         }),
       });
 
-      localStorage.setItem("workspace", trimmedProjectName);
       if (response.ok) {
         console.log("Workspace created successfully");
-        window.location.href = `/${userName}/${trimmedProjectName}/tasks`;
+        localStorage.setItem("workspace", JSON.stringify(trimmedProjectName));
+        window.location.href = `/${normalizedUserName}/${trimmedProjectName}/tasks`;
       }
       if (!response.ok) {
         const data: unknown = await response.json().catch(() => null);
@@ -92,7 +120,7 @@ export const FirstWorkspace: React.FC = () => {
       <span className="flex flex-col items-start absolute right-4 md:right-8 top-5 gap-1 text-neutral-400 text-sm max-w-[60vw] md:max-w-none">
         Logged in as{" "}
         <span className="text-neutral-200">
-          {userEmail?.split('"').join("")}
+          {userEmail}
         </span>
       </span>
       <main>

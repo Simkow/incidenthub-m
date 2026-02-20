@@ -7,25 +7,49 @@ const WORKSPACE_SPACE_MESSAGE =
 
 export async function POST(req: Request) {
   try {
-    const { workspace, username } = await req.json();
+    const { workspace, username, email } = await req.json();
 
     const workspaceName = typeof workspace === "string" ? workspace.trim() : "";
     const owner = typeof username === "string" ? username.trim() : "";
+    const ownerEmail = typeof email === "string" ? email.trim() : "";
 
-    if (!workspaceName || !owner) {
-      return Response.json({ message: "All fields needed" }, { status: 400 });
+    if (!workspaceName || (!owner && !ownerEmail)) {
+      return Response.json(
+        { message: "All fields needed" },
+        { status: 400 },
+      );
     }
 
     if (/\s/.test(workspaceName)) {
       return Response.json({ message: WORKSPACE_SPACE_MESSAGE }, { status: 400 });
     }
 
-    const idRow = await sql`SELECT id FROM users WHERE name = ${owner} LIMIT 1`;
+    let idRow: unknown[] = [];
+
+    if (ownerEmail) {
+      idRow = await sql`
+        SELECT id FROM users WHERE email = ${ownerEmail} LIMIT 1
+      `;
+    }
+
+    if (!idRow.length && owner) {
+      idRow = await sql`SELECT id FROM users WHERE name = ${owner} LIMIT 1`;
+    }
+
+    if (!idRow.length && owner) {
+      idRow = await sql`
+        SELECT id FROM users WHERE LOWER(name) = LOWER(${owner}) LIMIT 1
+      `;
+    }
 
     if (!idRow.length) {
+      console.warn("first-workspace: user not found", {
+        owner,
+        ownerEmail,
+      });
       return Response.json(
-        { message: "Something is wrong with database command" },
-        { status: 400 },
+        { message: "User not found. Please log in again." },
+        { status: 404 },
       );
     }
 
