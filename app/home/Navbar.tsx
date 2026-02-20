@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
           Product
         </Link>
         <Link
-          href={hasDashboard ? `/${user!.name}/${workspace}/tasks` : "/login"}
+          href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
           className=" hover:text-neutral-300 transition-all duration-300"
         >
           Dashboard
@@ -87,7 +87,7 @@ export const Navbar: React.FC = () => {
               Logout
             </Link>
             <Link
-              href={hasDashboard ? `/${user!.name}/${workspace}` : "/login"}
+              href={hasDashboard ? `/${username}/${workspace}` : "/login"}
               className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-white/50 transition-all duration-300"
             >
               Open App
