@@ -87,7 +87,7 @@ export const Navbar: React.FC = () => {
               Logout
             </Link>
             <Link
-              href={hasDashboard ? `/${username}/${workspace}` : "/login"}
+              href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
               className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-white/50 transition-all duration-300"
             >
               Open App
