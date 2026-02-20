@@ -19,6 +19,19 @@ export async function POST(req: Request) {
       return Response.json({ message: "User already exists" }, { status: 400 });
     }
 
+    const noSpaces = /^\S+$/; // brak whitespace
+    if (!noSpaces.test(name)) {
+    return Response.json({message: "Username can't contain spaces"}, {status: 400});
+  }
+
+  if (!noSpaces.test(email)) {
+    return Response.json({message: "Email can't contain spaces"}, {status: 400});
+  }
+
+  if (!noSpaces.test(password)) {
+    return Response.json({message: "Password can't contain spaces"}, {status: 400});
+  }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await sql`
