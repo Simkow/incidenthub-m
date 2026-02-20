@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import ProjectIcon from "../../../../public/assets/project-icon.png";
 
@@ -22,6 +23,7 @@ type TasksResponse = {
 };
 
 export const Project: React.FC = () => {
+  const router = useRouter();
   const [username, setUsername] = useState<string>("");
   const [workspace, setWorkspace] = useState<string>("");
   const [workspaceId, setWorkspaceId] = useState<number | null>(null);
@@ -30,6 +32,9 @@ export const Project: React.FC = () => {
   const [completionPct, setCompletionPct] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const saveTimeoutRef = useRef<number | null>(null);
 
@@ -252,15 +257,74 @@ export const Project: React.FC = () => {
     return completionPct;
   }, [completionPct]);
 
+  const handleDeleteWorkspace = useCallback(async () => {
+    if (!username || !workspace) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const res = await fetch("/api/delete-workspace", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, workspace }),
+      });
+
+      const data = (await res.json().catch(() => null)) as
+        | { message?: string }
+        | null;
+
+      if (!res.ok) {
+        setDeleteError(data?.message ?? "Failed to delete workspace");
+        return;
+      }
+
+      const nextRes = await fetch("/api/get-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
+
+      const nextData = (await nextRes.json().catch(() => null)) as
+        | { workspace?: string | null }
+        | null;
+
+      const nextWorkspace =
+        typeof nextData?.workspace === "string" && nextData.workspace.trim()
+          ? nextData.workspace
+          : null;
+
+      if (typeof window !== "undefined") {
+        if (nextWorkspace) {
+          window.localStorage.setItem("workspace", nextWorkspace);
+        } else {
+          window.localStorage.removeItem("workspace");
+        }
+      }
+
+      if (nextWorkspace) {
+        router.push(`/${username}/${nextWorkspace}/tasks`);
+      } else {
+        router.push("/first-workspace");
+      }
+    } catch (err) {
+      console.error("Error deleting workspace", err);
+      setDeleteError("Internal error");
+    } finally {
+      setIsDeleting(false);
+      setDeleteOpen(false);
+    }
+  }, [username, workspace, router]);
+
   return (
     <motion.main
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full h-screen bg-[#121212] flex"
+      className="w-full min-h-screen bg-[#121212] flex"
     >
-      <section className="py-2 w-full h-full">
-        <main className="w-full h-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-6 gap-6 text-white relative">
+      <section className="py-2 w-full">
+        <main className="w-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 md:p-6 gap-6 text-white relative">
           <div className="pt-6 flex flex-col items-center gap-4 w-full max-w-3xl">
             <div className="flex items-center justify-center">
               <Image src={ProjectIcon} alt="Project" className="w-32" />
@@ -364,6 +428,55 @@ export const Project: React.FC = () => {
                   }}
                   className="w-full bg-transparent text-center outline-none"
                 />
+              </div>
+
+              <div className="relative w-full max-w-xs flex flex-col items-center gap-2 pt-3">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => {
+                    setDeleteError(null);
+                    setDeleteOpen((prev) => !prev);
+                  }}
+                  className="w-full rounded-xl border border-red-300/60 text-red-300 px-4 py-2 text-sm hover:bg-red-500/10 disabled:opacity-60"
+                >
+                  Delete Workspace
+                </button>
+
+                {deleteOpen && (
+                  <div
+                    className="absolute top-full mt-2 w-full rounded-xl bg-neutral-950 border border-neutral-700 p-4 flex flex-col items-center gap-3 z-10"
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <span className="text-sm text-neutral-300 font-light text-center">
+                      Are you sure you want to delete this workspace?
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        disabled={isDeleting}
+                        onClick={() => setDeleteOpen(false)}
+                        className="border border-[#2e2e2e] text-sm text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800 disabled:opacity-60"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isDeleting}
+                        onClick={() => void handleDeleteWorkspace()}
+                        className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400 disabled:opacity-60"
+                      >
+                        {isDeleting ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                    {deleteError && (
+                      <div className="text-xs text-red-300 text-center">
+                        {deleteError}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

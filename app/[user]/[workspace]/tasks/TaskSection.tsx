@@ -13,6 +13,7 @@ import type { Priority, Task } from "./types";
 
 type Props = {
   search?: string;
+  scope?: "workspace" | "user";
 };
 
 function isoToLocalInputValue(iso: string) {
@@ -35,7 +36,7 @@ function localInputValueToIso(localValue: string) {
   return d.toISOString();
 }
 
-export default function TaskSection({ search = "" }: Props) {
+export default function TaskSection({ search = "", scope = "workspace" }: Props) {
   const params = useParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [username, setUsername] = useState("");
@@ -166,27 +167,31 @@ export default function TaskSection({ search = "" }: Props) {
   }, []);
 
   const fetchTasks = useCallback(async () => {
-    if (!username || !workspace) return;
+    if (!username) return;
+    if (scope === "workspace" && !workspace) return;
 
     try {
       const response = await fetch("/api/get-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, workspace }),
+        body: JSON.stringify(
+          scope === "workspace" ? { username, workspace } : { username },
+        ),
       });
       const data = (await response.json()) as { tasks?: Task[] };
       setTasks(data.tasks ?? []);
     } catch (error) {
       console.error("Error fetching tasks", error);
     }
-  }, [username, workspace]);
+  }, [username, workspace, scope]);
 
   useEffect(() => {
-    if (!username || !workspace) return;
+    if (!username) return;
+    if (scope === "workspace" && !workspace) return;
     queueMicrotask(() => {
       void fetchTasks();
     });
-  }, [username, workspace, fetchTasks]);
+  }, [username, workspace, fetchTasks, scope]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -210,9 +215,169 @@ export default function TaskSection({ search = "" }: Props) {
     });
   }, [tasks, search]);
 
+  const groupedTasks = useMemo(() => {
+    if (scope !== "user") return [] as Array<{ key: string; label: string; tasks: Task[] }>;
+
+    const groups = new Map<string, { key: string; label: string; tasks: Task[] }>();
+    for (const task of filteredTasks) {
+      const labelRaw = (task as Task & { workspace_name?: unknown }).workspace_name;
+      const label = typeof labelRaw === "string" && labelRaw.trim() ? labelRaw : "No workspace";
+      const key = label;
+
+      const existing = groups.get(key);
+      if (existing) {
+        existing.tasks.push(task);
+      } else {
+        groups.set(key, { key, label, tasks: [task] });
+      }
+    }
+
+    return Array.from(groups.values()).sort((a, b) =>
+      a.label.localeCompare(b.label, undefined, { sensitivity: "base" }),
+    );
+  }, [filteredTasks, scope]);
+
+  const renderTaskRow = (task: Task) => {
+    const selectPriorityValue = priorityOptions.includes(task.priority as Priority)
+      ? (task.priority as Priority)
+      : ("" as const);
+
+    return (
+      <section
+        key={task.id}
+        className="grid grid-cols-1 md:grid-cols-7 items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-neutral-950/50 hover:bg-neutral-950/30 px-3 py-2"
+        role="button"
+        tabIndex={0}
+        onClick={() => setActiveTaskId(task.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setActiveTaskId(task.id);
+        }}
+      >
+        <input
+          value={task.title}
+          onChange={(e) => updateTask(task.id, "title", e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          className="min-w-0 w-full bg-transparent text-sm text-neutral-200 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
+          placeholder="Title"
+        />
+
+        <input
+          value={task.description}
+          onChange={(e) => updateTask(task.id, "description", e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
+          placeholder="Description"
+        />
+
+        <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
+          <Select.Root
+            value={selectPriorityValue}
+            onValueChange={(value) => updateTask(task.id, "priority", value)}
+          >
+            <Select.Trigger className="text-neutral-300 text-sm rounded-lg border border-[#2e2e2e] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
+              <Select.Value placeholder="Priority" />
+              <Select.Icon className="text-neutral-400">▾</Select.Icon>
+            </Select.Trigger>
+            <Select.Portal>
+              <Select.Content
+                position="popper"
+                sideOffset={6}
+                className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818] hover:cursor-pointer"
+              >
+                <Select.Viewport className="p-1">
+                  {priorityOptions.map((p) => (
+                    <Select.Item
+                      key={p}
+                      value={p}
+                      className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                    >
+                      <Select.ItemText>{p}</Select.ItemText>
+                    </Select.Item>
+                  ))}
+                </Select.Viewport>
+              </Select.Content>
+            </Select.Portal>
+          </Select.Root>
+        </div>
+
+        <input
+          type="datetime-local"
+          value={isoToLocalInputValue(task.due_date)}
+          onChange={(e) =>
+            updateTask(task.id, "due_date", localInputValueToIso(e.target.value))
+          }
+          onClick={(e) => e.stopPropagation()}
+          className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
+        />
+
+        <input
+          value={String(task.assignee)}
+          onChange={(e) => updateTask(task.id, "assignee", e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          className="min-w-0 w-full bg-transparent text-sm text-neutral-300 text-center rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
+          placeholder="Assignee"
+        />
+
+        <div className="flex items-center justify-center">
+          <RoundedCheckbox
+            checked={task.is_finished}
+            onCheckedChange={(next) => updateTask(task.id, "is_finished", next)}
+            ariaLabel="Mark task as finished"
+            stopPropagation
+          />
+        </div>
+
+        <div className="flex items-center justify-center">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteConfirmTaskId((prev) => (prev === task.id ? null : task.id));
+            }}
+            className="text-xs px-2 py-1 rounded-lg border text-red-300 border-[#2e2e2e] hover:bg-white/10"
+          >
+            Delete
+          </button>
+
+          <div
+            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-64 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-neutral-950 border border-neutral-700 absolute mt-40 left-1/2 -translate-x-1/2 flex-col items-center justify-center p-4`}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <span className="text-sm text-neutral-300 font-light text-center">
+              Are you sure to <br /> delete this task?
+            </span>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteConfirmTaskId(null);
+                }}
+                className="border border-[#2e2e2e] text-sm text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void handleDelete(task.id);
+                }}
+                className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  };
+
   return (
     <div className="relative w-full min-h-125 flex flex-col justify-start gap-2">
-      <div className="grid grid-cols-7 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-neutral-400">
+      <div className="hidden md:grid grid-cols-7 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-neutral-400">
         <span className="text-left">Title</span>
         <span className="text-left">Description</span>
         <span className="text-center">Priority</span>
@@ -264,163 +429,16 @@ export default function TaskSection({ search = "" }: Props) {
         ) : (
           ""
         )}
-        {filteredTasks.map((task) => {
-          const selectPriorityValue = priorityOptions.includes(
-            task.priority as Priority,
-          )
-            ? (task.priority as Priority)
-            : ("" as const);
-
-          return (
-            <section
-              key={task.id}
-              className="grid grid-cols-7 items-center gap-x-5 rounded-lg bg-neutral-950/50 hover:bg-neutral-950/30 px-3 py-2"
-              role="button"
-              tabIndex={0}
-              onClick={() => setActiveTaskId(task.id)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ")
-                  setActiveTaskId(task.id);
-              }}
-            >
-              <input
-                value={task.title}
-                onChange={(e) => updateTask(task.id, "title", e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-                className="min-w-0 w-full bg-transparent text-sm text-neutral-200 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
-                placeholder="Title"
-              />
-
-              <input
-                value={task.description}
-                onChange={(e) =>
-                  updateTask(task.id, "description", e.target.value)
-                }
-                onClick={(e) => e.stopPropagation()}
-                className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
-                placeholder="Description"
-              />
-
-              <div
-                className="min-w-0 w-full"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <Select.Root
-                  value={selectPriorityValue}
-                  onValueChange={(value) =>
-                    updateTask(task.id, "priority", value)
-                  }
-                >
-                  <Select.Trigger className="text-neutral-300 text-sm rounded-lg border border-[#2e2e2e] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
-                    <Select.Value placeholder="Priority" />
-                    <Select.Icon className="text-neutral-400">▾</Select.Icon>
-                  </Select.Trigger>
-                  <Select.Portal>
-                    <Select.Content
-                      position="popper"
-                      sideOffset={6}
-                      className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818] hover:cursor-pointer"
-                    >
-                      <Select.Viewport className="p-1">
-                        {priorityOptions.map((p) => (
-                          <Select.Item
-                            key={p}
-                            value={p}
-                            className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
-                          >
-                            <Select.ItemText>{p}</Select.ItemText>
-                          </Select.Item>
-                        ))}
-                      </Select.Viewport>
-                    </Select.Content>
-                  </Select.Portal>
-                </Select.Root>
-              </div>
-
-              <input
-                type="datetime-local"
-                value={isoToLocalInputValue(task.due_date)}
-                onChange={(e) =>
-                  updateTask(
-                    task.id,
-                    "due_date",
-                    localInputValueToIso(e.target.value),
-                  )
-                }
-                onClick={(e) => e.stopPropagation()}
-                className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
-              />
-
-              <input
-                value={String(task.assignee)}
-                onChange={(e) =>
-                  updateTask(task.id, "assignee", e.target.value)
-                }
-                onClick={(e) => e.stopPropagation()}
-                className="min-w-0 w-full bg-transparent text-sm text-neutral-300 text-center rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
-                placeholder="Assignee"
-              />
-
-              <div className="flex items-center justify-center">
-                <RoundedCheckbox
-                  checked={task.is_finished}
-                  onCheckedChange={(next) =>
-                    updateTask(task.id, "is_finished", next)
-                  }
-                  ariaLabel="Mark task as finished"
-                  stopPropagation
-                />
-              </div>
-
-              <div className="flex items-center justify-center">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirmTaskId((prev) =>
-                      prev === task.id ? null : task.id,
-                    );
-                  }}
-                  className="text-xs px-2 py-1 rounded-lg border text-red-300 border-[#2e2e2e] hover:bg-white/10"
-                >
-                  Delete
-                </button>
-
-                <div
-                  className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-48 h-28 rounded-xl bg-neutral-950 border border-neutral-700 absolute mt-40 flex-col items-center justify-center p-4`}
-                  onClick={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <span className="text-sm text-neutral-300 font-light text-center">
-                    Are you sure to <br /> delete this task?
-                  </span>
-                  <div className="mt-2 flex gap-2">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteConfirmTaskId(null);
-                      }}
-                      className="border border-[#2e2e2e] text-sm text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        void handleDelete(task.id);
-                      }}
-                      className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400"
-                    >
-                      Delete
-                    </button>
-                  </div>
+        {scope === "user"
+          ? groupedTasks.map((group) => (
+              <div key={group.key} className="flex flex-col gap-3">
+                <div className="px-3 pt-3 text-xs text-neutral-400">
+                  Workspace: <span className="text-neutral-200">{group.label}</span>
                 </div>
+                {group.tasks.map(renderTaskRow)}
               </div>
-            </section>
-          );
-        })}
+            ))
+          : filteredTasks.map(renderTaskRow)}
       </div>
 
       <TaskModal

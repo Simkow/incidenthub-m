@@ -75,10 +75,10 @@ export const FirstWorkspace: React.FC = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex flex-col justify-center relative bg-[#121212] manrope">
+    <div className="w-full min-h-screen flex flex-col justify-center relative bg-[#121212] manrope px-4 md:px-0">
       <Link
         href={"/"}
-        className="text-neutral-400 absolute left-8 top-5 flex gap-2 items-center hover:text-neutral-200 transition-all text-sm"
+        className="text-neutral-400 absolute left-4 md:left-8 top-5 flex gap-2 items-center hover:text-neutral-200 transition-all text-sm"
       >
         <Image
           src={Arrow}
@@ -89,7 +89,7 @@ export const FirstWorkspace: React.FC = () => {
         />
         Back to IncidentHub
       </Link>
-      <span className="flex flex-col items-start absolute right-8 top-5 gap-1 text-neutral-400 text-sm">
+      <span className="flex flex-col items-start absolute right-4 md:right-8 top-5 gap-1 text-neutral-400 text-sm max-w-[60vw] md:max-w-none">
         Logged in as{" "}
         <span className="text-neutral-200">
           {userEmail?.split('"').join("")}
@@ -100,7 +100,7 @@ export const FirstWorkspace: React.FC = () => {
           <h1 className="text-3xl font-bold text-white">
             Welcome to your first workspace!
           </h1>
-          <p className="text-neutral-400 text-center w-1/2">
+          <p className="text-neutral-400 text-center w-full max-w-xl px-2 md:px-0">
             It looks like you haven&apos;t set up any projects or teams yet. Get
             started by creating your first project and inviting team members to
             collaborate.
@@ -116,7 +116,7 @@ export const FirstWorkspace: React.FC = () => {
               initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
               transition={{ duration: 0.5 }}
-              className="flex flex-col gap-4 w-96 mt-4"
+              className="flex flex-col gap-4 w-[92vw] max-w-md mt-4"
               onSubmit={handleSubmit}
             >
               <div className="flex flex-col gap-2">

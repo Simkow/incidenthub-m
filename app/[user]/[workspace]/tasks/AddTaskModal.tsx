@@ -100,30 +100,30 @@ export function AddTaskModal({
       }}
     >
       <div
-        className="w-200 min-h-125 rounded-xl bg-[#181818] border border-[#2e2e2e] p-3 flex flex-col gap-3"
+        className="w-[92vw] max-w-3xl rounded-xl bg-[#181818] border border-[#2e2e2e] p-3 flex flex-col gap-3"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 className="text-sm">Create task</h2>
         <main className="w-full h-full border-t border-[#2e2e2e] flex flex-col py-2">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            <div className="flex gap-3 h-1/2">
-              <section className="flex flex-col gap-1">
+            <div className="flex flex-col md:flex-row gap-3">
+              <section className="flex flex-col gap-1 w-full">
                 <span>Title</span>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-48"
+                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-48 bg-transparent focus:outline-none focus:border-neutral-300"
                   placeholder="Enter title"
                 />
               </section>
-              <section className="flex flex-col gap-1">
+              <section className="flex flex-col gap-1 w-full">
                 <span>Priority</span>
                 <Select.Root
                   value={priority}
                   onValueChange={(value) => setPriority(value as Priority)}
                 >
-                  <Select.Trigger className="text-white rounded-md border border-[#2e2e2e] px-2 py-2 w-48 flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
+                  <Select.Trigger className="text-white rounded-md border border-[#2e2e2e] px-2 py-2 w-full md:w-48 flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
                     <Select.Value placeholder="Select priority" />
                     <Select.Icon className="text-neutral-400">▾</Select.Icon>
                   </Select.Trigger>
@@ -151,34 +151,34 @@ export function AddTaskModal({
                 </Select.Root>
               </section>
             </div>
-            <div className="flex gap-3 h-1/2">
-              <section className="flex flex-col gap-1">
+            <div className="flex flex-col md:flex-row gap-3">
+              <section className="flex flex-col gap-1 w-full">
                 <span>Description</span>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-72 h-40 bg-transparent focus:outline-none focus:border-neutral-300"
+                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-72 h-40 bg-transparent focus:outline-none focus:border-neutral-300"
                   placeholder="Type description to your task"
                 />
               </section>
-              <section className="flex flex-col gap-1">
+              <section className="flex flex-col gap-1 w-full">
                 <span>Due date</span>
                 <input
                   type="datetime-local"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-72 bg-transparent focus:outline-none focus:border-neutral-300"
+                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-72 bg-transparent focus:outline-none focus:border-neutral-300"
                 />
               </section>
             </div>
             <div className="flex gap-3">
-              <section className="flex flex-col gap-1">
+              <section className="flex flex-col gap-1 w-full">
                 <span>Assignee</span>
                 <input
                   type="text"
                   value={assignee}
                   onChange={(e) => setAssignee(e.target.value)}
-                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-72 bg-transparent focus:outline-none focus:border-neutral-300"
+                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-72 bg-transparent focus:outline-none focus:border-neutral-300"
                   placeholder="Enter assignee"
                 />
               </section>
@@ -186,7 +186,7 @@ export function AddTaskModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-xl border border-[#2e2e2e] p-2 w-24 text-center hover:bg-[#2e2e2e] cursor-pointer disabled:opacity-60"
+              className="rounded-xl border border-[#2e2e2e] p-2 w-full md:w-24 text-center hover:bg-[#2e2e2e] cursor-pointer disabled:opacity-60"
             >
               {isSubmitting ? "Sending..." : "Submit"}
             </button>

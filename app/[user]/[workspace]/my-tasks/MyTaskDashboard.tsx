@@ -1,24 +1,19 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ChangeEvent,
-} from "react";
+
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import { motion } from "motion/react";
-import TaskSection from "./TaskSection";
-import ActiveTaskSection from "./ActiveTaskSection";
-import DoneTaskSection from "./DoneTaskSection";
-import { AddTaskModal } from "./AddTaskModal";
+import TaskSection from "../tasks/TaskSection";
+import ActiveTaskSection from "../tasks/ActiveTaskSection";
+import DoneTaskSection from "../tasks/DoneTaskSection";
+import { AddTaskModal } from "../tasks/AddTaskModal";
 import { useParams, useRouter } from "next/navigation";
 import Plus from "../../../../public/assets/plus.png";
 import Minus from "../../../../public/assets/minus.png";
 import Image from "next/image";
-import type { Task } from "./types";
-import { ProjectCompletionModal } from "./ProjectCompletionBanner";
+import type { Task } from "../tasks/types";
+import { ProjectCompletionModal } from "../tasks/ProjectCompletionBanner";
 
-export const TaskDashboard: React.FC = () => {
+export const MyTaskDashboard: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -36,7 +31,6 @@ export const TaskDashboard: React.FC = () => {
     if (typeof window === "undefined") return;
 
     const usr = window.localStorage.getItem("users");
-    console.log("localStorage users:", usr);
 
     if (usr) {
       const nextUser = usr.replace(/"/g, "");
@@ -63,27 +57,26 @@ export const TaskDashboard: React.FC = () => {
 
   const fetchTasks = useCallback(async () => {
     if (!user) return;
-    if (!currentWorkspace) return;
 
     try {
       const response = await fetch("/api/get-task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: user, workspace: currentWorkspace }),
+        body: JSON.stringify({ username: user }),
       });
       const data = (await response.json()) as { tasks?: Task[] };
       setTasks(data.tasks ?? []);
     } catch (error) {
       console.error("Error fetching tasks", error);
     }
-  }, [user, currentWorkspace]);
+  }, [user]);
 
   useEffect(() => {
-    if (!user || !currentWorkspace) return;
+    if (!user) return;
     queueMicrotask(() => {
       void fetchTasks();
     });
-  }, [user, currentWorkspace, fetchTasks]);
+  }, [user, fetchTasks]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -234,11 +227,11 @@ export const TaskDashboard: React.FC = () => {
             <h2 className="heading text-lg">Tasks</h2>
             <main className="border-t border-[#2e2e2e] w-full">
               {taskView === "All" ? (
-                <TaskSection search={search} />
+                <TaskSection search={search} scope="user" />
               ) : taskView === "Active" ? (
-                <ActiveTaskSection search={search} />
+                <ActiveTaskSection search={search} scope="user" />
               ) : (
-                <DoneTaskSection search={search} />
+                <DoneTaskSection search={search} scope="user" />
               )}
             </main>
           </section>

@@ -32,12 +32,18 @@ export async function POST(req: Request) {
           const workspaceId = (wsRow[0] as { id: number } | undefined)?.id;
           if (!workspaceId) return null;
           return sql`
-            SELECT *
-            FROM tasks
-            WHERE assignee_id = ${id} AND workspace_id = ${workspaceId} AND is_finished = true
+            SELECT t.*, w.workspace_name
+            FROM tasks t
+            LEFT JOIN workspaces w ON t.workspace_id = w.id
+            WHERE t.assignee_id = ${id} AND t.workspace_id = ${workspaceId} AND t.is_finished = true
           `;
         })
-      : await sql`SELECT * FROM tasks WHERE assignee_id = ${id} AND is_finished = true`;
+      : await sql`
+          SELECT t.*, w.workspace_name
+          FROM tasks t
+          LEFT JOIN workspaces w ON t.workspace_id = w.id
+          WHERE t.assignee_id = ${id} AND t.is_finished = true
+        `;
 
     if (workspaceName && !data) {
       return Response.json({ message: "Workspace not found" }, { status: 404 });

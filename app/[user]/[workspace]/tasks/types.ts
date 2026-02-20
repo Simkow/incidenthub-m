@@ -9,4 +9,6 @@ export type Task = {
   due_date: string;
   is_finished: boolean;
   assignee: string;
+  workspace_id?: string | number | null;
+  workspace_name?: string | null;
 };

@@ -38,13 +38,7 @@ type Props = {
   ) => void;
 };
 
-export function TaskModal({
-  open,
-  task,
-  priorities,
-  onClose,
-  onUpdate,
-}: Props) {
+export function TaskModal({ open, task, priorities, onClose, onUpdate }: Props) {
   return (
     <AnimatePresence>
       {open &&
@@ -71,7 +65,7 @@ export function TaskModal({
                 animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
                 exit={{ opacity: 0, filter: "blur(10px)", scale: 0.98 }}
                 transition={{ duration: 0.2 }}
-                className="w-full max-w-3xl rounded-xl bg-[#181818] border border-[#2e2e2e] text-white"
+                className="w-[92vw] max-w-3xl rounded-xl bg-[#181818] border border-[#2e2e2e] text-white"
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[#2e2e2e]">
@@ -86,22 +80,18 @@ export function TaskModal({
                 </div>
 
                 {task && (
-                  <div className="p-4 grid grid-cols-2 gap-4">
-                    <section className="col-span-2 flex flex-col gap-1">
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <section className="md:col-span-2 flex flex-col gap-1">
                       <span className="text-xs text-neutral-400">Title</span>
                       <input
                         value={task.title}
-                        onChange={(e) =>
-                          onUpdate(task.id, "title", e.target.value)
-                        }
+                        onChange={(e) => onUpdate(task.id, "title", e.target.value)}
                         className="bg-transparent text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 focus:outline-none focus:border-neutral-300"
                       />
                     </section>
 
-                    <section className="col-span-2 flex flex-col gap-1">
-                      <span className="text-xs text-neutral-400">
-                        Description
-                      </span>
+                    <section className="md:col-span-2 flex flex-col gap-1">
+                      <span className="text-xs text-neutral-400">Description</span>
                       <textarea
                         value={task.description}
                         onChange={(e) =>
@@ -121,9 +111,7 @@ export function TaskModal({
                       >
                         <Select.Trigger className="text-neutral-200 text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
                           <Select.Value placeholder="Priority" />
-                          <Select.Icon className="text-neutral-400">
-                            ▾
-                          </Select.Icon>
+                          <Select.Icon className="text-neutral-400">▾</Select.Icon>
                         </Select.Trigger>
                         <Select.Portal>
                           <Select.Content
@@ -174,7 +162,7 @@ export function TaskModal({
                       />
                     </section>
 
-                    <section className="col-span-2 flex items-center justify-between rounded-lg border border-[#2e2e2e] px-3 py-3">
+                    <section className="md:col-span-2 flex items-center justify-between rounded-lg border border-[#2e2e2e] px-3 py-3">
                       <div>
                         <div className="text-sm">Finished</div>
                         <div className="text-xs text-neutral-400">

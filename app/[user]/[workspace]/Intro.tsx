@@ -4,7 +4,7 @@ import React from "react";
 export const Intro: React.FC = () => {
 
     return(
-        <section className="w-screen h-screen bg-[#121212]">
+        <section className="w-full min-h-screen bg-[#121212]">
             <div className="loader">
                 <div className="line l1"></div>
                 <div className="line l2"></div>

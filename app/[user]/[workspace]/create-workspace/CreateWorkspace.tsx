@@ -92,10 +92,10 @@ export const CreateWorkspace: React.FC<Props> = ({
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full h-screen bg-[#121212] flex py-2"
+      className="w-full min-h-screen bg-[#121212] flex py-2"
     >
-        <main className="w-full h-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] items-center gap-8 text-white relative">
-            <div className="min-h-screen manrope text-white flex items-center justify-center">
+        <main className="w-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] items-center gap-8 text-white relative">
+            <div className="min-h-[70vh] md:min-h-screen manrope text-white flex items-center justify-center">
                 <div className="w-full max-w-xl p-8">
                      <h1 className="text-2xl font-semibold text-center">Create workspace</h1>
                     <p className="text-neutral-400 text-sm mt-2 text-center">

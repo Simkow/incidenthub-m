@@ -5,7 +5,7 @@ const ProjectPage: React.FC = () => {
     return(
         <div>
             <Sidebar />
-            <div className="ml-48 bg-[#121212]">
+            <div className="md:ml-48 bg-[#121212]">
                 <Project />
             </div>
         </div>

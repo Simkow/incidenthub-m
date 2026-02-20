@@ -37,15 +37,21 @@ export async function POST(req: Request) {
       }
 
       const data = await sql`
-        SELECT *
-        FROM tasks
-        WHERE assignee_id = ${userId} AND workspace_id = ${workspaceId}
+        SELECT t.*, w.workspace_name
+        FROM tasks t
+        LEFT JOIN workspaces w ON t.workspace_id = w.id
+        WHERE t.assignee_id = ${userId} AND t.workspace_id = ${workspaceId}
       `;
 
       return Response.json({ tasks: data ?? [] }, { status: 200 });
     }
 
-    const data = await sql`SELECT * FROM tasks WHERE assignee_id = ${userId}`;
+    const data = await sql`
+      SELECT t.*, w.workspace_name
+      FROM tasks t
+      LEFT JOIN workspaces w ON t.workspace_id = w.id
+      WHERE t.assignee_id = ${userId}
+    `;
     return Response.json({ tasks: data ?? [] }, { status: 200 });
   } catch (error) {
     console.error(error);

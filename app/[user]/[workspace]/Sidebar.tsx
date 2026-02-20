@@ -91,7 +91,7 @@ export const Sidebar: React.FC = () => {
   }, [user]);
 
   return (
-    <div className="fixed flex flex-col items-start justify-start gap-6 left-0 top-0 p-3 w-48 h-full bg-[#121212] manrope z-50">
+    <div className="relative md:fixed flex flex-col items-start justify-start gap-6 md:left-0 md:top-0 p-3 w-full md:w-48 h-auto md:h-full bg-[#121212] manrope z-50">
       <Link href={"/"}>
         <Image
           src={Logo}
@@ -103,7 +103,7 @@ export const Sidebar: React.FC = () => {
       </Link>
       <section
         onClick={() => setIsOpen(!isOpen)}
-        className="mt-3 flex gap-2 items-center w-40 py-2 pl-2 pr-3 bg-white/5 hover:bg-white/10 cursor-pointer rounded-lg"
+        className="mt-3 flex gap-2 items-center w-full md:w-40 py-2 pl-2 pr-3 bg-white/5 hover:bg-white/10 cursor-pointer rounded-lg"
       >
         <Image
           src={Project}
@@ -159,8 +159,8 @@ export const Sidebar: React.FC = () => {
           )}
         </div>
       </section>
-      <section className="flex flex-col gap-2 mt-5">
-        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 hover:bg-white/10 cursor-pointer">
+      <section className="flex flex-col gap-2 mt-5 w-full">
+        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-white/10 cursor-pointer w-full">
           <Image
             src={Inbox}
             alt="Inbox"
@@ -170,7 +170,15 @@ export const Sidebar: React.FC = () => {
           />
           <span className="text-white text-xs font-medium">Inbox</span>
         </div>
-        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 hover:bg-white/10 cursor-pointer">
+        <Link
+          href={`/${user}/${currentWorkspace}/my-tasks`}
+          className={
+            "flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 cursor-pointer w-full " +
+            (isActiveLink(`/${user}/${currentWorkspace}/my-tasks`)
+              ? "bg-white/10"
+              : "hover:bg-white/10")
+          }
+        >
           <Image
             src={Incidents}
             alt="Issues"
@@ -179,17 +187,17 @@ export const Sidebar: React.FC = () => {
             height={16}
           />
           <span className="text-white text-xs font-medium">My tasks</span>
-        </div>
+        </Link>
       </section>
-      <section className="flex flex-col items-start gap-2 text-white">
+      <section className="flex flex-col items-start gap-2 text-white w-full">
         <h2 className="text-sm text-neutral-400">Workspace</h2>
-        <div className="flex flex-col items-start gap-1">
+        <div className="flex flex-col items-start gap-1 w-full">
           {Workspace_Links.map((link) => (
             <Link
               key={link.name}
               href={link.to}
               className={
-                "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 cursor-pointer " +
+                "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer " +
                 (isActiveLink(link.to) ? "bg-white/10" : "hover:bg-white/10")
               }
             >
@@ -208,7 +216,7 @@ export const Sidebar: React.FC = () => {
               if (!user || !currentWorkspace) return;
               window.location.href = `/${user}/${currentWorkspace}/create-workspace`;
             }}
-            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 hover:bg-white/10 cursor-pointer"
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full hover:bg-white/10 cursor-pointer"
           >
             <Image
               src={Add}
@@ -221,15 +229,15 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
       </section>
-      <section className="flex flex-col items-start gap-2 text-white">
+      <section className="flex flex-col items-start gap-2 text-white w-full">
         <h2 className="text-sm text-neutral-400">Project</h2>
-        <div className="flex flex-col items-start gap-1">
+        <div className="flex flex-col items-start gap-1 w-full">
           {Teams_Links.map((link) => (
             <Link
               key={link.name}
               href={link.to}
               className={
-                "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-10 w-34 cursor-pointer " +
+                "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer " +
                 (isActiveLink(link.to) ? "bg-white/10" : "hover:bg-white/10")
               }
             >

@@ -70,7 +70,7 @@ export const Register: React.FC = () => {
       />
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl bg-neutral-900/30 px-8 py-5 flex justify-center items-center flex-col gap-4 shadow-lg shadow-black/30 backdrop-blur-[1px] border border-white/20 z-20"
+        className="w-[92vw] max-w-md rounded-xl bg-neutral-900/30 px-8 py-5 flex justify-center items-center flex-col gap-4 shadow-lg shadow-black/30 backdrop-blur-[1px] border border-white/20 z-20"
       >
         <div className="w-full flex flex-col justify-center items-center">
           <Link href="/">
@@ -98,7 +98,7 @@ export const Register: React.FC = () => {
             type="text"
             id="name"
             name="name"
-            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-400"
             value={name}
             onChange={handleNameChange}
           />
@@ -117,7 +117,7 @@ export const Register: React.FC = () => {
             type="email"
             id="email"
             name="email"
-            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-400"
             value={email}
             onChange={handleEmailChange}
           />
@@ -136,7 +136,7 @@ export const Register: React.FC = () => {
             type="password"
             id="password"
             name="password"
-            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-400"
+            className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-400"
             value={password}
             onChange={handlePasswordChange}
           />

@@ -20,14 +20,14 @@ export const Navbar: React.FC = () => {
   const hasDashboard = !!user?.name && !!workspace;
 
   return (
-    <div className="w-full h-18 fixed px-56 py-4 bg-[#090909]/70 text-gray-400 flex items-center justify-between heading border-b border-white/30 z-50 backdrop-blur-sm">
-      <div className="flex gap-4 items-center justify-center">
+    <div className="w-full fixed px-6 md:px-12 lg:px-56 py-4 bg-[#090909]/70 text-gray-400 flex flex-col md:flex-row items-center md:justify-between gap-4 heading border-b border-white/30 z-50 backdrop-blur-sm">
+      <div className="flex gap-4 items-center justify-center shrink-0">
         <Image src={Logo} alt="IncidentHub Logo" className="h-12 w-12" />
         <span className="font-medium text-lg text-transparent bg-linear-to-r from-neutral-200 to-neutral-300 bg-clip-text">
           IncidentHub
         </span>
       </div>
-      <div className="flex gap-8 text-base">
+      <div className="flex gap-4 md:gap-8 text-sm md:text-base flex-wrap justify-center">
         <Link
           href="/"
           className="hover:text-neutral-300 transition-all duration-300"
@@ -49,7 +49,7 @@ export const Navbar: React.FC = () => {
       </div>
       <div>
         {!token ? (
-          <div className="flex gap-4 text-base">
+          <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
             <Link
               href="/login"
               className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-white/50 transition-all duration-300"
@@ -64,7 +64,7 @@ export const Navbar: React.FC = () => {
             </Link>
           </div>
         ) : (
-          <div className="flex gap-4 text-base">
+          <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
             <Link
               href="/login"
               onClick={() => localStorage.removeItem("authToken")}

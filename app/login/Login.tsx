@@ -111,7 +111,7 @@ export const Login: React.FC = () => {
       />
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl bg-neutral-900/30 px-8 py-5 flex justify-center items-center flex-col gap-4 shadow-lg shadow-black/30 backdrop-blur-[1px] border border-white/20 z-20"
+        className="w-[92vw] max-w-md rounded-xl bg-neutral-900/30 px-8 py-5 flex justify-center items-center flex-col gap-4 shadow-lg shadow-black/30 backdrop-blur-[1px] border border-white/20 z-20"
       >
         <div className="w-full flex flex-col justify-center items-center">
           <Link href="/">
@@ -142,7 +142,7 @@ export const Login: React.FC = () => {
             type="email"
             id="email"
             name="email"
-            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300"
             onChange={handleEmailChange}
           />
         </div>
@@ -160,7 +160,7 @@ export const Login: React.FC = () => {
             type="password"
             id="password"
             name="password"
-            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-80 focus:outline-none focus:ring-2 focus:ring-neutral-300"
+            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300"
             onChange={handlePasswordChange}
           />
         </div>

@@ -1,7 +1,7 @@
-import { Sidebar } from "./Sidebar";
-import { Dashboard } from "./Dashboard";
-import { sql } from "../../lib/db";
+import { Sidebar } from "../Sidebar";
+import { sql } from "../../../lib/db";
 import { notFound } from "next/navigation";
+import { MyTaskDashboard } from "./MyTaskDashboard";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ type PageProps = {
   }>;
 };
 
-export default async function WorkspacePage({ params }: PageProps) {
+export default async function MyTasksPage({ params }: PageProps) {
   const { user, workspace } = await params;
 
   const users = await sql`
@@ -40,7 +40,7 @@ export default async function WorkspacePage({ params }: PageProps) {
     <div>
       <Sidebar />
       <div className="md:ml-48 bg-[#121212]">
-        <Dashboard />
+        <MyTaskDashboard />
       </div>
     </div>
   );
