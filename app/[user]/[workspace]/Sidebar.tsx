@@ -17,8 +17,11 @@ import Settings from "../../../public/assets/settings.png";
 import Project from "../../../public/assets/current-project.png";
 import Arrow from "../../../public/assets/down-arrow.png";
 import Tasks from "../../../public/assets/tasks.png";
+import { LocaleToggle } from "../../i18n/LocaleToggle";
+import { useI18n } from "../../i18n/I18nProvider";
 
 export const Sidebar: React.FC = () => {
+  const { t } = useI18n();
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
@@ -36,9 +39,13 @@ export const Sidebar: React.FC = () => {
   const [currentWorkspace, setCurrentWorkspace] = useState("");
   const [user, setUser] = useState("");
   const Workspace_Links = [
-    { name: "Tasks", to: `/${user}/${currentWorkspace}/tasks`, icon: Tasks },
     {
-      name: "Project",
+      name: t("sidebar.tasks"),
+      to: `/${user}/${currentWorkspace}/tasks`,
+      icon: Tasks,
+    },
+    {
+      name: t("sidebar.project"),
       to: `/${user}/${currentWorkspace}/project`,
       icon: Projects,
     },
@@ -233,7 +240,7 @@ export const Sidebar: React.FC = () => {
                   width={12}
                   height={12}
                 />
-                Create workspace
+                {t("sidebar.createWorkspace")}
               </div>
             </div>
           )}
@@ -249,7 +256,7 @@ export const Sidebar: React.FC = () => {
             height={16}
           />
           <span className="text-white text-xs font-medium opacity-50">
-            Inbox
+            {t("sidebar.inbox")}
           </span>
         </div>
         <Link
@@ -268,11 +275,13 @@ export const Sidebar: React.FC = () => {
             width={16}
             height={16}
           />
-          <span className="text-white text-xs font-medium">My tasks</span>
+          <span className="text-white text-xs font-medium">
+            {t("sidebar.myTasks")}
+          </span>
         </Link>
       </section>
       <section className="flex flex-col items-start gap-2 text-white w-full">
-        <h2 className="text-sm text-neutral-400">Workspace</h2>
+        <h2 className="text-sm text-neutral-400">{t("sidebar.workspace")}</h2>
         <div className="flex flex-col items-start gap-1 w-full">
           {Workspace_Links.map((link) => (
             <Link
@@ -307,8 +316,12 @@ export const Sidebar: React.FC = () => {
               width={16}
               height={16}
             />
-            Add
+            {t("sidebar.add")}
           </button>
+
+          <div className="mt-2 px-2">
+            <LocaleToggle />
+          </div>
         </div>
       </section>
       {/* <section className="flex flex-col items-start gap-2 text-white w-full">

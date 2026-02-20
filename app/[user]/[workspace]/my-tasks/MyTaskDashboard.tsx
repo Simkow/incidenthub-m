@@ -18,8 +18,10 @@ import Minus from "../../../../public/assets/minus.png";
 import Image from "next/image";
 import type { Task } from "../tasks/types";
 import { ProjectCompletionModal } from "../tasks/ProjectCompletionBanner";
+import { useI18n } from "../../../i18n/I18nProvider";
 
 export const MyTaskDashboard: React.FC = () => {
+  const { t } = useI18n();
   const params = useParams();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -174,33 +176,33 @@ export const MyTaskDashboard: React.FC = () => {
               onClick={() => setTaskView("All")}
               className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e]"
             >
-              All Tasks
+              {t("tasks.allTasks")}
             </button>
             <button
               onClick={() => setTaskView("Active")}
               className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e]"
             >
-              Active
+              {t("tasks.active")}
             </button>
             <button
               onClick={() => setTaskView("Done")}
               className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e]"
             >
-              Done
+              {t("tasks.done")}
             </button>
 
             <input
               type="text"
               value={search}
               onChange={handleChange}
-              placeholder="Search by title, description or assignee"
+              placeholder={t("tasks.searchPh")}
               className="w-full md:w-72 px-2 py-1 rounded-lg border border-[#2e2e2e] focus:border-neutral-300 focus:outline-none"
             />
           </section>
 
           {/* main */}
           <section className="w-full flex flex-col gap-1">
-            <p className="heading">Progress</p>
+            <p className="heading">{t("tasks.progress")}</p>
             <div className="w-full rounded-xl border border-[#2e2e2e] px-3 py-2 flex items-center gap-3 mb-5">
               <span className="text-xs text-neutral-300 whitespace-nowrap">
                 {allTasksCount} : {doneTasksCount}
@@ -230,7 +232,7 @@ export const MyTaskDashboard: React.FC = () => {
               </span>
             </div>
 
-            <h2 className="heading text-lg">Tasks</h2>
+            <h2 className="heading text-lg">{t("tasks.tasksHeading")}</h2>
             <main className="border-t border-[#2e2e2e] w-full">
               {taskView === "All" ? (
                 <TaskSection search={search} scope="user" />

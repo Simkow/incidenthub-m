@@ -6,38 +6,30 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../AuthProvider";
 import Image from "next/image";
 import { useCurrentWorkspace } from "./CurrentWorkspace";
+import { LocaleToggle } from "../i18n/LocaleToggle";
+import { useI18n } from "../i18n/I18nProvider";
 
 export const Navbar: React.FC = () => {
   const { user } = useAuth();
   const [token, setToken] = useState<string>("");
   const [username, setUsername] = useState("");
 
+  const { t } = useI18n();
+
   const workspace = useCurrentWorkspace(username);
   const hasDashboard = !!username && !!workspace;
 
   useEffect(() => {
-    if (typeof window === undefined) {
-      return;
-    }
-    const user1 = window.localStorage.getItem("users") as string;
-    if (user1 !== null) {
-      setUsername(user1.replace(/"/g, ""));
-    } else {
-      setUsername("");
-    }
-  })
+    if (typeof window === "undefined") return;
+    const user1 = window.localStorage.getItem("users");
+    setUsername(user1 ? user1.replace(/"/g, "") : "");
+  }, []);
 
   useEffect(() => {
-    if (typeof window === undefined) {
-      return;
-    }
-    const token1 = window.localStorage.getItem("authToken") as string;
-    if (token1 !== null) {
-      setToken(token1.replace(/"/g, ""));
-    } else {
-      setToken("");
-    }
-  })
+    if (typeof window === "undefined") return;
+    const token1 = window.localStorage.getItem("authToken");
+    setToken(token1 ? token1.replace(/"/g, "") : "");
+  }, []);
 
   return (
     <div className="w-full fixed px-6 md:px-12 lg:px-56 py-4 bg-[#090909]/70 text-gray-400 flex flex-col md:flex-row items-center md:justify-between gap-4 heading border-b border-white/30 z-50 backdrop-blur-sm">
@@ -52,35 +44,36 @@ export const Navbar: React.FC = () => {
           href="/"
           className="hover:text-neutral-300 transition-all duration-300 opacity-50"
         >
-          Product
+          {t("navbar.product")}
         </Link>
         <Link
           href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
           className=" hover:text-neutral-300 transition-all duration-300"
         >
-          Dashboard
+          {t("navbar.dashboard")}
         </Link>
         <Link
           href="/contact"
           className=" hover:text-neutral-300 transition-all duration-300 opacity-50"
         >
-          Contact
+          {t("navbar.contact")}
         </Link>
       </div>
-      <div>
+      <div className="flex items-center gap-3">
+        <LocaleToggle />
         {!token ? (
           <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
             <Link
               href="/login"
               className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-white/50 transition-all duration-300"
             >
-              Login
+              {t("navbar.login")}
             </Link>
             <Link
               href="/login"
               className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-white/50 transition-all duration-300"
             >
-              Open App
+              {t("navbar.openApp")}
             </Link>
           </div>
         ) : (
@@ -90,13 +83,13 @@ export const Navbar: React.FC = () => {
               onClick={() => localStorage.removeItem("authToken")}
               className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-white/50 transition-all duration-300"
             >
-              Logout
+              {t("navbar.logout")}
             </Link>
             <Link
               href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
               className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-white/50 transition-all duration-300"
             >
-              Open App
+              {t("navbar.openApp")}
             </Link>
           </div>
         )}

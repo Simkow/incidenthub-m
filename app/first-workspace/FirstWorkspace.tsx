@@ -5,11 +5,11 @@ import Image from "next/image";
 import Arrow from "../../public/assets/down-arrow.png";
 import { useState } from "react";
 import { motion } from "motion/react";
-
-const WORKSPACE_SPACE_MESSAGE =
-  'Workspace name cannot contain spaces. Example: "my-workspace" or "my_workspace".';
+import { useI18n } from "../i18n/I18nProvider";
 
 export const FirstWorkspace: React.FC = () => {
+  const { t } = useI18n();
+
   const [userName] = useState<string>(() => {
     if (typeof window === "undefined") return "";
     const storedUser = window.localStorage.getItem("users");
@@ -52,7 +52,7 @@ export const FirstWorkspace: React.FC = () => {
 
       if (!trimmedProjectName || !normalizedUserName) {
         console.error("Missing project name");
-        setError("Missing project name");
+        setError(t("firstWorkspace.missingProjectName"));
         return;
       }
 
@@ -60,12 +60,12 @@ export const FirstWorkspace: React.FC = () => {
         normalizedUserName.toLowerCase() === "undefined" ||
         normalizedUserName.toLowerCase() === "null"
       ) {
-        setError("Session expired. Please log in again.");
+        setError(t("firstWorkspace.sessionExpired"));
         return;
       }
 
       if (/\s/.test(trimmedProjectName)) {
-        setError(WORKSPACE_SPACE_MESSAGE);
+        setError(t("firstWorkspace.workspaceSpaceMessage"));
         return;
       }
 
@@ -92,13 +92,13 @@ export const FirstWorkspace: React.FC = () => {
           (data as { message?: unknown })?.message &&
           typeof (data as { message?: unknown }).message === "string"
             ? ((data as { message: string }).message as string)
-            : "Failed to create workspace";
+            : t("firstWorkspace.failedCreate");
         console.error(message);
         setError(message);
       }
     } catch (error) {
       console.error("Error adding workspace:", error);
-      setError("Internal error");
+      setError(t("firstWorkspace.internalError"));
     }
   };
 
@@ -115,26 +115,25 @@ export const FirstWorkspace: React.FC = () => {
           width={12}
           height={12}
         />
-        Back to IncidentHub
+        {t("firstWorkspace.back")}
       </Link>
       <span className="flex flex-col items-start absolute right-4 md:right-8 top-5 gap-1 text-neutral-400 text-sm max-w-[60vw] md:max-w-none">
-        Logged in as <span className="text-neutral-200">{userEmail}</span>
+        {t("firstWorkspace.loggedInAs")}{" "}
+        <span className="text-neutral-200">{userEmail}</span>
       </span>
       <main>
         <section className="w-full h-full flex flex-col justify-center items-center gap-6">
           <h1 className="text-3xl font-bold text-white">
-            Welcome to your first workspace!
+            {t("firstWorkspace.title")}
           </h1>
           <p className="text-neutral-400 text-center w-full max-w-xl px-2 md:px-0">
-            It looks like you haven&apos;t set up any projects or teams yet. Get
-            started by creating your first project and inviting team members to
-            collaborate.
+            {t("firstWorkspace.desc")}
           </p>
           <button
             onClick={() => setIsClicked(true)}
             className="bg-black text-white rounded-lg px-6 py-3 hover:bg-neutral-800 transition cursor-pointer"
           >
-            Create Your First Project
+            {t("firstWorkspace.cta")}
           </button>
           {isClicked && (
             <motion.form
@@ -149,14 +148,14 @@ export const FirstWorkspace: React.FC = () => {
                   htmlFor="projectName"
                   className="text-neutral-200 font-medium"
                 >
-                  Project Name
+                  {t("firstWorkspace.projectName")}
                 </label>
                 <input
                   type="text"
                   id="projectName"
                   name="projectName"
                   className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
-                  placeholder="Enter project name"
+                  placeholder={t("firstWorkspace.projectNamePh")}
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                 />
@@ -164,7 +163,7 @@ export const FirstWorkspace: React.FC = () => {
                   htmlFor="workspaceUrl"
                   className="text-neutral-200 font-medium mt-2"
                 >
-                  Workspace URL
+                  {t("firstWorkspace.workspaceUrl")}
                 </label>
                 <input
                   readOnly
@@ -173,7 +172,7 @@ export const FirstWorkspace: React.FC = () => {
                   value={`http://localhost:5173/${userName}/${trimmedProjectName || "<workspace>"}`}
                   name="workspaceUrl"
                   className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
-                  placeholder="Enter workspace name"
+                  placeholder={t("firstWorkspace.workspaceUrlPh")}
                 />
               </div>
               <span className="text-red-400 text-sm">{error}</span>
@@ -181,7 +180,7 @@ export const FirstWorkspace: React.FC = () => {
                 type="submit"
                 className="bg-black text-white rounded-lg px-6 py-3 hover:bg-neutral-800 transition cursor-pointer"
               >
-                Create Workspace
+                {t("firstWorkspace.createWorkspace")}
               </button>
             </motion.form>
           )}

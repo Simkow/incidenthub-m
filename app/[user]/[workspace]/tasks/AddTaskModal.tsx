@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import * as Select from "@radix-ui/react-select";
+import { useI18n } from "../../../i18n/I18nProvider";
 
 type Priority = "Light" | "Medium" | "High" | "Urgent";
 
@@ -25,12 +26,61 @@ export function AddTaskModal({
   onErrorMessage,
   afterSuccess,
 }: Props) {
+  const { t } = useI18n();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [assignee, setAssignee] = useState("");
+  const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
+  const [assigneeLoading, setAssigneeLoading] = useState(false);
   const [priority, setPriority] = useState<Priority | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    if (!workspace) return;
+
+    let cancelled = false;
+
+    (async () => {
+      setAssigneeLoading(true);
+      try {
+        const res = await fetch("/api/get-workspace-users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspace }),
+        });
+
+        const data = (await res.json().catch(() => null)) as {
+          users?: unknown;
+        } | null;
+
+        const users = Array.isArray(data?.users)
+          ? (data?.users as unknown[])
+              .filter((u): u is string => typeof u === "string")
+              .map((u) => u.trim())
+              .filter(Boolean)
+          : [];
+
+        if (cancelled) return;
+        setAssigneeOptions(users);
+
+        if (!assignee && users.length) {
+          setAssignee(users[0] ?? "");
+        }
+      } catch {
+        if (cancelled) return;
+        setAssigneeOptions([]);
+      } finally {
+        if (cancelled) return;
+        setAssigneeLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, workspace, assignee]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,7 +89,7 @@ export function AddTaskModal({
     onErrorMessage?.("");
 
     if (!title || !description || !priority || !dueDate || !assignee) {
-      onErrorMessage?.("Please fill in all fields");
+      onErrorMessage?.(t("tasks.fillAll"));
       return;
     }
 
@@ -64,11 +114,11 @@ export function AddTaskModal({
       } | null;
 
       if (!res.ok) {
-        onErrorMessage?.(data?.message ?? "Failed to add task");
+        onErrorMessage?.(data?.message ?? t("tasks.addFailed"));
         return;
       }
 
-      onSuccessMessage?.(data?.message ?? "Task added successfully");
+      onSuccessMessage?.(data?.message ?? t("tasks.addSuccess"));
       setTitle("");
       setDescription("");
       setPriority("");
@@ -81,7 +131,7 @@ export function AddTaskModal({
       }
       afterSuccess?.();
     } catch {
-      onErrorMessage?.("Network error");
+      onErrorMessage?.(t("tasks.networkError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -103,28 +153,28 @@ export function AddTaskModal({
         className="w-[92vw] max-w-3xl rounded-xl bg-[#181818] border border-[#2e2e2e] p-3 flex flex-col gap-3"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <h2 className="text-sm">Create task</h2>
+        <h2 className="text-sm">{t("tasks.createTask")}</h2>
         <main className="w-full h-full border-t border-[#2e2e2e] flex flex-col py-2">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row gap-3">
               <section className="flex flex-col gap-1 w-full">
-                <span>Title</span>
+                <span>{t("tasks.title")}</span>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-48 bg-transparent focus:outline-none focus:border-neutral-300"
-                  placeholder="Enter title"
+                  placeholder={t("tasks.titlePh")}
                 />
               </section>
               <section className="flex flex-col gap-1 w-full">
-                <span>Priority</span>
+                <span>{t("tasks.priority")}</span>
                 <Select.Root
                   value={priority}
                   onValueChange={(value) => setPriority(value as Priority)}
                 >
                   <Select.Trigger className="text-white rounded-md border border-[#2e2e2e] px-2 py-2 w-full md:w-48 flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
-                    <Select.Value placeholder="Select priority" />
+                    <Select.Value placeholder={t("tasks.priorityPh")} />
                     <Select.Icon className="text-neutral-400">▾</Select.Icon>
                   </Select.Trigger>
                   <Select.Portal>
@@ -153,16 +203,16 @@ export function AddTaskModal({
             </div>
             <div className="flex flex-col md:flex-row gap-3">
               <section className="flex flex-col gap-1 w-full">
-                <span>Description</span>
+                <span>{t("tasks.description")}</span>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-72 h-40 bg-transparent focus:outline-none focus:border-neutral-300"
-                  placeholder="Type description to your task"
+                  placeholder={t("tasks.descriptionPh")}
                 />
               </section>
               <section className="flex flex-col gap-1 w-full">
-                <span>Due date</span>
+                <span>{t("tasks.dueDate")}</span>
                 <input
                   type="datetime-local"
                   value={dueDate}
@@ -173,14 +223,42 @@ export function AddTaskModal({
             </div>
             <div className="flex gap-3">
               <section className="flex flex-col gap-1 w-full">
-                <span>Assignee</span>
-                <input
-                  type="text"
+                <span>{t("tasks.assignee")}</span>
+                <Select.Root
                   value={assignee}
-                  onChange={(e) => setAssignee(e.target.value)}
-                  className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-72 bg-transparent focus:outline-none focus:border-neutral-300"
-                  placeholder="Enter assignee"
-                />
+                  onValueChange={(value) => setAssignee(value)}
+                  disabled={assigneeLoading || assigneeOptions.length === 0}
+                >
+                  <Select.Trigger className="text-white rounded-md border border-[#2e2e2e] px-2 py-2 w-full md:w-72 flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer disabled:opacity-60">
+                    <Select.Value
+                      placeholder={
+                        assigneeLoading
+                          ? t("tasks.assigneeLoading")
+                          : t("tasks.assigneePh")
+                      }
+                    />
+                    <Select.Icon className="text-neutral-400">▾</Select.Icon>
+                  </Select.Trigger>
+                  <Select.Portal>
+                    <Select.Content
+                      position="popper"
+                      sideOffset={6}
+                      className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818] hover:cursor-pointer"
+                    >
+                      <Select.Viewport className="p-1">
+                        {assigneeOptions.map((name) => (
+                          <Select.Item
+                            key={name}
+                            value={name}
+                            className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                          >
+                            <Select.ItemText>{name}</Select.ItemText>
+                          </Select.Item>
+                        ))}
+                      </Select.Viewport>
+                    </Select.Content>
+                  </Select.Portal>
+                </Select.Root>
               </section>
             </div>
             <button
@@ -188,7 +266,7 @@ export function AddTaskModal({
               disabled={isSubmitting}
               className="rounded-xl border border-[#2e2e2e] p-2 w-full md:w-24 text-center hover:bg-[#2e2e2e] cursor-pointer disabled:opacity-60"
             >
-              {isSubmitting ? "Sending..." : "Submit"}
+              {isSubmitting ? t("tasks.sending") : t("tasks.submit")}
             </button>
           </form>
         </main>

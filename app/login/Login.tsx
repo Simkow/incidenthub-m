@@ -7,8 +7,10 @@ import Logo from "../../public/assets/IncidentHub-logo-white.png";
 import Background from "../../public/assets/login-bg.jpg";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../AuthProvider";
+import { useI18n } from "../i18n/I18nProvider";
 
 export const Login: React.FC = () => {
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isBlurred, setIsBlurred] = useState(false);
@@ -44,7 +46,7 @@ export const Login: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
       const data = await response.json();
@@ -89,14 +91,27 @@ export const Login: React.FC = () => {
         }
       }
       if (response.status === 400) {
-        setError(data?.message || "Invalid credentials");
+        setError(
+          (data?.message as unknown) && typeof data.message === "string"
+            ? data.message
+            : t("auth.invalidCredentials"),
+        );
       } else if (response.status === 401) {
-        setError(data?.message || "Invalid credentials");
+        setError(
+          (data?.message as unknown) && typeof data.message === "string"
+            ? data.message
+            : t("auth.invalidCredentials"),
+        );
       } else if (!response.ok) {
-        setError(data?.message || "Login failed");
+        setError(
+          (data?.message as unknown) && typeof data.message === "string"
+            ? data.message
+            : t("auth.loginFailed"),
+        );
       }
     } catch (error) {
       console.error("Error during login:", error);
+      setError(t("auth.genericError"));
     }
   }
 
@@ -124,19 +139,19 @@ export const Login: React.FC = () => {
             />
           </Link>
           <h1 className="text-2xl font-bold text-neutral-500 mb-4 text-center">
-            Login to <br />
+            {t("auth.loginTitle")} <br />
             <span className="text-white">IncidentHub</span>
           </h1>
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="email" className="text-neutral-300 font-medium">
-            Email:
+            {t("auth.email")}
           </label>
           <label
             htmlFor="email"
             className="text-xs text-neutral-500 font-light"
           >
-            Provide your email address
+            {t("auth.emailHint")}
           </label>
           <input
             type="email"
@@ -148,13 +163,13 @@ export const Login: React.FC = () => {
         </div>
         <div className="flex flex-col gap-2 mt-4">
           <label htmlFor="password" className="text-neutral-300 font-medium">
-            Password:
+            {t("auth.password")}
           </label>
           <label
             htmlFor="password"
             className="text-xs text-neutral-500 font-light"
           >
-            Enter your password
+            {t("auth.passwordHint")}
           </label>
           <input
             type="password"
@@ -169,7 +184,7 @@ export const Login: React.FC = () => {
             type="submit"
             className="mt-6 bg-black text-white rounded-lg px-4 py-2 w-full hover:bg-neutral-800 transition cursor-pointer"
           >
-            Login
+            {t("auth.login")}
           </button>
           {error && <p className="text-red-300 text-sm">{error}</p>}
           <Link href="/register">
@@ -177,7 +192,7 @@ export const Login: React.FC = () => {
               type="button"
               className="text-neutral-400 hover:underline text-sm cursor-pointer"
             >
-              Register...
+              {t("auth.registerLink")}
             </button>
           </Link>
         </div>

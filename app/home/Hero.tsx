@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useAuth } from "../AuthProvider";
 import Image from "next/image";
 import { useCurrentWorkspace } from "./CurrentWorkspace";
+import { useI18n } from "../i18n/I18nProvider";
 
 const MotionImage = motion(Image);
 
@@ -16,20 +17,16 @@ export const Hero: FC = () => {
   const { user } = useAuth();
   const [username, setUsername] = useState("");
 
+  const { t } = useI18n();
+
   const workspace = useCurrentWorkspace(username);
   const hasDashboard = !!username && !!workspace;
 
   useEffect(() => {
-    if (typeof window === undefined) {
-      return;
-    }
-    const user1 = window.localStorage.getItem("users") as string;
-    if (user1 !== null) {
-      setUsername(user1.replace(/"/g, ""));
-    } else {
-      setUsername("");
-    }
-  });
+    if (typeof window === "undefined") return;
+    const user1 = window.localStorage.getItem("users");
+    setUsername(user1 ? user1.replace(/"/g, "") : "");
+  }, []);
 
   return (
     <main className="w-full max-md:max-h-screen max-md:justify-center min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-40 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-32 md:pb-40">
@@ -50,15 +47,15 @@ export const Hero: FC = () => {
           transition={{ duration: 1 }}
           className="font-bold text-4xl md:text-6xl text-start text-white"
         >
-          A modern way to{" "}
+          {t("hero.titleA")}{" "}
           <motion.span
             initial={{ opacity: 0, filter: "blur(10px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ duration: 1.3 }}
           >
-            handle{" "}
+            {t("hero.titleB")}{" "}
             <span className="text-transparent bg-linear-to-l from-neutral-400 to-white bg-clip-text">
-              incidents.
+              {t("hero.titleC")}
             </span>
           </motion.span>
         </motion.h1>
@@ -68,8 +65,7 @@ export const Hero: FC = () => {
           transition={{ duration: 1.6 }}
           className="text-start text-neutral-400 leading-relaxed text-base md:text-xl font-base"
         >
-          Log incidents, track actions, and build postmortems with a clean,
-          <br /> frontend-first workflow designed for real-world scenarios.
+          {t("hero.subtitle")}
         </motion.h2>
         <div className="justify-start flex flex-col sm:flex-row gap-4 sm:gap-8">
           <Link
@@ -81,26 +77,26 @@ export const Hero: FC = () => {
               transition={{ duration: 1.7 }}
               className="border border-white rounded-xl w-full sm:w-38 py-2 hover:bg-neutral-100 hover:text-black transition-all duration-300 cursor-pointer font-bold"
             >
-              Start Building
+              {t("hero.startBuilding")}
             </motion.button>
           </Link>
-          <motion.button
+          {/* <motion.button
             initial={{ opacity: 0, filter: "blur(10px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ duration: 1.7 }}
             disabled
             className="border border-white/40 text-white/70 rounded-xl w-full sm:w-38 py-2 cursor-not-allowed font-bold"
-            title="Resolving workspace..."
+            title={t("hero.resolvingWorkspaceTitle")}
           >
-            Opening...
-          </motion.button>
+            {t("hero.opening")}
+          </motion.button> */}
           <motion.button
             initial={{ opacity: 0, filter: "blur(10px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ duration: 2 }}
-            className="group text-neutral-300 rounded-xl w-full sm:w-38 py-2 hover:bg-neutral-700 transition-all duration-300 cursor-pointer font-bold"
+            className="group text-neutral-300 rounded-xl w-full sm:w-48 py-2 hover:bg-neutral-700 transition-all duration-300 cursor-pointer font-bold"
           >
-            Learn More...
+            {t("hero.learnMore")}
             <span className="ml-2 text-neutral-400 font-base group-hover:text-white">{`>`}</span>
           </motion.button>
         </div>
