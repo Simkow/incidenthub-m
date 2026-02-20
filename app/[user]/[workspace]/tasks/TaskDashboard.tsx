@@ -130,7 +130,7 @@ export const TaskDashboard: React.FC = () => {
         }}
       />
       <section className="py-2 w-full">
-        <main className="w-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 gap-8 text-white relative">
+        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 gap-8 text-white relative">
           {/* top bar */}
           <section className="w-full rounded-xl border border-[#2e2e2e] flex flex-wrap items-center px-3 py-2 body-text text-xs gap-2">
             <button

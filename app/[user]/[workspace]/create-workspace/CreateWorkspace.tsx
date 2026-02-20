@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { motion } from 'motion/react'
+import { motion } from "motion/react";
 
 type Props = {
   user: string;
@@ -94,94 +94,104 @@ export const CreateWorkspace: React.FC<Props> = ({
       transition={{ duration: 0.5 }}
       className="w-full min-h-screen bg-[#121212] flex py-2"
     >
-        <main className="w-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] items-center gap-8 text-white relative">
-            <div className="min-h-[70vh] md:min-h-screen manrope text-white flex items-center justify-center">
-                <div className="w-full max-w-xl p-8">
-                     <h1 className="text-2xl font-semibold text-center">Create workspace</h1>
-                    <p className="text-neutral-400 text-sm mt-2 text-center">
-                    Current workspace:{" "}
-                    <span className="text-neutral-200">{currentWorkspace}</span>
-                    </p>
+      <main className="w-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] items-center gap-8 text-white relative">
+        <div className="h-full md:max-h-screen manrope text-white flex items-center justify-center">
+          <div className="w-full max-w-xl p-8">
+            <h1 className="text-2xl font-semibold text-center">
+              Create workspace
+            </h1>
+            <p className="text-neutral-400 text-sm mt-2 text-center">
+              Current workspace:{" "}
+              <span className="text-neutral-200">{currentWorkspace}</span>
+            </p>
 
-                    <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="workspaceName" className="text-neutral-400 text-sm">
-                        Workspace name
-                        </label>
-                        <input
-                        id="workspaceName"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
-                        placeholder="Enter workspace name"
-                        autoComplete="off"
-                        />
-                    </div>
+            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceName"
+                  className="text-neutral-400 text-sm"
+                >
+                  Workspace name
+                </label>
+                <input
+                  id="workspaceName"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                  placeholder="Enter workspace name"
+                  autoComplete="off"
+                />
+              </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label
-                        htmlFor="workspaceDescription"
-                        className="text-neutral-400 text-sm"
-                        >
-                        Description (optional)
-                        </label>
-                        <textarea
-                        id="workspaceDescription"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm min-h-24"
-                        placeholder="What is this workspace for?"
-                        />
-                    </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceDescription"
+                  className="text-neutral-400 text-sm"
+                >
+                  Description (optional)
+                </label>
+                <textarea
+                  id="workspaceDescription"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm min-h-24"
+                  placeholder="What is this workspace for?"
+                />
+              </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label
-                        htmlFor="workspaceDueDate"
-                        className="text-neutral-400 text-sm"
-                        >
-                        Due date (optional)
-                        </label>
-                        <input
-                        id="workspaceDueDate"
-                        type="date"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
-                        className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
-                        />
-                    </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceDueDate"
+                  className="text-neutral-400 text-sm"
+                >
+                  Due date (optional)
+                </label>
+                <input
+                  id="workspaceDueDate"
+                  type="date"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                />
+              </div>
 
-                    <div className="flex flex-col gap-2">
-                        <label htmlFor="workspaceUrl" className="text-neutral-400 text-sm">
-                        Workspace URL
-                        </label>
-                        <input
-                        id="workspaceUrl"
-                        readOnly
-                        type="text"
-                        value={`/${user}/${safeName || "<workspace>"}`}
-                        className="text-neutral-700 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full text-sm"
-                        />
-                    </div>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="workspaceUrl"
+                  className="text-neutral-400 text-sm"
+                >
+                  Workspace URL
+                </label>
+                <input
+                  id="workspaceUrl"
+                  readOnly
+                  type="text"
+                  value={`/${user}/${safeName || "<workspace>"}`}
+                  className="text-neutral-700 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full text-sm"
+                />
+              </div>
 
-                    {error ? <div className="text-red-400 text-sm">{error}</div> : null}
+              {error ? (
+                <div className="text-red-400 text-sm">{error}</div>
+              ) : null}
 
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={
-                        "bg-black text-white rounded-lg px-6 py-3 transition cursor-pointer " +
-                        (isSubmitting
-                            ? "opacity-70 cursor-not-allowed"
-                            : "hover:bg-neutral-800")
-                        }
-                    >
-                        {isSubmitting ? "Creating..." : "Create workspace"}
-                    </button>
-                    </form>
-                </div>
-            </div>
-        </main>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={
+                  "bg-black text-white rounded-lg px-6 py-3 transition cursor-pointer " +
+                  (isSubmitting
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:bg-neutral-800")
+                }
+              >
+                {isSubmitting ? "Creating..." : "Create workspace"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </main>
     </motion.main>
   );
 };

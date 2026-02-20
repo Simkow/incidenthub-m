@@ -43,23 +43,28 @@ export function useCurrentWorkspace(userName?: string | null) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    if (workspace) return;
     if (!userName) return;
 
-    // 2. fallback do backendu – pierwszy workspace z bazy
+    // Resolve: jeśli localStorage ma workspace, ale jest już usunięty,
+    // backend zwróci pierwszy dostępny. Jeśli brak workspace'ów -> null.
     (async () => {
       try {
-        const res = await fetch("/api/get-workspace", {
+        const res = await fetch("/api/resolve-workspace", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: userName }),
+          body: JSON.stringify({ username: userName, workspace }),
         });
         if (!res.ok) return;
 
         const data = await res.json();
         const name = data.workspace as string | null;
-        if (!name) return;
+        if (!name) {
+          setWorkspace(null);
+          window.localStorage.removeItem("workspace");
+          return;
+        }
+
+        if (name === workspace) return;
 
         setWorkspace(name);
         window.localStorage.setItem("workspace", JSON.stringify(name));

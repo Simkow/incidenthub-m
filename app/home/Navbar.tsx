@@ -30,7 +30,7 @@ export const Navbar: React.FC = () => {
       <div className="flex gap-4 md:gap-8 text-sm md:text-base flex-wrap justify-center">
         <Link
           href="/"
-          className="hover:text-neutral-300 transition-all duration-300"
+          className="hover:text-neutral-300 transition-all duration-300 opacity-50"
         >
           Product
         </Link>
@@ -42,7 +42,7 @@ export const Navbar: React.FC = () => {
         </Link>
         <Link
           href="/contact"
-          className=" hover:text-neutral-300 transition-all duration-300"
+          className=" hover:text-neutral-300 transition-all duration-300 opacity-50"
         >
           Contact
         </Link>

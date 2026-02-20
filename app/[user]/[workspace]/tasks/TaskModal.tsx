@@ -38,7 +38,13 @@ type Props = {
   ) => void;
 };
 
-export function TaskModal({ open, task, priorities, onClose, onUpdate }: Props) {
+export function TaskModal({
+  open,
+  task,
+  priorities,
+  onClose,
+  onUpdate,
+}: Props) {
   return (
     <AnimatePresence>
       {open &&
@@ -85,13 +91,17 @@ export function TaskModal({ open, task, priorities, onClose, onUpdate }: Props) 
                       <span className="text-xs text-neutral-400">Title</span>
                       <input
                         value={task.title}
-                        onChange={(e) => onUpdate(task.id, "title", e.target.value)}
+                        onChange={(e) =>
+                          onUpdate(task.id, "title", e.target.value)
+                        }
                         className="bg-transparent text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 focus:outline-none focus:border-neutral-300"
                       />
                     </section>
 
                     <section className="md:col-span-2 flex flex-col gap-1">
-                      <span className="text-xs text-neutral-400">Description</span>
+                      <span className="text-xs text-neutral-400">
+                        Description
+                      </span>
                       <textarea
                         value={task.description}
                         onChange={(e) =>
@@ -111,7 +121,9 @@ export function TaskModal({ open, task, priorities, onClose, onUpdate }: Props) 
                       >
                         <Select.Trigger className="text-neutral-200 text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
                           <Select.Value placeholder="Priority" />
-                          <Select.Icon className="text-neutral-400">▾</Select.Icon>
+                          <Select.Icon className="text-neutral-400">
+                            ▾
+                          </Select.Icon>
                         </Select.Trigger>
                         <Select.Portal>
                           <Select.Content

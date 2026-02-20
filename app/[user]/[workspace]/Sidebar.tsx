@@ -4,7 +4,7 @@ import React from "react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import Logo from "../../../public/assets/IncidentHub-logo-white.png";
 import Inbox from "../../../public/assets/inbox.png";
 import Incidents from "../../../public/assets/issues.png";
@@ -19,6 +19,8 @@ import Arrow from "../../../public/assets/down-arrow.png";
 import Tasks from "../../../public/assets/tasks.png";
 
 export const Sidebar: React.FC = () => {
+  const router = useRouter();
+  const params = useParams();
   const pathname = usePathname();
 
   const isActiveLink = (href: string) => {
@@ -40,8 +42,8 @@ export const Sidebar: React.FC = () => {
       to: `/${user}/${currentWorkspace}/project`,
       icon: Projects,
     },
-    { name: "Views", to: "/app/views", icon: Views },
-    { name: "Teams", to: "/app/teams", icon: Teams },
+    // { name: "Views", to: "/app/views", icon: Views },
+    // { name: "Teams", to: "/app/teams", icon: Teams },
   ];
 
   type Workspace = {
@@ -51,17 +53,34 @@ export const Sidebar: React.FC = () => {
   React.useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const routeUserRaw = (params as Record<string, string | string[] | undefined>)[
+      "user"
+    ];
+    const routeWorkspaceRaw = (
+      params as Record<string, string | string[] | undefined>
+    )["workspace"];
+
+    const routeUser = Array.isArray(routeUserRaw)
+      ? (routeUserRaw[0] ?? "")
+      : (routeUserRaw ?? "");
+    const routeWorkspace = Array.isArray(routeWorkspaceRaw)
+      ? (routeWorkspaceRaw[0] ?? "")
+      : (routeWorkspaceRaw ?? "");
+
     const usr = window.localStorage.getItem("users");
     const work = window.localStorage.getItem("workspace");
 
-    const nextUser = usr ? usr.replace(/"/g, "") : "";
-    const nextWorkspace = work ? work.replace(/"/g, "") || "No Workspace" : "";
+    const storedUser = usr ? usr.replace(/"/g, "") : "";
+    const storedWorkspace = work ? work.replace(/"/g, "") : "";
+
+    const nextUser = routeUser || storedUser;
+    const nextWorkspace = routeWorkspace || storedWorkspace || "";
 
     queueMicrotask(() => {
       setUser(nextUser);
       setCurrentWorkspace(nextWorkspace);
     });
-  }, []);
+  }, [params]);
 
   const Teams_Links = [
     { name: "Friends", to: "/dashboard", icon: Friends },
@@ -89,6 +108,62 @@ export const Sidebar: React.FC = () => {
     if (!user) return;
     fetchWorkspaces();
   }, [user]);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!user) return;
+    if (!currentWorkspace) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/resolve-workspace", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: user, workspace: currentWorkspace }),
+        });
+
+        if (!res.ok) return;
+        const data = (await res.json().catch(() => null)) as
+          | { workspace?: unknown }
+          | null;
+
+        const resolved =
+          typeof data?.workspace === "string" ? (data.workspace as string) : "";
+
+        if (cancelled) return;
+
+        if (!resolved) {
+          window.localStorage.removeItem("workspace");
+          return;
+        }
+
+        // keep localStorage in sync
+        window.localStorage.setItem("workspace", JSON.stringify(resolved));
+
+        if (resolved === currentWorkspace) return;
+
+        setCurrentWorkspace(resolved);
+
+        const rawPath = pathname ?? "";
+        const segments = rawPath.split("/").filter(Boolean);
+        // expected: [user, workspace, ...rest]
+        const nextPath =
+          segments.length >= 2
+            ? "/" + [segments[0], resolved, ...segments.slice(2)].join("/")
+            : `/${user}/${resolved}/tasks`;
+
+        router.replace(nextPath);
+      } catch (err) {
+        console.error("Failed to resolve workspace", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, currentWorkspace, router, pathname]);
 
   return (
     <div className="relative md:fixed flex flex-col items-start justify-start gap-6 md:left-0 md:top-0 p-3 w-full md:w-48 h-auto md:h-full bg-[#121212] manrope z-50">
@@ -130,8 +205,13 @@ export const Sidebar: React.FC = () => {
                   key={workspace.workspace_name}
                   className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs"
                   onClick={() => {
-                    localStorage.setItem("workspace", workspace.workspace_name);
-                    window.location.href = `/${user}/${workspace.workspace_name}/tasks`;
+                    if (!user) return;
+                    localStorage.setItem(
+                      "workspace",
+                      JSON.stringify(workspace.workspace_name),
+                    );
+                    setIsOpen(false);
+                    router.push(`/${user}/${workspace.workspace_name}/tasks`);
                   }}
                 >
                   {workspace.workspace_name}
@@ -143,7 +223,7 @@ export const Sidebar: React.FC = () => {
                 onClick={() => {
                   setIsOpen(false);
                   if (!user || !currentWorkspace) return;
-                  window.location.href = `/${user}/${currentWorkspace}/create-workspace`;
+                  router.push(`/${user}/${currentWorkspace}/create-workspace`);
                 }}
               >
                 <Image
@@ -164,11 +244,11 @@ export const Sidebar: React.FC = () => {
           <Image
             src={Inbox}
             alt="Inbox"
-            className="w-4 h-4"
+            className="w-4 h-4 opacity-50"
             width={16}
             height={16}
           />
-          <span className="text-white text-xs font-medium">Inbox</span>
+          <span className="text-white text-xs font-medium opacity-50">Inbox</span>
         </div>
         <Link
           href={`/${user}/${currentWorkspace}/my-tasks`}
@@ -214,7 +294,7 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={() => {
               if (!user || !currentWorkspace) return;
-              window.location.href = `/${user}/${currentWorkspace}/create-workspace`;
+              router.push(`/${user}/${currentWorkspace}/create-workspace`);
             }}
             className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full hover:bg-white/10 cursor-pointer"
           >
@@ -229,7 +309,7 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
       </section>
-      <section className="flex flex-col items-start gap-2 text-white w-full">
+      {/* <section className="flex flex-col items-start gap-2 text-white w-full">
         <h2 className="text-sm text-neutral-400">Project</h2>
         <div className="flex flex-col items-start gap-1 w-full">
           {Teams_Links.map((link) => (
@@ -252,7 +332,7 @@ export const Sidebar: React.FC = () => {
             </Link>
           ))}
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };

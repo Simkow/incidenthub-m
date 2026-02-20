@@ -270,9 +270,9 @@ export const Project: React.FC = () => {
         body: JSON.stringify({ username, workspace }),
       });
 
-      const data = (await res.json().catch(() => null)) as
-        | { message?: string }
-        | null;
+      const data = (await res.json().catch(() => null)) as {
+        message?: string;
+      } | null;
 
       if (!res.ok) {
         setDeleteError(data?.message ?? "Failed to delete workspace");
@@ -285,9 +285,9 @@ export const Project: React.FC = () => {
         body: JSON.stringify({ username }),
       });
 
-      const nextData = (await nextRes.json().catch(() => null)) as
-        | { workspace?: string | null }
-        | null;
+      const nextData = (await nextRes.json().catch(() => null)) as {
+        workspace?: string | null;
+      } | null;
 
       const nextWorkspace =
         typeof nextData?.workspace === "string" && nextData.workspace.trim()
@@ -324,7 +324,7 @@ export const Project: React.FC = () => {
       className="w-full min-h-screen bg-[#121212] flex"
     >
       <section className="py-2 w-full">
-        <main className="w-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 md:p-6 gap-6 text-white relative">
+        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 md:p-6 gap-6 text-white relative">
           <div className="pt-6 flex flex-col items-center gap-4 w-full max-w-3xl">
             <div className="flex items-center justify-center">
               <Image src={ProjectIcon} alt="Project" className="w-32" />

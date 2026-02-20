@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { sql } from "../../../lib/db";
 import { Sidebar } from "../Sidebar";
 import { CreateWorkspace } from "./CreateWorkspace";
@@ -33,7 +33,24 @@ export default async function CreateWorkspacePage({ params }: PageProps) {
   `;
 
   if (!workspaces.length) {
-    notFound();
+    const first = await sql`
+      SELECT workspace_name
+      FROM workspaces
+      WHERE owner_id = ${userId}
+      ORDER BY id ASC
+      LIMIT 1
+    `;
+
+    const firstName = (first[0] as { workspace_name: string } | undefined)
+      ?.workspace_name;
+
+    if (firstName) {
+      redirect(
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/create-workspace`
+      );
+    }
+
+    redirect("/first-workspace");
   }
 
   return (

@@ -1,6 +1,6 @@
 import { Sidebar } from "../Sidebar";
 import { sql } from "../../../lib/db";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MyTaskDashboard } from "./MyTaskDashboard";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +33,24 @@ export default async function MyTasksPage({ params }: PageProps) {
   `;
 
   if (!workspaces.length) {
-    notFound();
+    const first = await sql`
+      SELECT workspace_name
+      FROM workspaces
+      WHERE owner_id = ${userId}
+      ORDER BY id ASC
+      LIMIT 1
+    `;
+
+    const firstName = (first[0] as { workspace_name: string } | undefined)
+      ?.workspace_name;
+
+    if (firstName) {
+      redirect(
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/my-tasks`
+      );
+    }
+
+    redirect("/first-workspace");
   }
 
   return (

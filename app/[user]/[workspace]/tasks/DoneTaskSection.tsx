@@ -33,7 +33,10 @@ function localInputValueToIso(localValue: string) {
   return d.toISOString();
 }
 
-export default function DoneTaskSection({ search = "", scope = "workspace" }: Props) {
+export default function DoneTaskSection({
+  search = "",
+  scope = "workspace",
+}: Props) {
   const params = useParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [username, setUsername] = useState("");
@@ -208,12 +211,20 @@ export default function DoneTaskSection({ search = "", scope = "workspace" }: Pr
   }, [tasks, search]);
 
   const groupedTasks = useMemo(() => {
-    if (scope !== "user") return [] as Array<{ key: string; label: string; tasks: Task[] }>;
+    if (scope !== "user")
+      return [] as Array<{ key: string; label: string; tasks: Task[] }>;
 
-    const groups = new Map<string, { key: string; label: string; tasks: Task[] }>();
+    const groups = new Map<
+      string,
+      { key: string; label: string; tasks: Task[] }
+    >();
     for (const task of filteredTasks) {
-      const labelRaw = (task as Task & { workspace_name?: unknown }).workspace_name;
-      const label = typeof labelRaw === "string" && labelRaw.trim() ? labelRaw : "No workspace";
+      const labelRaw = (task as Task & { workspace_name?: unknown })
+        .workspace_name;
+      const label =
+        typeof labelRaw === "string" && labelRaw.trim()
+          ? labelRaw
+          : "No workspace";
       const key = label;
 
       const existing = groups.get(key);
@@ -230,7 +241,9 @@ export default function DoneTaskSection({ search = "", scope = "workspace" }: Pr
   }, [filteredTasks, scope]);
 
   const renderTaskRow = (task: Task) => {
-    const selectPriorityValue = priorityOptions.includes(task.priority as Priority)
+    const selectPriorityValue = priorityOptions.includes(
+      task.priority as Priority,
+    )
       ? (task.priority as Priority)
       : ("" as const);
 
@@ -296,7 +309,11 @@ export default function DoneTaskSection({ search = "", scope = "workspace" }: Pr
           type="datetime-local"
           value={isoToLocalInputValue(task.due_date)}
           onChange={(e) =>
-            updateTask(task.id, "due_date", localInputValueToIso(e.target.value))
+            updateTask(
+              task.id,
+              "due_date",
+              localInputValueToIso(e.target.value),
+            )
           }
           onClick={(e) => e.stopPropagation()}
           className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
@@ -324,7 +341,9 @@ export default function DoneTaskSection({ search = "", scope = "workspace" }: Pr
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setDeleteConfirmTaskId((prev) => (prev === task.id ? null : task.id));
+              setDeleteConfirmTaskId((prev) =>
+                prev === task.id ? null : task.id,
+              );
             }}
             className="text-xs px-2 py-1 rounded-lg border text-red-300 border-[#2e2e2e] hover:bg-white/10"
           >
@@ -396,7 +415,8 @@ export default function DoneTaskSection({ search = "", scope = "workspace" }: Pr
           ? groupedTasks.map((group) => (
               <div key={group.key} className="flex flex-col gap-3">
                 <div className="px-3 pt-3 text-xs text-neutral-400">
-                  Workspace: <span className="text-neutral-200">{group.label}</span>
+                  Workspace:{" "}
+                  <span className="text-neutral-200">{group.label}</span>
                 </div>
                 {group.tasks.map(renderTaskRow)}
               </div>
