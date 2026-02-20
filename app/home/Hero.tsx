@@ -31,7 +31,7 @@ export const Hero: FC = () => {
     return works
   });
   // const workspace = useCurrentWorkspace(user?.name);
-  // console.log(workspace);
+  console.log(workspace);
   const hasDashboard = !!username && !!workspace;
 
   useEffect(() => {
