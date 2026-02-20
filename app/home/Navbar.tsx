@@ -2,36 +2,42 @@
 
 import Logo from "../../public/assets/IncidentHub-logo-white.png";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../AuthProvider";
 import Image from "next/image";
 import { useCurrentWorkspace } from "./CurrentWorkspace";
 
 export const Navbar: React.FC = () => {
   const { user } = useAuth();
-  const [token] = useState(() => {
-    if (typeof window === "undefined") return;
+  const [token, setToken] = useState<string>("");
+  const [username, setUsername] = useState("");
 
-    const storedToken = window.localStorage.getItem("authToken");
-    return storedToken ? storedToken.replace(/"/g, "") : "";
-  });
-  const [username] = useState<string | null>(() => {
-    if (typeof window === "undefined") return "";
-    const usr = window.localStorage.getItem("users");
-    return usr ? usr.replace(/"/g, "") : "";
-  });
-  const [workspace] = useState(() => {
+  const workspace = useCurrentWorkspace(username);
+  const hasDashboard = !!username && !!workspace;
+
+  useEffect(() => {
     if (typeof window === undefined) {
       return;
     }
-    const currentWorkspace = localStorage.getItem("workspace") as string;
-    if (!currentWorkspace.length) {
+    const user1 = window.localStorage.getItem("users") as string;
+    if (user1 !== null) {
+      setUsername(user1.replace(/"/g, ""));
+    } else {
+      setUsername("");
+    }
+  })
+
+  useEffect(() => {
+    if (typeof window === undefined) {
       return;
     }
-    const works = currentWorkspace.replace(/"/g, "");
-    return works
-  });
-  const hasDashboard = !!username && !!workspace;
+    const token1 = window.localStorage.getItem("authToken") as string;
+    if (token1 !== null) {
+      setToken(token1.replace(/"/g, ""));
+    } else {
+      setToken("");
+    }
+  })
 
   return (
     <div className="w-full fixed px-6 md:px-12 lg:px-56 py-4 bg-[#090909]/70 text-gray-400 flex flex-col md:flex-row items-center md:justify-between gap-4 heading border-b border-white/30 z-50 backdrop-blur-sm">

@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import BgImage from "../../public/assets/hero-bg.png";
 import BgImage2 from "../../public/assets/hero-bg2.png";
-import { useEffect, useState, type FC } from "react";
+import { useEffect, useState, useMemo, type FC } from "react";
 import Link from "next/link";
 import { useAuth } from "../AuthProvider";
 import Image from "next/image";
@@ -13,33 +13,23 @@ const MotionImage = motion(Image);
 
 export const Hero: FC = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [username] = useState<string | null>(() => {
-    if (typeof window === "undefined") return "";
-    const usr = window.localStorage.getItem("users");
-    return usr ? usr.replace(/"/g, "") : "";
-  });
   const { user } = useAuth();
-  const [workspace] = useState(() => {
-    if (typeof window === undefined) {
-      return;
-    }
-    const currentWorkspace = localStorage.getItem("workspace") as string;
-    if (!currentWorkspace.length) {
-      return;
-    }
-    const works = currentWorkspace.replace(/"/g, "");
-    return works
-  });
-  // const workspace = useCurrentWorkspace(user?.name);
-  console.log(workspace);
+  const [username, setUsername] = useState("");
+
+  const workspace = useCurrentWorkspace(username);
   const hasDashboard = !!username && !!workspace;
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible((isVisible) => !isVisible);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [isVisible]);
+    if (typeof window === undefined) {
+      return;
+    }
+    const user1 = window.localStorage.getItem("users") as string;
+    if (user1 !== null) {
+      setUsername(user1.replace(/"/g, ""));
+    } else {
+      setUsername("");
+    }
+  })
 
   return (
     <main className="w-full max-md:max-h-screen max-md:justify-center min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-40 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-32 md:pb-40">
@@ -82,9 +72,7 @@ export const Hero: FC = () => {
           <br /> frontend-first workflow designed for real-world scenarios.
         </motion.h2>
         <div className="justify-start flex flex-col sm:flex-row gap-4 sm:gap-8">
-          <Link
-            href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
-          >
+          <Link href={hasDashboard ? `/${username}/${workspace}/tasks` : '/login'}>
             <motion.button
               initial={{ opacity: 0, filter: "blur(10px)" }}
               animate={{ opacity: 1, filter: "blur(0px)" }}
@@ -94,6 +82,16 @@ export const Hero: FC = () => {
               Start Building
             </motion.button>
           </Link>
+          <motion.button
+            initial={{ opacity: 0, filter: "blur(10px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 1.7 }}
+            disabled
+            className="border border-white/40 text-white/70 rounded-xl w-full sm:w-38 py-2 cursor-not-allowed font-bold"
+            title="Resolving workspace..."
+          >
+            Opening...
+          </motion.button>
           <motion.button
             initial={{ opacity: 0, filter: "blur(10px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
