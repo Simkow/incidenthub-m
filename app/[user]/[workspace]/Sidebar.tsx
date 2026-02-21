@@ -408,11 +408,11 @@ export const Sidebar: React.FC = () => {
             <LocaleToggle />
           </div>
           <Link
-              href="/login"
-              onClick={() => localStorage.removeItem("authToken")}
-              className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-white/10"
-            >
-              {t("navbar.logout")}
+            href="/login"
+            onClick={() => localStorage.removeItem("authToken")}
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-white/10"
+          >
+            {t("navbar.logout")}
           </Link>
         </div>
       </section>
