@@ -35,26 +35,44 @@ export async function DELETE(req: Request) {
       return Response.json({ message: "User not found" }, { status: 404 });
     }
 
+    // Resolve the workspace either by ownership or membership (names are not globally unique).
     const wsRow = await sql`
-      SELECT id
-      FROM workspaces
-      WHERE workspace_name = ${workspace} AND owner_id = ${userId}
+      SELECT w.id, w.owner_id
+      FROM workspaces w
+      LEFT JOIN workspace_members wm
+        ON wm.workspace_id = w.id
+       AND wm.user_id = ${userId}
+      WHERE w.workspace_name = ${workspace}
+        AND (w.owner_id = ${userId} OR wm.user_id = ${userId})
+      ORDER BY (w.owner_id = ${userId}) DESC, w.id ASC
       LIMIT 1
     `;
 
-    const workspaceId = (wsRow[0] as { id: number } | undefined)?.id;
-    if (!workspaceId) {
+    const ws = (wsRow[0] as { id: number; owner_id: number } | undefined) ?? null;
+    if (!ws?.id) {
       return Response.json({ message: "Workspace not found" }, { status: 404 });
+    }
+
+    if (ws.owner_id !== userId) {
+      return Response.json(
+        { message: "Only the workspace owner can delete this workspace" },
+        { status: 403 },
+      );
     }
 
     await sql`
       DELETE FROM tasks
-      WHERE workspace_id = ${workspaceId}
+      WHERE workspace_id = ${ws.id}
+    `;
+
+    await sql`
+      DELETE FROM workspace_members
+      WHERE workspace_id = ${ws.id}
     `;
 
     await sql`
       DELETE FROM workspaces
-      WHERE id = ${workspaceId}
+      WHERE id = ${ws.id}
     `;
 
     return Response.json({ message: "Workspace deleted" }, { status: 200 });

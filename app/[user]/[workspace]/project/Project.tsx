@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useI18n } from "../../../i18n/I18nProvider";
 
 import ProjectIcon from "../../../../public/assets/project-icon.png";
 
@@ -23,10 +24,12 @@ type TasksResponse = {
 };
 
 export const Project: React.FC = () => {
+  const { t, locale } = useI18n();
   const router = useRouter();
   const [username, setUsername] = useState<string>("");
   const [workspace, setWorkspace] = useState<string>("");
   const [workspaceId, setWorkspaceId] = useState<number | null>(null);
+  const [isWorkspaceOwner, setIsWorkspaceOwner] = useState<boolean>(false);
   const [project, setProject] = useState<ProjectData | null>(null);
   const [draft, setDraft] = useState<ProjectData | null>(null);
   const [completionPct, setCompletionPct] = useState<number>(0);
@@ -86,7 +89,7 @@ export const Project: React.FC = () => {
 
       if (!response.ok) {
         setProject(null);
-        setError("Failed to load project");
+        setError(t("project.failedLoad"));
         return;
       }
 
@@ -98,11 +101,11 @@ export const Project: React.FC = () => {
       console.error("Error fetching project", err);
       setProject(null);
       setDraft(null);
-      setError("Failed to load project");
+      setError(t("project.failedLoad"));
     } finally {
       setIsLoading(false);
     }
-  }, [username, workspace]);
+  }, [username, workspace, t]);
 
   const fetchWorkspaceId = useCallback(async () => {
     if (!username || !workspace) return;
@@ -116,18 +119,55 @@ export const Project: React.FC = () => {
 
       if (!res.ok) {
         setWorkspaceId(null);
+        setIsWorkspaceOwner(false);
         return;
       }
 
       const data = (await res.json().catch(() => null)) as {
-        workspaces?: WorkspaceRow[];
+        workspaces?: unknown;
+        memberWorkspaces?: unknown;
       } | null;
-      const rows = data?.workspaces ?? [];
-      const found = rows.find((w) => w.workspace_name === workspace) ?? null;
-      setWorkspaceId(found?.id ?? null);
+
+      const ownedRows = Array.isArray(data?.workspaces)
+        ? (data?.workspaces as unknown[])
+            .map((w) => w as Partial<WorkspaceRow>)
+            .filter(
+              (w): w is WorkspaceRow =>
+                typeof w.id === "number" && typeof w.workspace_name === "string",
+            )
+        : [];
+
+      const memberRows = Array.isArray(data?.memberWorkspaces)
+        ? (data?.memberWorkspaces as unknown[])
+            .map((w) => w as Partial<WorkspaceRow>)
+            .filter(
+              (w): w is WorkspaceRow =>
+                typeof w.id === "number" && typeof w.workspace_name === "string",
+            )
+        : [];
+
+      const owned =
+        ownedRows.find((w) => w.workspace_name === workspace) ?? null;
+      if (owned) {
+        setWorkspaceId(owned.id);
+        setIsWorkspaceOwner(true);
+        return;
+      }
+
+      const member =
+        memberRows.find((w) => w.workspace_name === workspace) ?? null;
+      if (member) {
+        setWorkspaceId(null);
+        setIsWorkspaceOwner(false);
+        return;
+      }
+
+      setWorkspaceId(null);
+      setIsWorkspaceOwner(false);
     } catch (err) {
       console.error("Error fetching workspace id", err);
       setWorkspaceId(null);
+      setIsWorkspaceOwner(false);
     }
   }, [username, workspace]);
 
@@ -235,15 +275,15 @@ export const Project: React.FC = () => {
     const dt = new Date(raw);
     if (Number.isNaN(dt.getTime())) return raw;
 
-    // prefer PL format like on the mock
-    return dt.toLocaleString("pl-PL", {
+    const fmtLocale = locale === "pl" ? "pl-PL" : "en-US";
+    return dt.toLocaleString(fmtLocale, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       hour: raw.includes("T") ? "2-digit" : undefined,
       minute: raw.includes("T") ? "2-digit" : undefined,
     });
-  }, [project?.due_date]);
+  }, [project?.due_date, locale]);
 
   void dueDateLabel;
 
@@ -275,7 +315,11 @@ export const Project: React.FC = () => {
       } | null;
 
       if (!res.ok) {
-        setDeleteError(data?.message ?? "Failed to delete workspace");
+        if (res.status === 403) {
+          setDeleteError(t("project.onlyOwnerDelete"));
+        } else {
+          setDeleteError(data?.message ?? t("project.deleteFailed"));
+        }
         return;
       }
 
@@ -309,12 +353,12 @@ export const Project: React.FC = () => {
       }
     } catch (err) {
       console.error("Error deleting workspace", err);
-      setDeleteError("Internal error");
+      setDeleteError(t("project.internalError"));
     } finally {
       setIsDeleting(false);
       setDeleteOpen(false);
     }
-  }, [username, workspace, router]);
+  }, [username, workspace, router, t]);
 
   return (
     <motion.main
@@ -331,7 +375,7 @@ export const Project: React.FC = () => {
             </div>
             <div className="w-full flex flex-col gap-2">
               <div className="text-xs text-neutral-400 heading">
-                Progress bar
+                {t("project.progressBar")}
               </div>
               <div className="w-full flex items-center gap-4">
                 <div className="flex-1 h-2 rounded-full bg-[#2e2e2e] overflow-hidden">
@@ -350,7 +394,7 @@ export const Project: React.FC = () => {
           <div className="w-full max-w-3xl flex flex-col gap-5">
             <div className="flex flex-col items-center gap-2">
               <div className="text-xs text-neutral-400 heading">
-                Project Name
+                {t("project.projectName")}
               </div>
               <div className="w-full max-w-sm rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-6 py-5 text-center">
                 <input
@@ -379,7 +423,7 @@ export const Project: React.FC = () => {
 
             <div className="flex flex-col gap-2">
               <div className="text-xs text-neutral-400 heading text-center">
-                Description
+                {t("project.description")}
               </div>
               <textarea
                 value={draft?.description ?? ""}
@@ -399,14 +443,16 @@ export const Project: React.FC = () => {
                   });
                 }}
                 placeholder={
-                  isLoading ? "Loading…" : "Define your project idea..."
+                  isLoading ? t("project.loading") : t("project.descriptionPh")
                 }
                 className="min-h-44 rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-5 py-4 text-sm text-neutral-200 whitespace-pre-wrap outline-none resize-none"
               />
             </div>
 
             <div className="flex flex-col items-center gap-2 pt-2">
-              <div className="text-xs text-neutral-400 heading">Due Date</div>
+              <div className="text-xs text-neutral-400 heading">
+                {t("project.dueDate")}
+              </div>
               <div className="w-full max-w-xs rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-6 py-4 text-center text-sm tabular-nums">
                 <input
                   type="datetime-local"
@@ -431,26 +477,32 @@ export const Project: React.FC = () => {
               </div>
 
               <div className="relative w-full max-w-xs flex flex-col items-center gap-2 pt-3">
-                <button
-                  type="button"
-                  disabled={isDeleting}
-                  onClick={() => {
-                    setDeleteError(null);
-                    setDeleteOpen((prev) => !prev);
-                  }}
-                  className="w-full rounded-xl border border-red-300/60 text-red-300 px-4 py-2 text-sm hover:bg-red-500/10 disabled:opacity-60"
-                >
-                  Delete Workspace
-                </button>
+                {isWorkspaceOwner ? (
+                  <button
+                    type="button"
+                    disabled={isDeleting}
+                    onClick={() => {
+                      setDeleteError(null);
+                      setDeleteOpen((prev) => !prev);
+                    }}
+                    className="w-full rounded-xl border border-red-300/60 text-red-300 px-4 py-2 text-sm hover:bg-red-500/10 disabled:opacity-60"
+                  >
+                    {t("project.deleteWorkspace")}
+                  </button>
+                ) : (
+                  <div className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-neutral-300 text-center">
+                    {t("project.onlyOwnerDelete")}
+                  </div>
+                )}
 
-                {deleteOpen && (
+                {isWorkspaceOwner && deleteOpen && (
                   <div
                     className="absolute top-full mt-2 w-full rounded-xl bg-neutral-950 border border-neutral-700 p-4 flex flex-col items-center gap-3 z-10"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                   >
                     <span className="text-sm text-neutral-300 font-light text-center">
-                      Are you sure you want to delete this workspace?
+                      {t("project.deleteConfirm")}
                     </span>
                     <div className="flex gap-2">
                       <button
@@ -459,7 +511,7 @@ export const Project: React.FC = () => {
                         onClick={() => setDeleteOpen(false)}
                         className="border border-[#2e2e2e] text-sm text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800 disabled:opacity-60"
                       >
-                        Cancel
+                        {t("project.cancel")}
                       </button>
                       <button
                         type="button"
@@ -467,7 +519,7 @@ export const Project: React.FC = () => {
                         onClick={() => void handleDeleteWorkspace()}
                         className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400 disabled:opacity-60"
                       >
-                        {isDeleting ? "Deleting..." : "Delete"}
+                        {isDeleting ? t("project.deleting") : t("project.delete")}
                       </button>
                     </div>
                     {deleteError && (

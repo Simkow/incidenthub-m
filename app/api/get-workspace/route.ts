@@ -31,8 +31,30 @@ export async function POST(req: Request) {
       LIMIT 1
     `;
 
-    const first = (workspaces[0] as { workspace_name: string } | undefined) ?? null;
-    return Response.json({ workspace: first?.workspace_name ?? null }, { status: 200 });
+    const firstOwned =
+      (workspaces[0] as { workspace_name: string } | undefined) ?? null;
+    if (firstOwned?.workspace_name) {
+      return Response.json(
+        { workspace: firstOwned.workspace_name },
+        { status: 200 },
+      );
+    }
+
+    const member = await sql`
+      SELECT w.workspace_name
+      FROM workspace_members wm
+      JOIN workspaces w ON w.id = wm.workspace_id
+      WHERE wm.user_id = ${userId}
+      ORDER BY w.id ASC
+      LIMIT 1
+    `;
+
+    const firstMember =
+      (member[0] as { workspace_name: string } | undefined) ?? null;
+    return Response.json(
+      { workspace: firstMember?.workspace_name ?? null },
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
     return Response.json({ message: "Internal server error" }, { status: 500 });

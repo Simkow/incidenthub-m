@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -36,6 +36,14 @@ export const Sidebar: React.FC = () => {
   const [memberWorkspaces, setMemberWorkspaces] = useState<Workspace[]>([]);
   const [currentWorkspace, setCurrentWorkspace] = useState("");
   const [user, setUser] = useState("");
+  const [pendingInvites, setPendingInvites] = useState<
+    Array<{ id: number; workspace: string; inviter: string }>
+  >([]);
+  const [inviteMessage, setInviteMessage] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [respondingInviteId, setRespondingInviteId] = useState<number | null>(
+    null,
+  );
   const Workspace_Links = [
     {
       name: t("sidebar.tasks"),
@@ -140,6 +148,123 @@ export const Sidebar: React.FC = () => {
     if (!user) return;
     fetchWorkspaces();
   }, [user]);
+
+  const fetchInvites = useCallback(async () => {
+    if (!user) return;
+    if (typeof window === "undefined") return;
+
+    const token = window.localStorage.getItem("authToken");
+    const tokenPresent = !!(token ? token.replace(/"/g, "") : "");
+    if (!tokenPresent) {
+      setPendingInvites([]);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/get-invitations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user }),
+      });
+
+      const data = (await res.json().catch(() => null)) as {
+        invitations?: unknown;
+      } | null;
+
+      const invites = Array.isArray(data?.invitations)
+        ? (data?.invitations as Array<{
+            id?: unknown;
+            workspace?: unknown;
+            inviter?: unknown;
+          }>)
+            .map((i) => ({
+              id: typeof i.id === "number" ? i.id : Number(i.id),
+              workspace: typeof i.workspace === "string" ? i.workspace : "",
+              inviter: typeof i.inviter === "string" ? i.inviter : "",
+            }))
+            .filter((i) => Number.isFinite(i.id) && i.workspace && i.inviter)
+        : [];
+
+      setPendingInvites(invites);
+    } catch (err) {
+      console.error("Failed to fetch invitations", err);
+      setPendingInvites([]);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    void fetchInvites();
+  }, [fetchInvites]);
+
+  const respondInvite = useCallback(
+    async (invitationId: number, action: "accept" | "reject") => {
+      if (!user) return;
+
+      setInviteMessage(null);
+      setInviteError(null);
+      setRespondingInviteId(invitationId);
+
+      try {
+        const res = await fetch("/api/respond-invitation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: user, invitationId, action }),
+        });
+
+        const data = (await res.json().catch(() => null)) as {
+          message?: unknown;
+        } | null;
+        const msg = typeof data?.message === "string" ? data.message : "";
+
+        if (!res.ok) {
+          setInviteError(msg || "Failed");
+          return;
+        }
+
+        setInviteMessage(msg || "OK");
+        await fetchInvites();
+        // Refresh workspace lists (accept will add workspace membership)
+        if (action === "accept") {
+          const response = await fetch(`/api/workspace`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ owner: user }),
+          });
+          const refreshed = (await response.json().catch(() => null)) as {
+            workspaces?: unknown;
+            memberWorkspaces?: unknown;
+          } | null;
+
+          const owned = Array.isArray(refreshed?.workspaces)
+            ? (refreshed?.workspaces as unknown[])
+                .map((w) => w as Partial<Workspace>)
+                .filter(
+                  (w): w is Workspace => typeof w.workspace_name === "string",
+                )
+            : [];
+
+          const member = Array.isArray(refreshed?.memberWorkspaces)
+            ? (refreshed?.memberWorkspaces as unknown[])
+                .map((w) => w as Partial<Workspace>)
+                .filter(
+                  (w): w is Workspace => typeof w.workspace_name === "string",
+                )
+            : [];
+
+          setWorkspaces(owned);
+          setMemberWorkspaces(member);
+        }
+      } catch (err) {
+        console.error("Failed to respond invitation", err);
+        setInviteError("Network error");
+      } finally {
+        setRespondingInviteId(null);
+      }
+    },
+    [fetchInvites, user],
+  );
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
@@ -339,6 +464,54 @@ export const Sidebar: React.FC = () => {
           </span>
         </Link>
       </section>
+
+      {pendingInvites.length ? (
+        <section className="flex flex-col items-start gap-2 text-white w-full mt-2">
+          <h2 className="text-sm text-neutral-400">
+            {t("sidebar.invitations")}
+          </h2>
+          <div className="flex flex-col gap-2 w-full">
+            {pendingInvites.map((inv) => (
+              <div
+                key={inv.id}
+                className="rounded-lg border border-white/10 bg-white/5 px-2 py-2 text-[11px] text-white/80"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="truncate">
+                    <span className="text-white/90">{inv.workspace}</span>
+                    <span className="text-white/50"> · {inv.inviter}</span>
+                  </div>
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    type="button"
+                    disabled={respondingInviteId === inv.id}
+                    onClick={() => void respondInvite(inv.id, "accept")}
+                    className="rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 px-2 py-1 text-[11px] text-white disabled:opacity-60"
+                  >
+                    {t("sidebar.accept")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={respondingInviteId === inv.id}
+                    onClick={() => void respondInvite(inv.id, "reject")}
+                    className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 text-[11px] text-white/80 disabled:opacity-60"
+                  >
+                    {t("sidebar.reject")}
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {inviteMessage ? (
+              <div className="text-[11px] text-emerald-300">{inviteMessage}</div>
+            ) : null}
+            {inviteError ? (
+              <div className="text-[11px] text-red-300">{inviteError}</div>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
       <section className="flex flex-col items-start gap-2 text-white w-full">
         <h2 className="text-sm text-neutral-400">{t("sidebar.workspace")}</h2>
         <div className="flex flex-col items-start gap-1 w-full">

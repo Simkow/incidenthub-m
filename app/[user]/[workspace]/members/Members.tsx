@@ -13,6 +13,12 @@ import { useI18n } from "../../../i18n/I18nProvider";
 
 type ApiMessage = { message?: unknown } | null;
 
+type Invitation = {
+  id: number;
+  invitee: string;
+  status: string;
+};
+
 export const Members: React.FC = () => {
   const { t } = useI18n();
   const params = useParams();
@@ -35,11 +41,16 @@ export const Members: React.FC = () => {
   const [members, setMembers] = useState<string[]>([]);
   const [membersLoading, setMembersLoading] = useState(false);
 
+  const [currentUser, setCurrentUser] = useState("");
+
   const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [removingUser, setRemovingUser] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [invitationsLoading, setInvitationsLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -50,6 +61,13 @@ export const Members: React.FC = () => {
     const nextWorkspace = workspaceFromRoute || storedWorkspace;
     setWorkspace(nextWorkspace);
   }, [workspaceFromRoute]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const usr = window.localStorage.getItem("users");
+    const nextUser = usr ? usr.replace(/"/g, "") : "";
+    queueMicrotask(() => setCurrentUser(nextUser));
+  }, []);
 
   const refreshMembers = useCallback(async (nextWorkspace: string) => {
     if (!nextWorkspace) return;
@@ -86,6 +104,58 @@ export const Members: React.FC = () => {
     void refreshMembers(workspace);
   }, [workspace, refreshMembers]);
 
+  const refreshInvitations = useCallback(
+    async (nextWorkspace: string) => {
+      if (!nextWorkspace) return;
+      if (!currentUser) return;
+
+      setInvitationsLoading(true);
+      try {
+        const res = await fetch("/api/get-workspace-invitations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: currentUser, workspace: nextWorkspace }),
+        });
+
+        if (!res.ok) {
+          setInvitations([]);
+          return;
+        }
+
+        const data = (await res.json().catch(() => null)) as {
+          invitations?: unknown;
+        } | null;
+
+        const inv = Array.isArray(data?.invitations)
+          ? (data?.invitations as Array<{
+              id?: unknown;
+              invitee?: unknown;
+              status?: unknown;
+            }>)
+              .map((r) => ({
+                id: typeof r.id === "number" ? r.id : Number(r.id),
+                invitee: typeof r.invitee === "string" ? r.invitee : "",
+                status: typeof r.status === "string" ? r.status : "",
+              }))
+              .filter((r) => Number.isFinite(r.id) && r.invitee && r.status)
+          : [];
+
+        setInvitations(inv);
+      } catch {
+        setInvitations([]);
+      } finally {
+        setInvitationsLoading(false);
+      }
+    },
+    [currentUser],
+  );
+
+  useEffect(() => {
+    if (!workspace) return;
+    if (!currentUser) return;
+    void refreshInvitations(workspace);
+  }, [workspace, currentUser, refreshInvitations]);
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
@@ -102,25 +172,30 @@ export const Members: React.FC = () => {
       return;
     }
 
+    if (!currentUser) {
+      setErrorMessage(t("firstWorkspace.sessionExpired"));
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/add-member", {
+      const res = await fetch("/api/invite-member", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: trimmedUsername, workspace }),
+        body: JSON.stringify({ inviter: currentUser, username: trimmedUsername, workspace }),
       });
 
       const data = (await res.json().catch(() => null)) as ApiMessage;
       const msg = typeof data?.message === "string" ? data.message : "";
 
       if (!res.ok) {
-        setErrorMessage(msg || t("members.addFailed"));
+        setErrorMessage(msg || t("members.inviteFailed"));
         return;
       }
 
-      setSuccessMessage(msg || t("members.addSuccess"));
+      setSuccessMessage(msg || t("members.inviteSuccess"));
       setUsername("");
-      await refreshMembers(workspace);
+      await refreshInvitations(workspace);
     } catch {
       setErrorMessage(t("members.networkError"));
     } finally {
@@ -219,6 +294,62 @@ export const Members: React.FC = () => {
                 ) : null}
               </div>
             )}
+          </div>
+
+          <div className="mt-6 border-t border-[#2e2e2e] pt-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-semibold text-white/80">
+                {t("members.invitationsTitle")}
+              </h2>
+              <button
+                type="button"
+                onClick={() => void refreshInvitations(workspace)}
+                disabled={!workspace || invitationsLoading}
+                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 text-[11px] text-white/80 disabled:opacity-60"
+              >
+                {invitationsLoading
+                  ? t("members.refreshingBtn")
+                  : t("members.refreshBtn")}
+              </button>
+            </div>
+
+            <div className="mt-2">
+              {invitationsLoading ? (
+                <p className="text-xs text-white/60">{t("members.loading")}</p>
+              ) : invitations.length ? (
+                <ul className="flex flex-col gap-2">
+                  {invitations.map((inv) => {
+                    const statusLabel =
+                      inv.status === "accepted"
+                        ? t("members.accepted")
+                        : inv.status === "rejected"
+                          ? t("members.rejected")
+                          : t("members.pending");
+
+                    const statusColor =
+                      inv.status === "accepted"
+                        ? "text-emerald-300"
+                        : inv.status === "rejected"
+                          ? "text-red-300"
+                          : "text-white/60";
+
+                    return (
+                      <li
+                        key={inv.id}
+                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white flex items-center justify-between gap-3"
+                      >
+                        <span className="truncate">{inv.invitee}</span>
+                        <span className={"text-[11px] " + statusColor}>
+                          {statusLabel}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p className="text-xs text-white/60">—</p>
+              )}
+            </div>
           </div>
 
           <div className="mt-6 border-t border-[#2e2e2e] pt-4">
