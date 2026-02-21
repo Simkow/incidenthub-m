@@ -89,7 +89,7 @@ export const Sidebar: React.FC = () => {
 
   const Teams_Links = [
     {
-      name: "Friends",
+      name: t("sidebar.member"),
       to: `/${user}/${currentWorkspace}/members`,
       icon: Friends,
     },
