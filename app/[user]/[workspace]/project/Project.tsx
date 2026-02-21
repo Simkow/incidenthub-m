@@ -133,7 +133,8 @@ export const Project: React.FC = () => {
             .map((w) => w as Partial<WorkspaceRow>)
             .filter(
               (w): w is WorkspaceRow =>
-                typeof w.id === "number" && typeof w.workspace_name === "string",
+                typeof w.id === "number" &&
+                typeof w.workspace_name === "string",
             )
         : [];
 
@@ -142,7 +143,8 @@ export const Project: React.FC = () => {
             .map((w) => w as Partial<WorkspaceRow>)
             .filter(
               (w): w is WorkspaceRow =>
-                typeof w.id === "number" && typeof w.workspace_name === "string",
+                typeof w.id === "number" &&
+                typeof w.workspace_name === "string",
             )
         : [];
 
@@ -519,7 +521,9 @@ export const Project: React.FC = () => {
                         onClick={() => void handleDeleteWorkspace()}
                         className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400 disabled:opacity-60"
                       >
-                        {isDeleting ? t("project.deleting") : t("project.delete")}
+                        {isDeleting
+                          ? t("project.deleting")
+                          : t("project.delete")}
                       </button>
                     </div>
                     {deleteError && (

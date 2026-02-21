@@ -74,11 +74,13 @@ export const FirstWorkspace: React.FC = () => {
       } | null;
 
       const invites = Array.isArray(data?.invitations)
-        ? (data?.invitations as Array<{
-            id?: unknown;
-            workspace?: unknown;
-            inviter?: unknown;
-          }>)
+        ? (
+            data?.invitations as Array<{
+              id?: unknown;
+              workspace?: unknown;
+              inviter?: unknown;
+            }>
+          )
             .map((i) => ({
               id: typeof i.id === "number" ? i.id : Number(i.id),
               workspace: typeof i.workspace === "string" ? i.workspace : "",
@@ -95,7 +97,11 @@ export const FirstWorkspace: React.FC = () => {
   }, [userName]);
 
   const respondInvite = useCallback(
-    async (invitationId: number, action: "accept" | "reject", workspace: string) => {
+    async (
+      invitationId: number,
+      action: "accept" | "reject",
+      workspace: string,
+    ) => {
       if (!userName) return;
 
       setInviteMessage(null);

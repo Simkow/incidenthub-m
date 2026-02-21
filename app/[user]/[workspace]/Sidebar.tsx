@@ -172,11 +172,13 @@ export const Sidebar: React.FC = () => {
       } | null;
 
       const invites = Array.isArray(data?.invitations)
-        ? (data?.invitations as Array<{
-            id?: unknown;
-            workspace?: unknown;
-            inviter?: unknown;
-          }>)
+        ? (
+            data?.invitations as Array<{
+              id?: unknown;
+              workspace?: unknown;
+              inviter?: unknown;
+            }>
+          )
             .map((i) => ({
               id: typeof i.id === "number" ? i.id : Number(i.id),
               workspace: typeof i.workspace === "string" ? i.workspace : "",
@@ -504,7 +506,9 @@ export const Sidebar: React.FC = () => {
             ))}
 
             {inviteMessage ? (
-              <div className="text-[11px] text-emerald-300">{inviteMessage}</div>
+              <div className="text-[11px] text-emerald-300">
+                {inviteMessage}
+              </div>
             ) : null}
             {inviteError ? (
               <div className="text-[11px] text-red-300">{inviteError}</div>

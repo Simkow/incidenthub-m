@@ -114,7 +114,10 @@ export const Members: React.FC = () => {
         const res = await fetch("/api/get-workspace-invitations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: currentUser, workspace: nextWorkspace }),
+          body: JSON.stringify({
+            username: currentUser,
+            workspace: nextWorkspace,
+          }),
         });
 
         if (!res.ok) {
@@ -127,11 +130,13 @@ export const Members: React.FC = () => {
         } | null;
 
         const inv = Array.isArray(data?.invitations)
-          ? (data?.invitations as Array<{
-              id?: unknown;
-              invitee?: unknown;
-              status?: unknown;
-            }>)
+          ? (
+              data?.invitations as Array<{
+                id?: unknown;
+                invitee?: unknown;
+                status?: unknown;
+              }>
+            )
               .map((r) => ({
                 id: typeof r.id === "number" ? r.id : Number(r.id),
                 invitee: typeof r.invitee === "string" ? r.invitee : "",
@@ -182,7 +187,11 @@ export const Members: React.FC = () => {
       const res = await fetch("/api/invite-member", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviter: currentUser, username: trimmedUsername, workspace }),
+        body: JSON.stringify({
+          inviter: currentUser,
+          username: trimmedUsername,
+          workspace,
+        }),
       });
 
       const data = (await res.json().catch(() => null)) as ApiMessage;
