@@ -92,12 +92,12 @@ export const CreateWorkspace: React.FC<Props> = ({
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[#121212] flex py-2"
+      className="w-full min-h-screen bg-[#121212] flex py-2 body-text"
     >
       <main className="w-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] items-center gap-8 text-white relative">
         <div className="h-full md:max-h-screen manrope text-white flex items-center justify-center">
           <div className="w-full max-w-xl p-8">
-            <h1 className="text-2xl font-semibold text-center">
+            <h1 className="text-2xl font-semibold text-center heading">
               Create workspace
             </h1>
             <p className="text-neutral-400 text-sm mt-2 text-center">
@@ -105,11 +105,14 @@ export const CreateWorkspace: React.FC<Props> = ({
               <span className="text-neutral-200">{currentWorkspace}</span>
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-6 flex flex-col gap-4 p-5 rounded-lg bg-neutral-950/50 border border-neutral-800 relative"
+            >
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceName"
-                  className="text-neutral-400 text-sm"
+                  className="text-neutral-400 text-sm heading"
                 >
                   Workspace name
                 </label>
@@ -118,7 +121,7 @@ export const CreateWorkspace: React.FC<Props> = ({
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                  className="text-neutral-100 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
                   placeholder="Enter workspace name"
                   autoComplete="off"
                 />
@@ -127,7 +130,7 @@ export const CreateWorkspace: React.FC<Props> = ({
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceDescription"
-                  className="text-neutral-400 text-sm"
+                  className="text-neutral-400 text-sm heading"
                 >
                   Description (optional)
                 </label>
@@ -135,7 +138,7 @@ export const CreateWorkspace: React.FC<Props> = ({
                   id="workspaceDescription"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm min-h-24"
+                  className="text-neutral-100 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm min-h-24"
                   placeholder="What is this workspace for?"
                 />
               </div>
@@ -143,7 +146,7 @@ export const CreateWorkspace: React.FC<Props> = ({
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceDueDate"
-                  className="text-neutral-400 text-sm"
+                  className="text-neutral-400 text-sm heading"
                 >
                   Due date (optional)
                 </label>
@@ -152,14 +155,14 @@ export const CreateWorkspace: React.FC<Props> = ({
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="text-neutral-900 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                  className="text-neutral-100 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
                 />
               </div>
 
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceUrl"
-                  className="text-neutral-400 text-sm"
+                  className="text-neutral-400 text-sm heading"
                 >
                   Workspace URL
                 </label>
@@ -168,7 +171,7 @@ export const CreateWorkspace: React.FC<Props> = ({
                   readOnly
                   type="text"
                   value={`/${user}/${safeName || "<workspace>"}`}
-                  className="text-neutral-700 bg-neutral-300 border border-neutral-500 rounded-lg px-4 py-2 w-full text-sm"
+                  className="text-neutral-400 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2 w-full text-sm"
                 />
               </div>
 
@@ -180,7 +183,7 @@ export const CreateWorkspace: React.FC<Props> = ({
                 type="submit"
                 disabled={isSubmitting}
                 className={
-                  "bg-black text-white rounded-lg px-6 py-3 transition cursor-pointer " +
+                  "bg-black/50 text-white rounded-lg px-6 py-3 transition cursor-pointer " +
                   (isSubmitting
                     ? "opacity-70 cursor-not-allowed"
                     : "hover:bg-neutral-800")

@@ -57,6 +57,9 @@ export default function TaskSection({
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
+  const [assigneeLoading, setAssigneeLoading] = useState(false);
+
   const plusIcon = Plus;
 
   const priorityOptions = useMemo<Priority[]>(
@@ -101,6 +104,50 @@ export default function TaskSection({
 
     saveTimeoutsRef.current.set(task.id, timeoutId);
   }, []);
+
+  useEffect(() => {
+    if (!workspace) {
+      setAssigneeOptions([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      setAssigneeLoading(true);
+      try {
+        const res = await fetch("/api/get-workspace-users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspace }),
+        });
+
+        const data = (await res.json().catch(() => null)) as {
+          users?: unknown;
+        } | null;
+
+        const users = Array.isArray(data?.users)
+          ? (data?.users as unknown[])
+              .filter((u): u is string => typeof u === "string")
+              .map((u) => u.trim())
+              .filter(Boolean)
+          : [];
+
+        if (cancelled) return;
+        setAssigneeOptions(users);
+      } catch {
+        if (cancelled) return;
+        setAssigneeOptions([]);
+      } finally {
+        if (cancelled) return;
+        setAssigneeLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [workspace]);
 
   useEffect(() => {
     const timeouts = saveTimeoutsRef.current;
@@ -323,17 +370,69 @@ export default function TaskSection({
               localInputValueToIso(e.target.value),
             )
           }
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            (
+              e.currentTarget as HTMLInputElement & { showPicker?: () => void }
+            ).showPicker?.();
+          }}
+          onFocus={(e) =>
+            (
+              e.currentTarget as HTMLInputElement & { showPicker?: () => void }
+            ).showPicker?.()
+          }
           className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
         />
 
-        <input
-          value={String(task.assignee)}
-          onChange={(e) => updateTask(task.id, "assignee", e.target.value)}
-          onClick={(e) => e.stopPropagation()}
-          className="min-w-0 w-full bg-transparent text-sm text-neutral-300 text-center rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
-          placeholder="Assignee"
-        />
+        <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
+          <Select.Root
+            value={(() => {
+              const current = String(task.assignee ?? "");
+              const options = assigneeOptions.includes(current)
+                ? assigneeOptions
+                : current
+                  ? [current, ...assigneeOptions]
+                  : assigneeOptions;
+              return options.includes(current) ? current : ("" as const);
+            })()}
+            onValueChange={(value) => updateTask(task.id, "assignee", value)}
+            disabled={assigneeLoading || assigneeOptions.length === 0}
+          >
+            <Select.Trigger className="text-neutral-300 text-sm rounded-lg border border-[#2e2e2e] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer disabled:opacity-60">
+              <Select.Value
+                placeholder={assigneeLoading ? "Loading..." : "Assignee"}
+              />
+              <Select.Icon className="text-neutral-400">▾</Select.Icon>
+            </Select.Trigger>
+            <Select.Portal>
+              <Select.Content
+                position="popper"
+                sideOffset={6}
+                className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818] hover:cursor-pointer"
+              >
+                <Select.Viewport className="p-1">
+                  {(() => {
+                    const current = String(task.assignee ?? "");
+                    const merged = assigneeOptions.includes(current)
+                      ? assigneeOptions
+                      : current
+                        ? [current, ...assigneeOptions]
+                        : assigneeOptions;
+                    return merged;
+                  })().map((name) => (
+                    <Select.Item
+                      key={name}
+                      value={name}
+                      className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                    >
+                      <Select.ItemText>{name}</Select.ItemText>
+                    </Select.Item>
+                  ))}
+                </Select.Viewport>
+              </Select.Content>
+            </Select.Portal>
+          </Select.Root>
+        </div>
 
         <div className="flex items-center justify-center">
           <RoundedCheckbox
@@ -409,7 +508,7 @@ export default function TaskSection({
       <div className="mt-2 flex flex-col gap-3">
         {tasks.length < 1 ? (
           <div className="text-neutral-400 text-sm flex items-center gap-3 justify-center mt-3">
-            <span className="text-base">Add first task</span>
+            <span className="text-base boxy-text">Add first task</span>
             <button
               type="button"
               onClick={() => {

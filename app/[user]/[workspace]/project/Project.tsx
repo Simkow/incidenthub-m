@@ -459,6 +459,20 @@ export const Project: React.FC = () => {
                 <input
                   type="datetime-local"
                   value={dueDateInputValue}
+                  onClick={(e) =>
+                    (
+                      e.currentTarget as HTMLInputElement & {
+                        showPicker?: () => void;
+                      }
+                    ).showPicker?.()
+                  }
+                  onFocus={(e) =>
+                    (
+                      e.currentTarget as HTMLInputElement & {
+                        showPicker?: () => void;
+                      }
+                    ).showPicker?.()
+                  }
                   onChange={(e) => {
                     const iso = localInputValueToIso(e.target.value);
                     setDraft((prev) => {

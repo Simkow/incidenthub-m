@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import * as Select from "@radix-ui/react-select";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -45,6 +46,67 @@ export function TaskModal({
   onClose,
   onUpdate,
 }: Props) {
+  const workspaceForUsers = useMemo(() => {
+    if (!task?.workspace_name) {
+      if (typeof window === "undefined") return "";
+      const stored = window.localStorage.getItem("workspace");
+      return stored ? stored.replace(/"/g, "") : "";
+    }
+    return task.workspace_name;
+  }, [task?.workspace_name]);
+
+  const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
+  const [assigneeLoading, setAssigneeLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    if (!workspaceForUsers) {
+      setAssigneeOptions([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      setAssigneeLoading(true);
+      try {
+        const res = await fetch("/api/get-workspace-users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ workspace: workspaceForUsers }),
+        });
+
+        const data = (await res.json().catch(() => null)) as {
+          users?: unknown;
+        } | null;
+
+        const users = Array.isArray(data?.users)
+          ? (data?.users as unknown[])
+              .filter((u): u is string => typeof u === "string")
+              .map((u) => u.trim())
+              .filter(Boolean)
+          : [];
+
+        const current = task?.assignee ? String(task.assignee) : "";
+        const options = [...users];
+        if (current && !options.includes(current)) options.unshift(current);
+
+        if (cancelled) return;
+        setAssigneeOptions(options);
+      } catch {
+        if (cancelled) return;
+        setAssigneeOptions(task?.assignee ? [String(task.assignee)] : []);
+      } finally {
+        if (cancelled) return;
+        setAssigneeLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, workspaceForUsers, task?.assignee]);
+
   return (
     <AnimatePresence>
       {open &&
@@ -52,6 +114,11 @@ export function TaskModal({
           const selectPriorityValue =
             task && priorities.includes(task.priority as Priority)
               ? (task.priority as Priority)
+              : ("" as const);
+
+          const selectAssigneeValue =
+            task && assigneeOptions.includes(String(task.assignee))
+              ? String(task.assignee)
               : ("" as const);
 
           return (
@@ -152,6 +219,20 @@ export function TaskModal({
                       <input
                         type="datetime-local"
                         value={isoToLocalInputValue(task.due_date)}
+                        onClick={(e) =>
+                          (
+                            e.currentTarget as HTMLInputElement & {
+                              showPicker?: () => void;
+                            }
+                          ).showPicker?.()
+                        }
+                        onFocus={(e) =>
+                          (
+                            e.currentTarget as HTMLInputElement & {
+                              showPicker?: () => void;
+                            }
+                          ).showPicker?.()
+                        }
                         onChange={(e) =>
                           onUpdate(
                             task.id,
@@ -165,13 +246,45 @@ export function TaskModal({
 
                     <section className="flex flex-col gap-1">
                       <span className="text-xs text-neutral-400">Assignee</span>
-                      <input
-                        value={String(task.assignee)}
-                        onChange={(e) =>
-                          onUpdate(task.id, "assignee", e.target.value)
+                      <Select.Root
+                        value={selectAssigneeValue}
+                        onValueChange={(value) =>
+                          onUpdate(task.id, "assignee", value)
                         }
-                        className="bg-transparent text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 focus:outline-none focus:border-neutral-300"
-                      />
+                        disabled={
+                          assigneeLoading || assigneeOptions.length === 0
+                        }
+                      >
+                        <Select.Trigger className="text-neutral-200 text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer disabled:opacity-60">
+                          <Select.Value
+                            placeholder={
+                              assigneeLoading ? "Loading..." : "Assignee"
+                            }
+                          />
+                          <Select.Icon className="text-neutral-400">
+                            ▾
+                          </Select.Icon>
+                        </Select.Trigger>
+                        <Select.Portal>
+                          <Select.Content
+                            position="popper"
+                            sideOffset={6}
+                            className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818]"
+                          >
+                            <Select.Viewport className="p-1">
+                              {assigneeOptions.map((name) => (
+                                <Select.Item
+                                  key={name}
+                                  value={name}
+                                  className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                                >
+                                  <Select.ItemText>{name}</Select.ItemText>
+                                </Select.Item>
+                              ))}
+                            </Select.Viewport>
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
                     </section>
 
                     <section className="md:col-span-2 flex items-center justify-between rounded-lg border border-[#2e2e2e] px-3 py-3">

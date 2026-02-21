@@ -254,13 +254,13 @@ export const Members: React.FC = () => {
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[#121212] flex"
+      className="w-full min-h-screen bg-[#121212] flex body-text"
     >
       <section className="py-2 w-full">
         <main className="w-full min-h-[calc(100vh-16px)] border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col">
-              <h1 className="text-sm font-semibold text-white">
+              <h1 className="text-sm font-semibold text-white heading">
                 {t("members.title")}
               </h1>
               <p className="text-xs text-white/60">
