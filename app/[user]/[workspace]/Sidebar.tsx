@@ -287,7 +287,7 @@ export const Sidebar: React.FC = () => {
                   setIsOpen(false);
                   if (!user) return;
                   const ownedFallback = workspaces[0]?.workspace_name ?? "";
-                  const target = ownedFallback || currentWorkspace;
+                  const target = currentWorkspace || ownedFallback;
                   if (!target) return;
                   router.push(`/${user}/${target}/create-workspace`);
                 }}
@@ -363,8 +363,11 @@ export const Sidebar: React.FC = () => {
           ))}
           <button
             onClick={() => {
-              if (!user || !currentWorkspace) return;
-              router.push(`/${user}/${currentWorkspace}/create-workspace`);
+              if (!user) return;
+              const ownedFallback = workspaces[0]?.workspace_name ?? "";
+              const target = currentWorkspace || ownedFallback;
+              if (!target) return;
+              router.push(`/${user}/${target}/create-workspace`);
             }}
             className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full hover:bg-white/10 cursor-pointer"
           >
