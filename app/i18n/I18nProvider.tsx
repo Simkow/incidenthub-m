@@ -47,7 +47,9 @@ function interpolate(template: string, vars?: Record<string, string | number>) {
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(() => getStoredLocale());
+  // IMPORTANT: Keep the initial render deterministic across SSR/CSR to avoid
+  // hydration mismatches. We sync from localStorage after mount.
+  const [locale, setLocaleState] = useState<Locale>(() => DEFAULT_LOCALE);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
@@ -58,6 +60,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // Sync initial locale from storage after hydration.
+    queueMicrotask(() => setLocaleState(getStoredLocale()));
 
     const onStorage = (e: StorageEvent) => {
       if (e.key !== STORAGE_KEY) return;

@@ -45,24 +45,7 @@ export async function POST(req: Request) {
       .map((n) => n.trim())
       .filter(Boolean);
 
-    const userRows = await sql`
-      SELECT DISTINCT u.name
-      FROM users u
-      JOIN tasks t
-        ON (t.assignee_id = u.id OR t.created_by = u.id)
-      WHERE t.workspace_id = ${ws.id}
-      ORDER BY u.name ASC
-    `;
-
-    const fromTasks = userRows
-      .map((r) => (r as { name?: unknown }).name)
-      .filter((n): n is string => typeof n === "string")
-      .map((n) => n.trim())
-      .filter(Boolean);
-
-    const users = Array.from(
-      new Set([...(ownerName ? [ownerName] : []), ...fromMembers, ...fromTasks]),
-    );
+    const users = Array.from(new Set([...(ownerName ? [ownerName] : []), ...fromMembers]));
 
     return Response.json({ users }, { status: 200 });
   } catch (error) {

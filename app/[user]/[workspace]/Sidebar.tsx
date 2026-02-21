@@ -10,10 +10,7 @@ import Inbox from "../../../public/assets/inbox.png";
 import Incidents from "../../../public/assets/issues.png";
 import Add from "../../../public/assets/add.png";
 import Projects from "../../../public/assets/projects.png";
-import Views from "../../../public/assets/views.png";
-import Teams from "../../../public/assets/teams.png";
 import Friends from "../../../public/assets/friends.png";
-import Settings from "../../../public/assets/settings.png";
 import Project from "../../../public/assets/current-project.png";
 import Arrow from "../../../public/assets/down-arrow.png";
 import Tasks from "../../../public/assets/tasks.png";
@@ -36,6 +33,7 @@ export const Sidebar: React.FC = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [memberWorkspaces, setMemberWorkspaces] = useState<Workspace[]>([]);
   const [currentWorkspace, setCurrentWorkspace] = useState("");
   const [user, setUser] = useState("");
   const Workspace_Links = [
@@ -90,9 +88,13 @@ export const Sidebar: React.FC = () => {
   }, [params]);
 
   const Teams_Links = [
-    { name: "Friends", to: "/dashboard", icon: Friends },
-    { name: "Incidents", to: "/incidents", icon: Incidents },
-    { name: "Settings", to: "/settings", icon: Settings },
+    {
+      name: "Friends",
+      to: `/${user}/${currentWorkspace}/members`,
+      icon: Friends,
+    },
+    // { name: "Incidents", to: "/incidents", icon: Incidents },
+    // { name: "Settings", to: "/settings", icon: Settings },
   ];
 
   React.useEffect(() => {
@@ -105,10 +107,33 @@ export const Sidebar: React.FC = () => {
           },
           body: JSON.stringify({ owner: user }),
         });
-        const data = await response.json();
-        setWorkspaces(data.workspaces);
+        const data = (await response.json().catch(() => null)) as {
+          workspaces?: unknown;
+          memberWorkspaces?: unknown;
+        } | null;
+
+        const owned = Array.isArray(data?.workspaces)
+          ? (data?.workspaces as unknown[])
+              .map((w) => w as Partial<Workspace>)
+              .filter(
+                (w): w is Workspace => typeof w.workspace_name === "string",
+              )
+          : [];
+
+        const member = Array.isArray(data?.memberWorkspaces)
+          ? (data?.memberWorkspaces as unknown[])
+              .map((w) => w as Partial<Workspace>)
+              .filter(
+                (w): w is Workspace => typeof w.workspace_name === "string",
+              )
+          : [];
+
+        setWorkspaces(owned);
+        setMemberWorkspaces(member);
       } catch (error) {
         console.error("Error fetching workspaces:", error);
+        setWorkspaces([]);
+        setMemberWorkspaces([]);
       }
     };
 
@@ -207,6 +232,9 @@ export const Sidebar: React.FC = () => {
         <div>
           {isOpen && (
             <div className="absolute mt-2 w-40 max-h-60 overflow-y-auto bg-[#121212] border border-white/20 rounded-lg shadow-lg z-50">
+              <div className="px-4 pt-3 pb-1 text-[11px] text-white/50">
+                {t("sidebar.ownedWorkspaces")}
+              </div>
               {workspaces.map((workspace) => (
                 <div
                   key={workspace.workspace_name}
@@ -224,13 +252,44 @@ export const Sidebar: React.FC = () => {
                   {workspace.workspace_name}
                 </div>
               ))}
+
+              {memberWorkspaces.length ? (
+                <>
+                  <div className="mx-2 my-2 border-t border-white/10" />
+                  <div className="px-4 pb-1 text-[11px] text-white/50">
+                    {t("sidebar.sharedWorkspaces")}
+                  </div>
+                  {memberWorkspaces.map((workspace) => (
+                    <div
+                      key={`member:${workspace.workspace_name}`}
+                      className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs"
+                      onClick={() => {
+                        if (!user) return;
+                        localStorage.setItem(
+                          "workspace",
+                          JSON.stringify(workspace.workspace_name),
+                        );
+                        setIsOpen(false);
+                        router.push(
+                          `/${user}/${workspace.workspace_name}/tasks`,
+                        );
+                      }}
+                    >
+                      {workspace.workspace_name}
+                    </div>
+                  ))}
+                </>
+              ) : null}
               <div className="mx-2 my-1 border-t border-white/10" />
               <div
                 className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs flex items-center gap-2"
                 onClick={() => {
                   setIsOpen(false);
-                  if (!user || !currentWorkspace) return;
-                  router.push(`/${user}/${currentWorkspace}/create-workspace`);
+                  if (!user) return;
+                  const ownedFallback = workspaces[0]?.workspace_name ?? "";
+                  const target = ownedFallback || currentWorkspace;
+                  if (!target) return;
+                  router.push(`/${user}/${target}/create-workspace`);
                 }}
               >
                 <Image
@@ -318,13 +377,9 @@ export const Sidebar: React.FC = () => {
             />
             {t("sidebar.add")}
           </button>
-
-          <div className="mt-2 px-2">
-            <LocaleToggle />
-          </div>
         </div>
       </section>
-      {/* <section className="flex flex-col items-start gap-2 text-white w-full">
+      <section className="flex flex-col items-start gap-2 text-white w-full">
         <h2 className="text-sm text-neutral-400">Project</h2>
         <div className="flex flex-col items-start gap-1 w-full">
           {Teams_Links.map((link) => (
@@ -346,8 +401,18 @@ export const Sidebar: React.FC = () => {
               <span>{link.name}</span>
             </Link>
           ))}
+          <div className="my-2">
+            <LocaleToggle />
+          </div>
+          <Link
+              href="/login"
+              onClick={() => localStorage.removeItem("authToken")}
+              className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-white/10"
+            >
+              {t("navbar.logout")}
+          </Link>
         </div>
-      </section> */}
+      </section>
     </div>
   );
 };

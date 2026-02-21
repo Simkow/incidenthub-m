@@ -35,6 +35,7 @@ export function AddTaskModal({
   const [assigneeLoading, setAssigneeLoading] = useState(false);
   const [priority, setPriority] = useState<Priority | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -90,6 +91,7 @@ export function AddTaskModal({
 
     if (!title || !description || !priority || !dueDate || !assignee) {
       onErrorMessage?.(t("tasks.fillAll"));
+      setError?.(t("tasks.fillAll"));
       return;
     }
 
@@ -268,6 +270,7 @@ export function AddTaskModal({
             >
               {isSubmitting ? t("tasks.sending") : t("tasks.submit")}
             </button>
+            <span className="text-xs text-red-300">{error}</span>
           </form>
         </main>
       </div>

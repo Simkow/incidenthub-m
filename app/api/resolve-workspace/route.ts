@@ -34,8 +34,12 @@ export async function POST(req: Request) {
     if (workspace) {
       const exists = await sql`
         SELECT 1
-        FROM workspaces
-        WHERE owner_id = ${userId} AND workspace_name = ${workspace}
+        FROM workspaces w
+        LEFT JOIN workspace_members wm
+          ON wm.workspace_id = w.id AND wm.user_id = ${userId}
+        WHERE w.workspace_name = ${workspace}
+          AND (w.owner_id = ${userId} OR wm.user_id IS NOT NULL)
+        ORDER BY w.id ASC
         LIMIT 1
       `;
 
@@ -55,7 +59,23 @@ export async function POST(req: Request) {
     const firstName = (first[0] as { workspace_name: string } | undefined)
       ?.workspace_name;
 
-    return Response.json({ workspace: firstName ?? null }, { status: 200 });
+    if (firstName) {
+      return Response.json({ workspace: firstName }, { status: 200 });
+    }
+
+    const firstMember = await sql`
+      SELECT w.workspace_name
+      FROM workspace_members wm
+      JOIN workspaces w ON w.id = wm.workspace_id
+      WHERE wm.user_id = ${userId}
+      ORDER BY w.id ASC
+      LIMIT 1
+    `;
+
+    const firstMemberName =
+      (firstMember[0] as { workspace_name: string } | undefined)?.workspace_name;
+
+    return Response.json({ workspace: firstMemberName ?? null }, { status: 200 });
   } catch (error) {
     console.error(error);
     return Response.json({ message: "Internal server error" }, { status: 500 });

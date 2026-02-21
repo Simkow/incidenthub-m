@@ -1,6 +1,6 @@
-import { Sidebar } from "./Sidebar";
-import { Dashboard } from "./Dashboard";
-import { sql } from "../../lib/db";
+import { Sidebar } from "../Sidebar";
+import { Members } from "./Members";
+import { sql } from "../../../lib/db";
 import { notFound, redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -12,12 +12,12 @@ type PageProps = {
   }>;
 };
 
-export default async function WorkspacePage({ params }: PageProps) {
+export default async function FriendsPage({ params }: PageProps) {
   const { user, workspace } = await params;
 
   const users = await sql`
-    SELECT id FROM users WHERE name = ${user} LIMIT 1
-  `;
+        SELECT id FROM users WHERE name = ${user} LIMIT 1
+    `;
 
   if (!users.length) {
     notFound();
@@ -26,30 +26,32 @@ export default async function WorkspacePage({ params }: PageProps) {
   const userId = (users[0] as { id: number }).id;
 
   const workspaces = await sql`
-    SELECT w.id
-    FROM workspaces w
-    LEFT JOIN workspace_members wm
-      ON wm.workspace_id = w.id AND wm.user_id = ${userId}
-    WHERE w.workspace_name = ${workspace}
-      AND (w.owner_id = ${userId} OR wm.user_id IS NOT NULL)
-    ORDER BY w.id ASC
-    LIMIT 1
-  `;
+        SELECT w.id
+        FROM workspaces w
+        LEFT JOIN workspace_members wm
+          ON wm.workspace_id = w.id AND wm.user_id = ${userId}
+        WHERE w.workspace_name = ${workspace}
+          AND (w.owner_id = ${userId} OR wm.user_id IS NOT NULL)
+        ORDER BY w.id ASC
+        LIMIT 1
+    `;
 
   if (!workspaces.length) {
     const first = await sql`
-      SELECT workspace_name
-      FROM workspaces
-      WHERE owner_id = ${userId}
-      ORDER BY id ASC
-      LIMIT 1
-    `;
+            SELECT workspace_name
+            FROM workspaces
+            WHERE owner_id = ${userId}
+            ORDER BY id ASC
+            LIMIT 1
+        `;
 
     const firstName = (first[0] as { workspace_name: string } | undefined)
       ?.workspace_name;
 
     if (firstName) {
-      redirect(`/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}`);
+      redirect(
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/project`,
+      );
     }
 
     const firstMember = await sql`
@@ -67,7 +69,7 @@ export default async function WorkspacePage({ params }: PageProps) {
 
     if (firstMemberName) {
       redirect(
-        `/${encodeURIComponent(user)}/${encodeURIComponent(firstMemberName)}`,
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstMemberName)}/project`,
       );
     }
 
@@ -78,7 +80,7 @@ export default async function WorkspacePage({ params }: PageProps) {
     <div>
       <Sidebar />
       <div className="md:ml-48 bg-[#121212]">
-        <Dashboard />
+        <Members />
       </div>
     </div>
   );

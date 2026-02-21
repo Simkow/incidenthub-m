@@ -2,33 +2,55 @@
 
 import Logo from "../../public/assets/IncidentHub-logo-white.png";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useAuth } from "../AuthProvider";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useCurrentWorkspace } from "./CurrentWorkspace";
 import { LocaleToggle } from "../i18n/LocaleToggle";
 import { useI18n } from "../i18n/I18nProvider";
+import { useRouter } from "next/navigation";
 
 export const Navbar: React.FC = () => {
-  const { user } = useAuth();
+  const router = useRouter();
   const [token, setToken] = useState<string>("");
   const [username, setUsername] = useState("");
 
   const { t } = useI18n();
 
-  const workspace = useCurrentWorkspace(username);
-  const hasDashboard = !!username && !!workspace;
+  const tokenPresent = !!token;
+  const workspace = useCurrentWorkspace(tokenPresent ? username : "");
+  const hasDashboard = !!username && !!workspace && tokenPresent;
+
+  const dashboardHref = useMemo(() => {
+    if (!hasDashboard) return "/login";
+    return `/${username}/${workspace}/tasks`;
+  }, [hasDashboard, username, workspace]);
+
+  const guardDashboardClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  ) => {
+    const liveToken =
+      typeof window === "undefined"
+        ? ""
+        : (window.localStorage.getItem("authToken") ?? "").replace(/"/g, "");
+
+    if (!liveToken) {
+      e.preventDefault();
+      router.push("/login");
+    }
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const user1 = window.localStorage.getItem("users");
-    setUsername(user1 ? user1.replace(/"/g, "") : "");
+    const next = user1 ? user1.replace(/"/g, "") : "";
+    queueMicrotask(() => setUsername(next));
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const token1 = window.localStorage.getItem("authToken");
-    setToken(token1 ? token1.replace(/"/g, "") : "");
+    const next = token1 ? token1.replace(/"/g, "") : "";
+    queueMicrotask(() => setToken(next));
   }, []);
 
   return (
@@ -40,14 +62,15 @@ export const Navbar: React.FC = () => {
         </span>
       </div>
       <div className="flex gap-4 md:gap-8 text-sm md:text-base flex-wrap justify-center">
-        <Link
+        {/* <Link
           href="/"
           className="hover:text-neutral-300 transition-all duration-300 opacity-50"
         >
           {t("navbar.product")}
-        </Link>
+        </Link> */}
         <Link
-          href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
+          href={dashboardHref}
+          onClick={guardDashboardClick}
           className=" hover:text-neutral-300 transition-all duration-300"
         >
           {t("navbar.dashboard")}
@@ -80,13 +103,17 @@ export const Navbar: React.FC = () => {
           <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
             <Link
               href="/login"
-              onClick={() => localStorage.removeItem("authToken")}
+              onClick={() => {
+                localStorage.removeItem("authToken");
+                queueMicrotask(() => setToken(""));
+              }}
               className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-white/50 transition-all duration-300"
             >
               {t("navbar.logout")}
             </Link>
             <Link
-              href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
+              href={dashboardHref}
+              onClick={guardDashboardClick}
               className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-white/50 transition-all duration-300"
             >
               {t("navbar.openApp")}

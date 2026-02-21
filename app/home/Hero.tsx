@@ -3,30 +3,53 @@
 import { motion } from "motion/react";
 import BgImage from "../../public/assets/hero-bg.png";
 import BgImage2 from "../../public/assets/hero-bg2.png";
-import { useEffect, useState, useMemo, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import Link from "next/link";
-import { useAuth } from "../AuthProvider";
 import Image from "next/image";
 import { useCurrentWorkspace } from "./CurrentWorkspace";
 import { useI18n } from "../i18n/I18nProvider";
+import { useRouter } from "next/navigation";
 
 const MotionImage = motion(Image);
 
 export const Hero: FC = () => {
-  const [isVisible, setIsVisible] = useState(false);
-  const { user } = useAuth();
+  const router = useRouter();
   const [username, setUsername] = useState("");
+  const [token, setToken] = useState("");
 
   const { t } = useI18n();
 
-  const workspace = useCurrentWorkspace(username);
-  const hasDashboard = !!username && !!workspace;
+  const tokenPresent = !!token;
+  const workspace = useCurrentWorkspace(tokenPresent ? username : "");
+  const hasDashboard = !!username && !!workspace && tokenPresent;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const user1 = window.localStorage.getItem("users");
-    setUsername(user1 ? user1.replace(/"/g, "") : "");
+    const next = user1 ? user1.replace(/"/g, "") : "";
+    queueMicrotask(() => setUsername(next));
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const token1 = window.localStorage.getItem("authToken");
+    const next = token1 ? token1.replace(/"/g, "") : "";
+    queueMicrotask(() => setToken(next));
+  }, []);
+
+  const guardDashboardClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  ) => {
+    const liveToken =
+      typeof window === "undefined"
+        ? ""
+        : (window.localStorage.getItem("authToken") ?? "").replace(/"/g, "");
+
+    if (!liveToken) {
+      e.preventDefault();
+      router.push("/login");
+    }
+  };
 
   return (
     <main className="w-full max-md:max-h-screen max-md:justify-center min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-40 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-32 md:pb-40">
@@ -70,6 +93,7 @@ export const Hero: FC = () => {
         <div className="justify-start flex flex-col sm:flex-row gap-4 sm:gap-8">
           <Link
             href={hasDashboard ? `/${username}/${workspace}/tasks` : "/login"}
+            onClick={guardDashboardClick}
           >
             <motion.button
               initial={{ opacity: 0, filter: "blur(10px)" }}

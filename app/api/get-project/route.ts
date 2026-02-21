@@ -34,12 +34,15 @@ export async function POST(req: Request) {
             return Response.json({ project: null }, { status: 404 });
         }
 
-        const rows = await sql`
-            SELECT workspace_name, description, due_date
-            FROM workspaces
-            WHERE id = ${workspaceId} AND owner_id = ${userId}
-            LIMIT 1
-        `;
+                const rows = await sql`
+                        SELECT w.workspace_name, w.description, w.due_date
+                        FROM workspaces w
+                        LEFT JOIN workspace_members wm
+                            ON wm.workspace_id = w.id AND wm.user_id = ${userId}
+                        WHERE w.id = ${workspaceId}
+                            AND (w.owner_id = ${userId} OR wm.user_id IS NOT NULL)
+                        LIMIT 1
+                `;
 
         const project = (rows?.[0] ?? null) as
             | { workspace_name: string; description: string | null; due_date: string | null }

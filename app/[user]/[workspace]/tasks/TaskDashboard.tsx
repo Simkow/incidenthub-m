@@ -157,6 +157,7 @@ export const TaskDashboard: React.FC = () => {
             {submitMessage && (
               <div className="text-xs text-neutral-300">{submitMessage}</div>
             )}
+
             {submitError && (
               <div className="text-xs text-red-400">{submitError}</div>
             )}
