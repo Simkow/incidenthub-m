@@ -33,7 +33,7 @@ export const messages = {
       titleB: "handle",
       titleC: "incidents.",
       subtitle:
-        "Log incidents, track actions, and build postmortems with a clean,\nfrontend-first workflow designed for real-world scenarios.",
+        "Log incidents, assign tasks, and track progress in one place.\nA clean workflow for real teams.",
       startBuilding: "Start Building",
       opening: "Opening...",
       learnMore: "Learn More...",
@@ -181,7 +181,7 @@ export const messages = {
       titleB: "obsługę",
       titleC: "incydentów.",
       subtitle:
-        "Rejestruj incydenty, śledź działania i twórz postmortemy w czystym,\nfrontend-first workflow zaprojektowanym pod realne scenariusze.",
+        "Rejestruj zadania, przypisuj taski i śledź postęp w jednym miejscu.\nProsty workflow dla zespołów.",
       startBuilding: "Zaczynaj",
       opening: "Otwieranie...",
       learnMore: "Dowiedz się więcej...",
