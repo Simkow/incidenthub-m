@@ -104,8 +104,21 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
 export function useI18n() {
   const ctx = useContext(I18nContext);
-  if (!ctx) {
-    throw new Error("useI18n must be used within I18nProvider");
-  }
-  return ctx;
+  if (ctx) return ctx;
+
+  const t = (key: string, vars?: Record<string, string | number>) => {
+    const value = lookup(messages[DEFAULT_LOCALE], key.split("."));
+    if (typeof value === "string") return interpolate(value, vars);
+    const fallback = lookup(messages.en, key.split("."));
+    if (typeof fallback === "string") return interpolate(fallback, vars);
+    return key;
+  };
+
+  return {
+    locale: DEFAULT_LOCALE,
+    setLocale: () => {
+      // no-op fallback
+    },
+    t,
+  } satisfies I18nContextValue;
 }

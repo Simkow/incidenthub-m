@@ -115,8 +115,11 @@ export const Login: React.FC = () => {
     }
   }
 
+  const inputClassName =
+    "bg-neutral-950/60 text-neutral-100 border border-neutral-800 rounded-lg px-4 py-2 w-full text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-700 focus:border-neutral-700";
+
   return (
-    <div className="w-full min-h-screen flex flex-col gap-4 justify-center items-center bg-[#090909] pt-20 pb-40">
+    <div className="w-full min-h-screen flex flex-col gap-4 justify-center items-center bg-neutral-950 pt-20 pb-40">
       <Image
         src={Background}
         alt="Background"
@@ -126,7 +129,7 @@ export const Login: React.FC = () => {
       />
       <form
         onSubmit={handleSubmit}
-        className="w-[92vw] max-w-md rounded-xl bg-neutral-900/30 px-8 py-5 flex justify-center items-center flex-col gap-4 shadow-lg shadow-black/30 backdrop-blur-[1px] border border-white/20 z-20"
+        className="w-[92vw] max-w-md rounded-xl bg-neutral-950/60 px-8 py-6 flex justify-center items-center flex-col gap-5 shadow-lg shadow-black/30 backdrop-blur-sm border border-white/10 z-20"
       >
         <div className="w-full flex flex-col justify-center items-center">
           <Link href="/">
@@ -138,55 +141,65 @@ export const Login: React.FC = () => {
               height={32}
             />
           </Link>
-          <h1 className="text-2xl font-bold text-neutral-500 mb-4 text-center">
+          <h1 className="text-2xl font-bold text-neutral-200 mb-1 text-center">
             {t("auth.loginTitle")} <br />
             <span className="text-white">IncidentHub</span>
           </h1>
+          <p className="text-xs text-neutral-500 text-center">
+            {t("auth.emailHint")}
+          </p>
         </div>
-        <div className="flex flex-col gap-2">
+        {error ? (
+          <div className="w-full rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            {error}
+          </div>
+        ) : null}
+
+        <div className="w-full flex flex-col gap-2">
           <label htmlFor="email" className="text-neutral-300 font-medium">
             {t("auth.email")}
           </label>
-          <label
-            htmlFor="email"
-            className="text-xs text-neutral-500 font-light"
-          >
+          <p className="text-xs text-neutral-500 font-light">
             {t("auth.emailHint")}
-          </label>
+          </p>
           <input
             type="email"
             id="email"
             name="email"
-            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300"
+            className={inputClassName}
+            value={email}
             onChange={handleEmailChange}
+            placeholder="name@company.com"
+            autoComplete="email"
+            required
           />
         </div>
-        <div className="flex flex-col gap-2 mt-4">
+        <div className="w-full flex flex-col gap-2">
           <label htmlFor="password" className="text-neutral-300 font-medium">
             {t("auth.password")}
           </label>
-          <label
-            htmlFor="password"
-            className="text-xs text-neutral-500 font-light"
-          >
+          <p className="text-xs text-neutral-500 font-light">
             {t("auth.passwordHint")}
-          </label>
+          </p>
           <input
             type="password"
             id="password"
             name="password"
-            className="bg-neutral-200 text-neutral-900 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300"
+            className={inputClassName}
+            value={password}
             onChange={handlePasswordChange}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
           />
         </div>
         <div className="w-full flex flex-col items-start gap-1">
           <button
             type="submit"
-            className="mt-6 bg-black text-white rounded-lg px-4 py-2 w-full hover:bg-neutral-800 transition cursor-pointer"
+            className="mt-2 bg-neutral-100 text-neutral-900 rounded-lg px-4 py-2 w-full hover:bg-white transition cursor-pointer font-medium"
           >
             {t("auth.login")}
           </button>
-          {error && <p className="text-red-300 text-sm">{error}</p>}
           <Link href="/register">
             <button
               type="button"

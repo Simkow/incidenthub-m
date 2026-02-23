@@ -79,7 +79,7 @@ export default async function CreateWorkspacePage({ params }: PageProps) {
   return (
     <div>
       <Sidebar />
-      <div className="md:ml-48 bg-[#121212]">
+      <div className="md:ml-48 bg-neutral-950">
         <CreateWorkspace user={user} currentWorkspace={workspace} />
       </div>
     </div>

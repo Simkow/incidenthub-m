@@ -207,7 +207,7 @@ export const FirstWorkspace: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen flex flex-col justify-center relative bg-[#121212] manrope px-4 md:px-0">
+    <div className="w-full min-h-screen flex flex-col justify-center relative bg-neutral-950 manrope px-4 md:px-0">
       <Link
         href={"/"}
         className="text-neutral-400 absolute left-4 md:left-8 top-5 flex gap-2 items-center hover:text-neutral-200 transition-all text-sm"
@@ -290,7 +290,7 @@ export const FirstWorkspace: React.FC = () => {
           </p>
           <button
             onClick={() => setIsClicked(true)}
-            className="bg-black text-white rounded-lg px-6 py-3 hover:bg-neutral-800 transition cursor-pointer"
+            className="bg-neutral-100 text-neutral-900 rounded-lg px-6 py-3 hover:bg-white transition cursor-pointer font-medium"
           >
             {t("firstWorkspace.cta")}
           </button>
@@ -313,10 +313,12 @@ export const FirstWorkspace: React.FC = () => {
                   type="text"
                   id="projectName"
                   name="projectName"
-                  className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                  className="text-neutral-100 bg-neutral-950/60 border border-neutral-800 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-700 focus:border-neutral-700 text-sm placeholder:text-neutral-500"
                   placeholder={t("firstWorkspace.projectNamePh")}
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
+                  autoComplete="off"
+                  required
                 />
                 <label
                   htmlFor="workspaceUrl"
@@ -330,14 +332,14 @@ export const FirstWorkspace: React.FC = () => {
                   id="workspaceUrl"
                   value={`http://localhost:5173/${userName}/${trimmedProjectName || "<workspace>"}`}
                   name="workspaceUrl"
-                  className="text-neutral-700 bg-neutral-200 border border-neutral-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-300 text-sm"
+                  className="text-neutral-400 bg-neutral-900/40 border border-neutral-800 rounded-lg px-4 py-2 w-full text-sm"
                   placeholder={t("firstWorkspace.workspaceUrlPh")}
                 />
               </div>
               <span className="text-red-400 text-sm">{error}</span>
               <button
                 type="submit"
-                className="bg-black text-white rounded-lg px-6 py-3 hover:bg-neutral-800 transition cursor-pointer"
+                className="bg-neutral-100 text-neutral-900 rounded-lg px-6 py-3 hover:bg-white transition cursor-pointer font-medium"
               >
                 {t("firstWorkspace.createWorkspace")}
               </button>

@@ -42,9 +42,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${jostFont.variable} ${manropeFont.variable} antialiased`}
       >
-        <AuthProvider>
-          <I18nProvider>{children}</I18nProvider>
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );
