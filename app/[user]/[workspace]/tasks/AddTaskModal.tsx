@@ -219,20 +219,17 @@ export function AddTaskModal({
                   type="datetime-local"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  onClick={(e) =>
-                    (
-                      e.currentTarget as HTMLInputElement & {
-                        showPicker?: () => void;
-                      }
-                    ).showPicker?.()
-                  }
-                  onFocus={(e) =>
-                    (
-                      e.currentTarget as HTMLInputElement & {
-                        showPicker?: () => void;
-                      }
-                    ).showPicker?.()
-                  }
+                  onClick={(e) => {
+                    try {
+                      (
+                        e.currentTarget as HTMLInputElement & {
+                          showPicker?: () => void;
+                        }
+                      ).showPicker?.();
+                    } catch {
+                      // ignore
+                    }
+                  }}
                   className="text-white rounded-md border border-[#2e2e2e] p-2 w-full md:w-72 bg-transparent focus:outline-none focus:border-neutral-300"
                 />
               </section>

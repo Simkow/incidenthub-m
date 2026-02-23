@@ -7,6 +7,7 @@ import { AddTaskModal } from "./AddTaskModal";
 import { RoundedCheckbox } from "./RoundedCheckbox";
 import Image from "next/image";
 import Plus from "../../../../public/assets/plus.png";
+import { motion } from "motion/react";
 import { useParams } from "next/navigation";
 
 import type { Priority, Task } from "./types";
@@ -18,6 +19,17 @@ type Props = {
 
 function isoToLocalInputValue(iso: string) {
   if (!iso) return "";
+
+  // If DB returns a date-only value, keep it stable (avoid timezone shifts).
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    return `${iso}T00:00`;
+  }
+
+  // If it's already a `datetime-local` shaped value, don't reinterpret it.
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(iso)) {
+    return iso;
+  }
+
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
 
@@ -31,9 +43,8 @@ function isoToLocalInputValue(iso: string) {
 
 function localInputValueToIso(localValue: string) {
   if (!localValue) return "";
-  const d = new Date(localValue);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString();
+  // Keep the `datetime-local` value (no timezone) to avoid day shifts.
+  return localValue;
 }
 
 export default function TaskSection({
@@ -303,9 +314,12 @@ export default function TaskSection({
       : ("" as const);
 
     return (
-      <section
+      <motion.section
+        initial={{ opacity: 0, filter: "blur(10px)" }}
+        animate={{ opacity: 1, filter: "blur(0px)" }}
+        transition={{ duration: 0.4 }}
         key={task.id}
-        className="grid grid-cols-1 md:grid-cols-7 items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-neutral-950/50 hover:bg-neutral-950/30 px-3 py-2"
+        className="grid grid-cols-1 md:grid-cols-7 body-text items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-neutral-950/50 hover:bg-neutral-950/30 px-3 py-2"
         role="button"
         tabIndex={0}
         onClick={() => setActiveTaskId(task.id)}
@@ -372,15 +386,16 @@ export default function TaskSection({
           }
           onClick={(e) => {
             e.stopPropagation();
-            (
-              e.currentTarget as HTMLInputElement & { showPicker?: () => void }
-            ).showPicker?.();
+            try {
+              (
+                e.currentTarget as HTMLInputElement & {
+                  showPicker?: () => void;
+                }
+              ).showPicker?.();
+            } catch {
+              // ignore: some browsers require strict user-gesture activation
+            }
           }}
-          onFocus={(e) =>
-            (
-              e.currentTarget as HTMLInputElement & { showPicker?: () => void }
-            ).showPicker?.()
-          }
           className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
         />
 
@@ -458,11 +473,11 @@ export default function TaskSection({
           </button>
 
           <div
-            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-64 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-neutral-950 border border-neutral-700 absolute mt-40 left-1/2 -translate-x-1/2 flex-col items-center justify-center p-4`}
+            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-44 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-neutral-950/60 border border-neutral-700 absolute flex-col items-center justify-center p-4 backdrop-blur-sm`}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <span className="text-sm text-neutral-300 font-light text-center">
+            <span className="text-xs text-neutral-300 font-light text-center">
               Are you sure to <br /> delete this task?
             </span>
             <div className="mt-2 flex gap-2">
@@ -472,7 +487,7 @@ export default function TaskSection({
                   e.stopPropagation();
                   setDeleteConfirmTaskId(null);
                 }}
-                className="border border-[#2e2e2e] text-sm text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800"
+                className="border border-[#2e2e2e] text-xs text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800"
               >
                 Cancel
               </button>
@@ -482,19 +497,24 @@ export default function TaskSection({
                   e.stopPropagation();
                   void handleDelete(task.id);
                 }}
-                className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400"
+                className="border border-red-300 text-xs text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400"
               >
                 Delete
               </button>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     );
   };
 
   return (
-    <div className="relative w-full min-h-125 flex flex-col justify-start gap-2">
+    <motion.div
+      initial={{ opacity: 0, filter: "blur(10px)" }}
+      animate={{ opacity: 1, filter: "blur(0px)" }}
+      transition={{ duration: 0.4 }}
+      className="relative w-full min-h-125 flex flex-col justify-start gap-2"
+    >
       <div className="hidden md:grid grid-cols-7 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-neutral-400">
         <span className="text-left">Title</span>
         <span className="text-left">Description</span>
@@ -567,6 +587,6 @@ export default function TaskSection({
         onClose={() => setActiveTaskId(null)}
         onUpdate={updateTask}
       />
-    </div>
+    </motion.div>
   );
 }

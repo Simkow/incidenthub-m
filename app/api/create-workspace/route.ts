@@ -70,16 +70,66 @@ export async function POST(req: Request) {
       );
     }
 
-    await sql`
+    await sql`BEGIN`;
+
+    const inserted = await sql`
       INSERT INTO workspaces (workspace_name, owner, owner_id, description, due_date)
       VALUES (${workspace_name}, ${owner}, ${owner_id}, ${description}, ${due_date})
+      RETURNING id
     `;
+
+    const workspaceId = (inserted[0] as { id: number } | undefined)?.id;
+    if (!workspaceId) {
+      await sql`ROLLBACK`;
+      return Response.json(
+        { message: "Failed to create workspace" },
+        { status: 500 },
+      );
+    }
+
+    const defaultTasks = [
+      {
+        title: "Add your first task",
+        description: "Start small: write down one thing you want to get done today.",
+      },
+      {
+        title: "Finish your first task",
+        description: "Mark a task as done and feel the momentum.",
+      },
+      {
+        title: "Delete your first task",
+        description: "Clean up tasks you no longer need — keep your list sharp.",
+      },
+    ] as const;
+
+    for (const t of defaultTasks) {
+      await sql`
+        INSERT INTO tasks (title, description, priority, due_date, assignee_id, workspace_id, created_by, assignee)
+        VALUES (
+          ${t.title},
+          ${t.description},
+          ${"Medium"},
+          NOW() + interval '3 days',
+          ${owner_id},
+          ${workspaceId},
+          ${owner_id},
+          ${owner}
+        )
+      `;
+    }
+
+    await sql`COMMIT`;
 
     return Response.json(
       { message: "Workspace created", workspace_name },
       { status: 201 },
     );
   } catch (error) {
+    try {
+      await sql`ROLLBACK`;
+    } catch {
+      // ignore
+    }
     console.error("Error creating workspace:", error);
     return Response.json({ message: "Internal server error" }, { status: 500 });
   }

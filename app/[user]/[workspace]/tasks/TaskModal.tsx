@@ -3,12 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import * as Select from "@radix-ui/react-select";
 import { AnimatePresence, motion } from "motion/react";
-
-import { RoundedCheckbox } from "./RoundedCheckbox";
 import type { Priority, Task } from "./types";
+import { RoundedCheckbox } from "./RoundedCheckbox";
 
 function isoToLocalInputValue(iso: string) {
   if (!iso) return "";
+
+  // If DB returns a date-only value, keep it stable (avoid timezone shifts).
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    return `${iso}T00:00`;
+  }
+
+  // If it's already a `datetime-local` shaped value, don't reinterpret it.
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(iso)) {
+    return iso;
+  }
+
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
 
@@ -22,9 +32,8 @@ function isoToLocalInputValue(iso: string) {
 
 function localInputValueToIso(localValue: string) {
   if (!localValue) return "";
-  const d = new Date(localValue);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString();
+  // Keep the `datetime-local` value (no timezone) to avoid day shifts.
+  return localValue;
 }
 
 type Props = {
@@ -219,20 +228,17 @@ export function TaskModal({
                       <input
                         type="datetime-local"
                         value={isoToLocalInputValue(task.due_date)}
-                        onClick={(e) =>
-                          (
-                            e.currentTarget as HTMLInputElement & {
-                              showPicker?: () => void;
-                            }
-                          ).showPicker?.()
-                        }
-                        onFocus={(e) =>
-                          (
-                            e.currentTarget as HTMLInputElement & {
-                              showPicker?: () => void;
-                            }
-                          ).showPicker?.()
-                        }
+                        onClick={(e) => {
+                          try {
+                            (
+                              e.currentTarget as HTMLInputElement & {
+                                showPicker?: () => void;
+                              }
+                            ).showPicker?.();
+                          } catch {
+                            // ignore
+                          }
+                        }}
                         onChange={(e) =>
                           onUpdate(
                             task.id,
@@ -296,7 +302,7 @@ export function TaskModal({
                       </div>
                       <RoundedCheckbox
                         checked={task.is_finished}
-                        onCheckedChange={(next) =>
+                        onCheckedChange={(next: boolean) =>
                           onUpdate(task.id, "is_finished", next)
                         }
                         ariaLabel="Mark task as finished"

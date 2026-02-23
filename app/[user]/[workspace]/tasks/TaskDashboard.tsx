@@ -19,6 +19,13 @@ import type { Task } from "./types";
 import { ProjectCompletionModal } from "./ProjectCompletionBanner";
 import { useI18n } from "../../../i18n/I18nProvider";
 
+type DeadlineTask = {
+  id: string | number;
+  title: string;
+  due_date: string;
+  priority?: string;
+};
+
 export const TaskDashboard: React.FC = () => {
   const { t } = useI18n();
   const params = useParams();
@@ -31,6 +38,8 @@ export const TaskDashboard: React.FC = () => {
   const [taskView, setTaskView] = useState("All");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [completionDismissed, setCompletionDismissed] = useState(false);
+  const [deadlineCount, setDeadlineCount] = useState(0);
+  const [deadlineTasks, setDeadlineTasks] = useState<DeadlineTask[]>([]);
   const plusIcon = Plus;
   const minusIcon = Minus;
 
@@ -80,23 +89,74 @@ export const TaskDashboard: React.FC = () => {
     }
   }, [user, currentWorkspace]);
 
+  const fetchDeadlineNotifications = useCallback(async () => {
+    if (!user) return;
+    if (!currentWorkspace) return;
+
+    try {
+      const res = await fetch("/api/get-deadline-notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: user,
+          workspace: currentWorkspace,
+          hours: 24,
+          limit: 3,
+        }),
+      });
+
+      const data = (await res.json().catch(() => null)) as {
+        count?: unknown;
+        tasks?: unknown;
+      } | null;
+
+      const count =
+        typeof data?.count === "number"
+          ? data.count
+          : typeof data?.count === "string"
+            ? Number(data.count)
+            : 0;
+
+      const dueSoon = Array.isArray(data?.tasks)
+        ? (data?.tasks as Array<Partial<DeadlineTask>>)
+            .map((task) => ({
+              id: typeof task.id === "number" ? task.id : String(task.id ?? ""),
+              title: typeof task.title === "string" ? task.title : "",
+              due_date: typeof task.due_date === "string" ? task.due_date : "",
+              priority:
+                typeof task.priority === "string" ? task.priority : undefined,
+            }))
+            .filter((task) => task.id && task.title && task.due_date)
+        : [];
+
+      setDeadlineCount(Number.isFinite(count) ? count : dueSoon.length);
+      setDeadlineTasks(dueSoon);
+    } catch (e) {
+      console.error("Failed to fetch deadline notifications", e);
+      setDeadlineCount(0);
+      setDeadlineTasks([]);
+    }
+  }, [user, currentWorkspace]);
+
   useEffect(() => {
     if (!user || !currentWorkspace) return;
     queueMicrotask(() => {
       void fetchTasks();
+      void fetchDeadlineNotifications();
     });
-  }, [user, currentWorkspace, fetchTasks]);
+  }, [user, currentWorkspace, fetchTasks, fetchDeadlineNotifications]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const handler = () => {
       void fetchTasks();
+      void fetchDeadlineNotifications();
     };
 
     window.addEventListener("tasks:refresh", handler);
     return () => window.removeEventListener("tasks:refresh", handler);
-  }, [fetchTasks]);
+  }, [fetchTasks, fetchDeadlineNotifications]);
 
   const doneTasksCount = useMemo(
     () => tasks.filter((t) => t.is_finished).length,
@@ -110,6 +170,9 @@ export const TaskDashboard: React.FC = () => {
 
   const completionOpen =
     allTasksCount > 0 && progressPercent === 100 && !completionDismissed;
+
+  const showDeadlineToast = deadlineCount > 0;
+  const nextDeadlineTask = deadlineTasks[0] ?? null;
 
   useEffect(() => {
     if (allTasksCount > 0 && progressPercent === 100) return;
@@ -247,6 +310,24 @@ export const TaskDashboard: React.FC = () => {
           </section>
         </main>
       </section>
+
+      {showDeadlineToast && (
+        <motion.div
+          initial={{ opacity: 0, filter: "blur(10px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.5 }}
+          className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border border-[#2e2e2e] bg-[#181818] px-4 py-3 text-sm text-neutral-200">
+          <div className="font-medium">{t("tasks.deadlineToastTitle")}</div>
+          <div className="text-neutral-300">
+            {t("tasks.deadlineToastBody", { count: deadlineCount })}
+          </div>
+          {nextDeadlineTask && (
+            <div className="mt-1 text-neutral-400 truncate">
+              {t("tasks.deadlineToastNext", { title: nextDeadlineTask.title })}
+            </div>
+          )}
+        </motion.div>
+      )}
     </motion.main>
   );
 };

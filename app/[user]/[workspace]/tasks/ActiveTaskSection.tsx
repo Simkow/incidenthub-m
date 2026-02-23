@@ -18,6 +18,17 @@ type Props = {
 
 function isoToLocalInputValue(iso: string) {
   if (!iso) return "";
+
+  // If DB returns a date-only value, keep it stable (avoid timezone shifts).
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    return `${iso}T00:00`;
+  }
+
+  // If it's already a `datetime-local` shaped value, don't reinterpret it.
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(iso)) {
+    return iso;
+  }
+
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
 
@@ -31,9 +42,8 @@ function isoToLocalInputValue(iso: string) {
 
 function localInputValueToIso(localValue: string) {
   if (!localValue) return "";
-  const d = new Date(localValue);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toISOString();
+  // Keep the `datetime-local` value (no timezone) to avoid day shifts.
+  return localValue;
 }
 
 export default function ActiveTaskSection({
@@ -372,15 +382,16 @@ export default function ActiveTaskSection({
           }
           onClick={(e) => {
             e.stopPropagation();
-            (
-              e.currentTarget as HTMLInputElement & { showPicker?: () => void }
-            ).showPicker?.();
+            try {
+              (
+                e.currentTarget as HTMLInputElement & {
+                  showPicker?: () => void;
+                }
+              ).showPicker?.();
+            } catch {
+              // ignore: some browsers require strict user-gesture activation
+            }
           }}
-          onFocus={(e) =>
-            (
-              e.currentTarget as HTMLInputElement & { showPicker?: () => void }
-            ).showPicker?.()
-          }
           className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
         />
 

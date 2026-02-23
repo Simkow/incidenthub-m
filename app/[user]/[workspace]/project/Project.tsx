@@ -4,9 +4,8 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useI18n } from "../../../i18n/I18nProvider";
-
 import ProjectIcon from "../../../../public/assets/project-icon.png";
+import { useI18n } from "../../../i18n/I18nProvider";
 
 type ProjectData = {
   workspace_name: string;
@@ -459,20 +458,17 @@ export const Project: React.FC = () => {
                 <input
                   type="datetime-local"
                   value={dueDateInputValue}
-                  onClick={(e) =>
-                    (
-                      e.currentTarget as HTMLInputElement & {
-                        showPicker?: () => void;
-                      }
-                    ).showPicker?.()
-                  }
-                  onFocus={(e) =>
-                    (
-                      e.currentTarget as HTMLInputElement & {
-                        showPicker?: () => void;
-                      }
-                    ).showPicker?.()
-                  }
+                  onClick={(e) => {
+                    try {
+                      (
+                        e.currentTarget as HTMLInputElement & {
+                          showPicker?: () => void;
+                        }
+                      ).showPicker?.();
+                    } catch {
+                      // ignore
+                    }
+                  }}
                   onChange={(e) => {
                     const iso = localInputValueToIso(e.target.value);
                     setDraft((prev) => {
