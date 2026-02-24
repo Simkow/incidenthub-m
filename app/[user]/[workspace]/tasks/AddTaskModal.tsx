@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { motion } from "motion/react";
 import * as Select from "@radix-ui/react-select";
 import { useI18n } from "../../../i18n/I18nProvider";
+import { dateInputToDateOnly } from "./dateTime";
 
 type Priority = "Light" | "Medium" | "High" | "Urgent";
 
@@ -89,7 +90,9 @@ export function AddTaskModal({
     onSuccessMessage?.("");
     onErrorMessage?.("");
 
-    if (!title || !description || !priority || !dueDate || !assignee) {
+    const dueDateOnly = dateInputToDateOnly(dueDate);
+
+    if (!title || !description || !priority || !dueDateOnly || !assignee) {
       onErrorMessage?.(t("tasks.fillAll"));
       setError?.(t("tasks.fillAll"));
       return;
@@ -104,7 +107,7 @@ export function AddTaskModal({
           title,
           priority,
           description,
-          due_date: dueDate,
+          due_date: dueDateOnly,
           assignee,
           workspace,
           ...(createdBy ? { created_by: createdBy } : {}),
@@ -216,7 +219,7 @@ export function AddTaskModal({
               <section className="flex flex-col gap-1 w-full">
                 <span>{t("tasks.dueDate")}</span>
                 <input
-                  type="datetime-local"
+                  type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                   onClick={(e) => {

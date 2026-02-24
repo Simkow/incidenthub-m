@@ -10,41 +10,12 @@ import Plus from "../../../../public/assets/plus.png";
 import { useParams } from "next/navigation";
 
 import type { Priority, Task } from "./types";
+import { dateInputToDateOnly, toDateInputValue } from "./dateTime";
 
 type Props = {
   search?: string;
   scope?: "workspace" | "user";
 };
-
-function isoToLocalInputValue(iso: string) {
-  if (!iso) return "";
-
-  // If DB returns a date-only value, keep it stable (avoid timezone shifts).
-  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-    return `${iso}T00:00`;
-  }
-
-  // If it's already a `datetime-local` shaped value, don't reinterpret it.
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(iso)) {
-    return iso;
-  }
-
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  const hh = String(d.getHours()).padStart(2, "0");
-  const min = String(d.getMinutes()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-}
-
-function localInputValueToIso(localValue: string) {
-  if (!localValue) return "";
-  // Keep the `datetime-local` value (no timezone) to avoid day shifts.
-  return localValue;
-}
 
 export default function ActiveTaskSection({
   search = "",
@@ -371,14 +342,10 @@ export default function ActiveTaskSection({
         </div>
 
         <input
-          type="datetime-local"
-          value={isoToLocalInputValue(task.due_date)}
+          type="date"
+          value={toDateInputValue(task.due_date)}
           onChange={(e) =>
-            updateTask(
-              task.id,
-              "due_date",
-              localInputValueToIso(e.target.value),
-            )
+            updateTask(task.id, "due_date", dateInputToDateOnly(e.target.value))
           }
           onClick={(e) => {
             e.stopPropagation();

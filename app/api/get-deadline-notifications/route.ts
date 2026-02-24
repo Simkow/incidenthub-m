@@ -8,6 +8,7 @@ export async function POST(req: Request) {
       username?: unknown;
       workspace?: unknown;
       hours?: unknown;
+      days?: unknown;
       limit?: unknown;
     } | null;
 
@@ -16,13 +17,13 @@ export async function POST(req: Request) {
     const workspace =
       typeof body?.workspace === "string" ? body.workspace.trim() : "";
 
-    const hoursRaw = body?.hours;
-    const hours =
-      typeof hoursRaw === "number"
-        ? hoursRaw
-        : typeof hoursRaw === "string"
-          ? Number(hoursRaw)
-          : 24;
+    const daysRaw = body?.days;
+    const days =
+      typeof daysRaw === "number"
+        ? daysRaw
+        : typeof daysRaw === "string"
+          ? Number(daysRaw)
+          : 1;
 
     const limitRaw = body?.limit;
     const limit =
@@ -40,8 +41,8 @@ export async function POST(req: Request) {
       return Response.json({ message: "workspace is invalid" }, { status: 400 });
     }
 
-    if (!Number.isFinite(hours) || hours <= 0 || hours > 24 * 30) {
-      return Response.json({ message: "hours is invalid" }, { status: 400 });
+    if (!Number.isFinite(days) || days < 1 || days > 30) {
+      return Response.json({ message: "days is invalid" }, { status: 400 });
     }
 
     if (!Number.isFinite(limit) || limit <= 0 || limit > 50) {
@@ -92,16 +93,15 @@ export async function POST(req: Request) {
       return Response.json({ message: "Forbidden" }, { status: 403 });
     }
 
-    // Due within next N hours (and not overdue yet)
+    // Due in N days (date-only semantics). For "1 day left" use days=1 (due tomorrow).
     const tasks = await sql`
       SELECT t.id, t.title, t.due_date, t.priority
       FROM tasks t
       WHERE t.workspace_id = ${workspaceId}
         AND t.is_finished = false
         AND t.due_date IS NOT NULL
-        AND t.due_date > NOW()
-        AND t.due_date <= NOW() + (${hours} * interval '1 hour')
-      ORDER BY t.due_date ASC
+        AND (t.due_date::date) = (CURRENT_DATE + ${days})
+      ORDER BY t.due_date ASC, t.id ASC
       LIMIT ${limit}
     `;
 
@@ -111,8 +111,7 @@ export async function POST(req: Request) {
       WHERE t.workspace_id = ${workspaceId}
         AND t.is_finished = false
         AND t.due_date IS NOT NULL
-        AND t.due_date > NOW()
-        AND t.due_date <= NOW() + (${hours} * interval '1 hour')
+        AND (t.due_date::date) = (CURRENT_DATE + ${days})
     `;
 
     const count = (countRow[0] as { count: number } | undefined)?.count ?? 0;

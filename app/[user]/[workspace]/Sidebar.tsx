@@ -14,6 +14,7 @@ import Friends from "../../../public/assets/friends.png";
 import Project from "../../../public/assets/current-project.png";
 import Arrow from "../../../public/assets/down-arrow.png";
 import Tasks from "../../../public/assets/tasks.png";
+import Profile from '../../../public/assets/profile.png'
 import { LocaleToggle } from "../../i18n/LocaleToggle";
 import { useI18n } from "../../i18n/I18nProvider";
 
@@ -432,7 +433,26 @@ export const Sidebar: React.FC = () => {
           )}
         </div>
       </section>
-      <section className="flex flex-col gap-2 mt-5 w-full">
+      <button
+            onClick={() => {
+              if (!user) return;
+              const ownedFallback = workspaces[0]?.workspace_name ?? "";
+              const target = currentWorkspace || ownedFallback;
+              if (!target) return;
+              router.push(`/${user}/${target}/profile`);
+            }}
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full font-bold heading hover:bg-white/10 cursor-pointer"
+          >
+            <Image
+              src={Profile}
+              alt="profile"
+              className="w-4 h-4"
+              width={16}
+              height={16}
+            />
+            {user}
+          </button>
+      <section className="flex flex-col gap-2 w-full">
         <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-white/10 cursor-pointer w-full">
           <Image
             src={Inbox}

@@ -100,7 +100,7 @@ export const TaskDashboard: React.FC = () => {
         body: JSON.stringify({
           username: user,
           workspace: currentWorkspace,
-          hours: 24,
+          days: 1,
           limit: 3,
         }),
       });
@@ -316,7 +316,8 @@ export const TaskDashboard: React.FC = () => {
           initial={{ opacity: 0, filter: "blur(10px)" }}
           animate={{ opacity: 1, filter: "blur(0px)" }}
           transition={{ duration: 0.5 }}
-          className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border border-[#2e2e2e] bg-[#181818] px-4 py-3 text-sm text-neutral-200">
+          className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border border-[#2e2e2e] bg-[#181818] px-4 py-3 text-sm text-neutral-200"
+        >
           <div className="font-medium">{t("tasks.deadlineToastTitle")}</div>
           <div className="text-neutral-300">
             {t("tasks.deadlineToastBody", { count: deadlineCount })}
