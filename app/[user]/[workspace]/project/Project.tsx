@@ -509,7 +509,7 @@ export const Project: React.FC = () => {
 
                 {isWorkspaceOwner && deleteOpen && (
                   <div
-                    className="absolute top-full mt-2 w-full rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] p-4 flex flex-col items-center gap-3 z-10"
+                    className="absolute bottom-10 w-full rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] p-4 flex flex-col items-center gap-3 z-10"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                   >

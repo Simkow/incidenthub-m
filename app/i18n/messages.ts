@@ -55,7 +55,7 @@ export const messages = {
       previewSecondary: "Secondary",
     },
     workspaceThemes: {
-      "default-dark": "Default (current)",
+      "default-dark": "Default (recommended)",
       "blue-light": "Blue (light)",
       "blue-dark": "Blue (dark)",
       "beige-light": "Beige (light)",
@@ -263,7 +263,7 @@ export const messages = {
       previewSecondary: "Drugorzędny",
     },
     workspaceThemes: {
-      "default-dark": "Domyślny (obecny)",
+      "default-dark": "Domyślny (zalecany)",
       "blue-light": "Niebieski (jasny)",
       "blue-dark": "Niebieski (ciemny)",
       "beige-light": "Beżowy (jasny)",
