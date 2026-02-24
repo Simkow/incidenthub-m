@@ -38,6 +38,9 @@ export const Project: React.FC = () => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const [isQuitting, setIsQuitting] = useState(false);
+  const [quitError, setQuitError] = useState<string | null>(null);
+
   const saveTimeoutRef = useRef<number | null>(null);
 
   const isoToLocalInputValue = useCallback((iso: string | null) => {
@@ -106,6 +109,64 @@ export const Project: React.FC = () => {
     }
   }, [username, workspace, t]);
 
+  const handleQuitWorkspace = useCallback(async () => {
+    if (!username || !workspaceId || isWorkspaceOwner) return;
+
+    setIsQuitting(true);
+    setQuitError(null);
+
+    try {
+      const res = await fetch("/api/quit-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, ws_id: workspaceId }),
+      });
+
+      const data = (await res.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+
+      if (!res.ok) {
+        setQuitError(data?.message ?? t("project.quitFailed"));
+        return;
+      }
+
+      const nextRes = await fetch("/api/get-workspace", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username }),
+      });
+
+      const nextData = (await nextRes.json().catch(() => null)) as {
+        workspace?: string | null;
+      } | null;
+
+      const nextWorkspace =
+        typeof nextData?.workspace === "string" && nextData.workspace.trim()
+          ? nextData.workspace
+          : null;
+
+      if (typeof window !== "undefined") {
+        if (nextWorkspace) {
+          window.localStorage.setItem("workspace", nextWorkspace);
+        } else {
+          window.localStorage.removeItem("workspace");
+        }
+      }
+
+      if (nextWorkspace) {
+        router.push(`/${username}/${nextWorkspace}/tasks`);
+      } else {
+        router.push("/first-workspace");
+      }
+    } catch (err) {
+      console.error("Error quitting workspace", err);
+      setQuitError(t("project.internalError"));
+    } finally {
+      setIsQuitting(false);
+    }
+  }, [username, workspaceId, isWorkspaceOwner, router, t]);
+
   const fetchWorkspaceId = useCallback(async () => {
     if (!username || !workspace) return;
 
@@ -158,7 +219,7 @@ export const Project: React.FC = () => {
       const member =
         memberRows.find((w) => w.workspace_name === workspace) ?? null;
       if (member) {
-        setWorkspaceId(null);
+        setWorkspaceId(member.id);
         setIsWorkspaceOwner(false);
         return;
       }
@@ -172,9 +233,11 @@ export const Project: React.FC = () => {
     }
   }, [username, workspace]);
 
+  console.log(project);
+
   const scheduleSave = useCallback(
     (nextDraft: ProjectData) => {
-      if (!username || !workspaceId) return;
+      if (!username || !workspaceId || !isWorkspaceOwner) return;
 
       const safeWorkspaceName = nextDraft.workspace_name.trim()
         ? nextDraft.workspace_name
@@ -215,7 +278,7 @@ export const Project: React.FC = () => {
         }
       }, 600);
     },
-    [username, workspaceId, fetchProject],
+    [username, workspaceId, isWorkspaceOwner, fetchProject],
   );
 
   useEffect(() => {
@@ -401,6 +464,7 @@ export const Project: React.FC = () => {
                 <input
                   value={draft?.workspace_name ?? ""}
                   spellCheck={false}
+                  disabled={!isWorkspaceOwner}
                   onChange={(e) => {
                     const value = e.target.value;
                     setDraft((prev) => {
@@ -417,7 +481,7 @@ export const Project: React.FC = () => {
                     });
                   }}
                   placeholder={isLoading ? "Loading…" : ""}
-                  className="w-full bg-transparent text-3xl font-semibold tracking-tight text-center text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] outline-none"
+                  className="w-full bg-transparent text-3xl font-semibold tracking-tight text-center text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] outline-none disabled:opacity-60"
                 />
               </div>
             </div>
@@ -428,6 +492,7 @@ export const Project: React.FC = () => {
               </div>
               <textarea
                 value={draft?.description ?? ""}
+                disabled={!isWorkspaceOwner}
                 onChange={(e) => {
                   const value = e.target.value;
                   setDraft((prev) => {
@@ -446,7 +511,7 @@ export const Project: React.FC = () => {
                 placeholder={
                   isLoading ? t("project.loading") : t("project.descriptionPh")
                 }
-                className="min-h-44 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-5 py-4 text-sm text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] whitespace-pre-wrap outline-none resize-none"
+                className="min-h-44 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-5 py-4 text-sm text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] whitespace-pre-wrap outline-none resize-none disabled:opacity-60"
               />
             </div>
 
@@ -458,6 +523,7 @@ export const Project: React.FC = () => {
                 <input
                   type="datetime-local"
                   value={dueDateInputValue}
+                  disabled={!isWorkspaceOwner}
                   onClick={(e) => {
                     try {
                       (
@@ -484,7 +550,7 @@ export const Project: React.FC = () => {
                       return next;
                     });
                   }}
-                  className="w-full bg-transparent text-center text-[color:var(--ws-fg)] outline-none"
+                  className="w-full bg-transparent text-center text-[color:var(--ws-fg)] outline-none disabled:opacity-60"
                 />
               </div>
 
@@ -502,9 +568,26 @@ export const Project: React.FC = () => {
                     {t("project.deleteWorkspace")}
                   </button>
                 ) : (
-                  <div className="w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-4 py-2 text-xs text-[color:var(--ws-fg-muted)] text-center">
-                    {t("project.onlyOwnerDelete")}
-                  </div>
+                  <>
+                    <button
+                      type="button"
+                      disabled={isQuitting || !workspaceId}
+                      onClick={() => void handleQuitWorkspace()}
+                      className="w-full cursor-pointer rounded-xl border border-red-300/60 text-red-300 px-4 py-2 text-sm hover:bg-red-500/10 disabled:opacity-60"
+                    >
+                      {isQuitting
+                        ? t("project.quitting")
+                        : t("project.quitWorkspace")}
+                    </button>
+                    {quitError && (
+                      <div className="text-xs text-red-300 text-center">
+                        {quitError}
+                      </div>
+                    )}
+                    <div className="w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-4 py-2 text-xs text-[color:var(--ws-fg-muted)] text-center">
+                      {t("project.onlyOwnerDelete")}
+                    </div>
+                  </>
                 )}
 
                 {isWorkspaceOwner && deleteOpen && (

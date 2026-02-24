@@ -2,20 +2,23 @@ import { sql } from "../../lib/db";
 
 export const dynamic = "force-dynamic";
 
+function trimOrEmpty(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as
-      | { username?: unknown; workspace?: unknown }
+      | { requester?: unknown; username?: unknown; workspace?: unknown }
       | null;
 
-    const username =
-      typeof body?.username === "string" ? body.username.trim() : "";
-    const workspace =
-      typeof body?.workspace === "string" ? body.workspace.trim() : "";
+    const requester = trimOrEmpty(body?.requester);
+    const username = trimOrEmpty(body?.username);
+    const workspace = trimOrEmpty(body?.workspace);
 
-    if (!username || !workspace) {
+    if (!requester || !username || !workspace) {
       return Response.json(
-        { message: "Invalid username or workspace" },
+        { message: "Invalid requester, username or workspace" },
         { status: 400 },
       );
     }
@@ -34,6 +37,44 @@ export async function POST(req: Request) {
 
     if (!ws?.id) {
       return Response.json({ message: "Workspace not found" }, { status: 404 });
+    }
+
+    const requesterIdRow = await sql`
+      SELECT id FROM users WHERE name = ${requester} LIMIT 1
+    `;
+
+    const requesterUser =
+      (requesterIdRow[0] as { id: number } | undefined) ?? null;
+
+    if (!requesterUser?.id) {
+      return Response.json(
+        { message: "Requester not found" },
+        { status: 404 },
+      );
+    }
+
+    const ownerCheckRows = await sql`
+      SELECT owner_id, owner
+      FROM workspaces
+      WHERE id = ${ws.id}
+      LIMIT 1
+    `;
+
+    const ownerCheck = (ownerCheckRows[0] as
+      | { owner_id: number | null; owner: string | null }
+      | undefined) ?? null;
+
+    const isOwnerById =
+      typeof ownerCheck?.owner_id === "number" &&
+      ownerCheck.owner_id === requesterUser.id;
+    const isOwnerByName =
+      typeof ownerCheck?.owner === "string" && ownerCheck.owner === requester;
+
+    if (!isOwnerById && !isOwnerByName) {
+      return Response.json(
+        { message: "Only workspace owner can remove members" },
+        { status: 403 },
+      );
     }
 
     const usernameIdRow = await sql`
@@ -59,7 +100,10 @@ export async function POST(req: Request) {
       WHERE workspace_id = ${ws.id} AND user_id = ${user.id}
     `;
 
-    return Response.json({ message: "Removed member successfully" }, { status: 200 });
+    return Response.json(
+      { message: "Removed member successfully" },
+      { status: 200 },
+    );
   } catch (error) {
     console.error(error);
     return Response.json({ message: "Internal server error" }, { status: 500 });

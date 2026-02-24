@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         }
 
                 const rows = await sql`
-                        SELECT w.workspace_name, w.description, w.due_date
+                        SELECT w.workspace_name, w.description, w.due_date, w.id
                         FROM workspaces w
                         LEFT JOIN workspace_members wm
                             ON wm.workspace_id = w.id AND wm.user_id = ${userId}

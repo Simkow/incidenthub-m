@@ -19,6 +19,11 @@ type Invitation = {
   status: string;
 };
 
+type WorkspaceRow = {
+  id: number;
+  workspace_name: string;
+};
+
 export const Members: React.FC = () => {
   const { t } = useI18n();
   const params = useParams();
@@ -42,6 +47,12 @@ export const Members: React.FC = () => {
   const [membersLoading, setMembersLoading] = useState(false);
 
   const [currentUser, setCurrentUser] = useState("");
+  const viewer = useMemo(
+    () => (currentUser.trim() ? currentUser.trim() : userFromRoute.trim()),
+    [currentUser, userFromRoute],
+  );
+
+  const [isWorkspaceOwner, setIsWorkspaceOwner] = useState(false);
 
   const [username, setUsername] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,6 +79,53 @@ export const Members: React.FC = () => {
     const nextUser = usr ? usr.replace(/"/g, "") : "";
     queueMicrotask(() => setCurrentUser(nextUser));
   }, []);
+
+  useEffect(() => {
+    if (!viewer || !workspace) {
+      setIsWorkspaceOwner(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/workspace", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ owner: viewer }),
+        });
+
+        if (!res.ok) {
+          if (!cancelled) setIsWorkspaceOwner(false);
+          return;
+        }
+
+        const data = (await res.json().catch(() => null)) as {
+          workspaces?: unknown;
+        } | null;
+
+        const ownedRows = Array.isArray(data?.workspaces)
+          ? (data?.workspaces as unknown[])
+              .map((w) => w as Partial<WorkspaceRow>)
+              .filter(
+                (w): w is WorkspaceRow =>
+                  typeof w.id === "number" &&
+                  typeof w.workspace_name === "string",
+              )
+          : [];
+
+        const owned = ownedRows.some((w) => w.workspace_name === workspace);
+        if (!cancelled) setIsWorkspaceOwner(owned);
+      } catch {
+        if (!cancelled) setIsWorkspaceOwner(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [viewer, workspace]);
 
   const refreshMembers = useCallback(async (nextWorkspace: string) => {
     if (!nextWorkspace) return;
@@ -217,6 +275,11 @@ export const Members: React.FC = () => {
       setSuccessMessage("");
       setErrorMessage("");
 
+      if (!isWorkspaceOwner) {
+        setErrorMessage(t("members.removeFailed"));
+        return;
+      }
+
       if (!workspace) {
         setErrorMessage(t("members.missingWorkspace"));
         return;
@@ -227,7 +290,11 @@ export const Members: React.FC = () => {
         const res = await fetch("/api/delete-member", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: memberName, workspace }),
+          body: JSON.stringify({
+            requester: viewer,
+            username: memberName,
+            workspace,
+          }),
         });
 
         const data = (await res.json().catch(() => null)) as ApiMessage;
@@ -246,7 +313,7 @@ export const Members: React.FC = () => {
         setRemovingUser(null);
       }
     },
-    [refreshMembers, t, workspace],
+    [isWorkspaceOwner, refreshMembers, t, workspace, viewer],
   );
 
   return (
@@ -395,7 +462,7 @@ export const Members: React.FC = () => {
                       className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-2 text-xs flex items-center justify-between gap-3"
                     >
                       <span className="truncate">{m}</span>
-                      {m && m !== userFromRoute ? (
+                      {isWorkspaceOwner && m && viewer && m !== viewer ? (
                         <button
                           type="button"
                           onClick={() => void handleRemove(m)}
