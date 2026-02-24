@@ -11,21 +11,6 @@ function toDateString(value: unknown): string {
   return "";
 }
 
-async function ensureWorkspaceInvitationsTable() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS workspace_invitations (
-      id SERIAL PRIMARY KEY,
-      workspace_id INTEGER NOT NULL,
-      inviter_user_id INTEGER NOT NULL,
-      invitee_user_id INTEGER NOT NULL,
-      status TEXT NOT NULL DEFAULT 'pending',
-      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-      responded_at TIMESTAMPTZ NULL,
-      UNIQUE (workspace_id, invitee_user_id)
-    )
-  `;
-}
-
 export type PendingInvitation = {
   id: number;
   workspace: string;
@@ -50,10 +35,8 @@ export async function POST(req: Request) {
       return Response.json({ message: "User not found" }, { status: 404 });
     }
 
-    await ensureWorkspaceInvitationsTable();
-
     const rows = await sql`
-      SELECT wi.id,
+      SELECT wi.id, wi.status,
              w.workspace_name AS workspace,
              u.name AS inviter,
              wi.created_at

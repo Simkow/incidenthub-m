@@ -343,6 +343,7 @@ export const Members: React.FC = () => {
                           : "text-white/60";
 
                     return (
+                      (inv.status === "pending" ?
                       <li
                         key={inv.id}
                         className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white flex items-center justify-between gap-3"
@@ -352,6 +353,9 @@ export const Members: React.FC = () => {
                           {statusLabel}
                         </span>
                       </li>
+                      :
+                      ""
+                      )
                     );
                   })}
                 </ul>
