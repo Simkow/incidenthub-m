@@ -206,13 +206,13 @@ export const TaskDashboard: React.FC = () => {
                 <Image
                   src={plusIcon}
                   alt="icon"
-                  className="w-4 h-4 group-hover:scale-115 transition-all"
+                  className="ws-icon w-4 h-4 group-hover:scale-115 transition-all"
                 />
               ) : (
                 <Image
                   src={minusIcon}
                   alt="icon"
-                  className="w-4 h-4 group-hover:scale-115 transition-all"
+                  className="ws-icon w-4 h-4 group-hover:scale-115 transition-all"
                 />
               )}
             </button>

@@ -40,6 +40,9 @@ body {
   --ws-hover: rgba(255, 255, 255, 0.08);
   --ws-accent: #60a5fa;
   --ws-accent-fg: #0b1020;
+  --ws-checkbox-bg: var(--ws-accent);
+  --ws-checkbox-border: var(--ws-accent);
+  --ws-checkbox-check: var(--ws-accent-fg);
   --ws-sidebar-bg: var(--ws-bg);
   --ws-icon-filter: none;
   --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
@@ -59,6 +62,9 @@ body {
   --ws-hover: rgba(255, 255, 255, 0.10);
   --ws-accent: #60a5fa;
   --ws-accent-fg: #0b1020;
+  --ws-checkbox-bg: #ffffff;
+  --ws-checkbox-border: #ffffff;
+  --ws-checkbox-check: #121212;
   --ws-sidebar-bg: #121212;
   --ws-icon-filter: none;
   --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
@@ -168,6 +174,25 @@ body {
 .ws-theme .line {
   background-color: var(--ws-fg);
   outline: 3px solid var(--ws-bg);
+}
+
+/* LocaleToggle: improve contrast for non-default workspace themes */
+.ws-theme:not([data-ws-theme="default-dark"]) .locale-toggle {
+  background-color: var(--ws-surface-2);
+  border-color: var(--ws-border);
+}
+
+.ws-theme:not([data-ws-theme="default-dark"]) .locale-toggle .locale-toggle__btn {
+  color: var(--ws-fg-muted);
+}
+
+.ws-theme:not([data-ws-theme="default-dark"]) .locale-toggle .locale-toggle__btn[data-active="true"] {
+  background-color: var(--ws-accent);
+  color: var(--ws-accent-fg);
+}
+
+.ws-theme:not([data-ws-theme="default-dark"]) .locale-toggle .locale-toggle__btn + .locale-toggle__btn {
+  border-left-color: var(--ws-border);
 }
 
 /* Workspace-scoped scrollbar */

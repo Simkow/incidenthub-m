@@ -9,7 +9,7 @@ export function LocaleToggle({ className }: { className?: string }) {
   return (
     <div
       className={
-        "inline-flex items-center rounded-xl border border-white/20 bg-black/20 overflow-hidden " +
+        "locale-toggle inline-flex items-center rounded-xl border border-white/20 bg-black/20 overflow-hidden " +
         (className ?? "")
       }
       role="group"
@@ -18,8 +18,9 @@ export function LocaleToggle({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => setLocale("en")}
+        data-active={locale === "en"}
         className={
-          "px-3 py-1 text-xs transition-all " +
+          "locale-toggle__btn px-3 py-1 text-xs transition-all " +
           (locale === "en" ? "text-white bg-white/10" : "text-neutral-400")
         }
       >
@@ -28,8 +29,9 @@ export function LocaleToggle({ className }: { className?: string }) {
       <button
         type="button"
         onClick={() => setLocale("pl")}
+        data-active={locale === "pl"}
         className={
-          "px-3 py-1 text-xs transition-all border-l border-white/10 " +
+          "locale-toggle__btn px-3 py-1 text-xs transition-all border-l border-white/10 " +
           (locale === "pl" ? "text-white bg-white/10" : "text-neutral-400")
         }
       >
