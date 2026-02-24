@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import * as Select from "@radix-ui/react-select";
 import { useI18n } from "../../../i18n/I18nProvider";
 import { dateInputToDateOnly } from "./dateTime";
+import { useWsPortalContainer } from "./useWsPortalContainer";
 
 type Priority = "Light" | "Medium" | "High" | "Urgent";
 
@@ -28,6 +29,7 @@ export function AddTaskModal({
   afterSuccess,
 }: Props) {
   const { t } = useI18n();
+  const portalContainer = useWsPortalContainer();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -184,7 +186,7 @@ export function AddTaskModal({
                       ▾
                     </Select.Icon>
                   </Select.Trigger>
-                  <Select.Portal>
+                  <Select.Portal container={portalContainer ?? undefined}>
                     <Select.Content
                       position="popper"
                       sideOffset={6}
@@ -259,7 +261,7 @@ export function AddTaskModal({
                       ▾
                     </Select.Icon>
                   </Select.Trigger>
-                  <Select.Portal>
+                  <Select.Portal container={portalContainer ?? undefined}>
                     <Select.Content
                       position="popper"
                       sideOffset={6}

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Priority, Task } from "./types";
 import { RoundedCheckbox } from "./RoundedCheckbox";
 import { dateInputToDateOnly, toDateInputValue } from "./dateTime";
+import { useWsPortalContainer } from "./useWsPortalContainer";
 
 type Props = {
   open: boolean;
@@ -26,6 +27,7 @@ export function TaskModal({
   onClose,
   onUpdate,
 }: Props) {
+  const portalContainer = useWsPortalContainer();
   const workspaceForUsers = useMemo(() => {
     if (!task?.workspace_name) {
       if (typeof window === "undefined") return "";
@@ -176,7 +178,7 @@ export function TaskModal({
                             ▾
                           </Select.Icon>
                         </Select.Trigger>
-                        <Select.Portal>
+                        <Select.Portal container={portalContainer ?? undefined}>
                           <Select.Content
                             position="popper"
                             sideOffset={6}
@@ -250,7 +252,7 @@ export function TaskModal({
                             ▾
                           </Select.Icon>
                         </Select.Trigger>
-                        <Select.Portal>
+                        <Select.Portal container={portalContainer ?? undefined}>
                           <Select.Content
                             position="popper"
                             sideOffset={6}

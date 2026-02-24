@@ -5,6 +5,7 @@ import * as Select from "@radix-ui/react-select";
 import { TaskModal } from "./TaskModal";
 import { RoundedCheckbox } from "./RoundedCheckbox";
 import { useParams } from "next/navigation";
+import { useWsPortalContainer } from "./useWsPortalContainer";
 
 import type { Priority, Task } from "./types";
 import { dateInputToDateOnly, toDateInputValue } from "./dateTime";
@@ -19,6 +20,7 @@ export default function DoneTaskSection({
   scope = "workspace",
 }: Props) {
   const params = useParams();
+  const portalContainer = useWsPortalContainer();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [username, setUsername] = useState("");
   const workspace = useMemo(() => {
@@ -313,7 +315,7 @@ export default function DoneTaskSection({
                 ▾
               </Select.Icon>
             </Select.Trigger>
-            <Select.Portal>
+            <Select.Portal container={portalContainer ?? undefined}>
               <Select.Content
                 position="popper"
                 sideOffset={6}
@@ -378,7 +380,7 @@ export default function DoneTaskSection({
                 ▾
               </Select.Icon>
             </Select.Trigger>
-            <Select.Portal>
+            <Select.Portal container={portalContainer ?? undefined}>
               <Select.Content
                 position="popper"
                 sideOffset={6}

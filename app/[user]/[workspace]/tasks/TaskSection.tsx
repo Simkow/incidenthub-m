@@ -5,6 +5,7 @@ import * as Select from "@radix-ui/react-select";
 import { TaskModal } from "./TaskModal";
 import { AddTaskModal } from "./AddTaskModal";
 import { RoundedCheckbox } from "./RoundedCheckbox";
+import { useWsPortalContainer } from "./useWsPortalContainer";
 import Image from "next/image";
 import Plus from "../../../../public/assets/plus.png";
 import { motion } from "motion/react";
@@ -23,6 +24,7 @@ export default function TaskSection({
   scope = "workspace",
 }: Props) {
   const params = useParams();
+  const portalContainer = useWsPortalContainer();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [username, setUsername] = useState("");
   const workspace = useMemo(() => {
@@ -325,7 +327,7 @@ export default function TaskSection({
                 ▾
               </Select.Icon>
             </Select.Trigger>
-            <Select.Portal>
+            <Select.Portal container={portalContainer ?? undefined}>
               <Select.Content
                 position="popper"
                 sideOffset={6}
@@ -390,7 +392,7 @@ export default function TaskSection({
                 ▾
               </Select.Icon>
             </Select.Trigger>
-            <Select.Portal>
+            <Select.Portal container={portalContainer ?? undefined}>
               <Select.Content
                 position="popper"
                 sideOffset={6}
