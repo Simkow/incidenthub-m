@@ -3,6 +3,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
+import { WorkspaceThemePicker } from "../../../components/WorkspaceThemePicker";
+import { WORKSPACE_THEMES, type WorkspaceThemeId } from "../theme";
 
 type Props = {
   user: string;
@@ -24,14 +26,19 @@ export const CreateWorkspace: React.FC<Props> = ({
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [dueDate, setDueDate] = React.useState("");
+  const [theme, setTheme] = React.useState<WorkspaceThemeId>("default-dark");
   const [error, setError] = React.useState<string>("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const safeName = trimOrEmpty(name);
 
   const inputClassName =
-    "text-neutral-100 bg-neutral-950/60 border border-neutral-800 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-neutral-700 focus:border-neutral-700 text-sm placeholder:text-neutral-500";
+    "text-[color:var(--ws-fg)] bg-transparent border border-[color:var(--ws-border)] rounded-lg px-4 py-2 w-full focus:outline-none text-sm placeholder:text-[color:var(--ws-fg-muted)]";
   const textareaClassName = inputClassName + " min-h-24 resize-y";
+
+  function themeStorageKey(username: string, workspace: string) {
+    return `ws-theme:${username}:${workspace}`;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +87,17 @@ export const CreateWorkspace: React.FC<Props> = ({
 
       if (typeof window !== "undefined") {
         window.localStorage.setItem("workspace", safeName);
+        window.localStorage.setItem(themeStorageKey(user, safeName), theme);
+      }
+
+      try {
+        await fetch("/api/workspace-theme", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: user, workspace: safeName, theme }),
+        });
+      } catch {
+        // ignore
       }
 
       router.push(`/${user}/${safeName}/tasks`);
@@ -96,27 +114,29 @@ export const CreateWorkspace: React.FC<Props> = ({
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-neutral-950 flex py-2 body-text"
+      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex py-2 body-text"
     >
-      <main className="w-full border-y border-l rounded-l-xl border-neutral-800 bg-neutral-900 items-center gap-8 text-white relative">
-        <div className="h-full md:max-h-screen manrope text-white flex items-center justify-center">
+      <main className="w-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] items-center gap-8 text-[color:var(--ws-fg)] relative">
+        <div className="h-full md:max-h-screen manrope text-[color:var(--ws-fg)] flex items-center justify-center">
           <div className="w-full max-w-xl p-8">
             <h1 className="text-2xl font-semibold text-center heading">
               Create workspace
             </h1>
-            <p className="text-neutral-400 text-sm mt-2 text-center">
+            <p className="text-[color:var(--ws-fg-muted)] text-sm mt-2 text-center">
               Current workspace:{" "}
-              <span className="text-neutral-200">{currentWorkspace}</span>
+              <span className="text-[color:var(--ws-fg)]">
+                {currentWorkspace}
+              </span>
             </p>
 
             <form
               onSubmit={handleSubmit}
-              className="mt-6 flex flex-col gap-4 p-5 rounded-lg bg-neutral-950/50 border border-neutral-800 relative"
+              className="mt-6 flex flex-col gap-4 p-5 rounded-lg bg-[color:var(--ws-surface-2)] border border-[color:var(--ws-border)] relative"
             >
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceName"
-                  className="text-neutral-400 text-sm heading"
+                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
                 >
                   Workspace name
                 </label>
@@ -135,7 +155,7 @@ export const CreateWorkspace: React.FC<Props> = ({
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceDescription"
-                  className="text-neutral-400 text-sm heading"
+                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
                 >
                   Description (optional)
                 </label>
@@ -151,7 +171,7 @@ export const CreateWorkspace: React.FC<Props> = ({
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceDueDate"
-                  className="text-neutral-400 text-sm heading"
+                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
                 >
                   Due date (optional)
                 </label>
@@ -160,14 +180,14 @@ export const CreateWorkspace: React.FC<Props> = ({
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className={inputClassName + " [color-scheme:dark]"}
+                  className={inputClassName}
                 />
               </div>
 
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceUrl"
-                  className="text-neutral-400 text-sm heading"
+                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
                 >
                   Workspace URL
                 </label>
@@ -176,9 +196,15 @@ export const CreateWorkspace: React.FC<Props> = ({
                   readOnly
                   type="text"
                   value={`/${user}/${safeName || "<workspace>"}`}
-                  className="text-neutral-400 bg-neutral-900/40 border border-neutral-800 rounded-lg px-4 py-2 w-full text-sm"
+                  className="text-[color:var(--ws-fg-muted)] bg-transparent border border-[color:var(--ws-border)] rounded-lg px-4 py-2 w-full text-sm"
                 />
               </div>
+
+              <WorkspaceThemePicker
+                value={theme}
+                onChange={setTheme}
+                themes={WORKSPACE_THEMES}
+              />
 
               {error ? (
                 <div className="text-red-400 text-sm">{error}</div>
@@ -188,10 +214,10 @@ export const CreateWorkspace: React.FC<Props> = ({
                 type="submit"
                 disabled={isSubmitting}
                 className={
-                  "bg-neutral-100 text-neutral-900 rounded-lg px-6 py-3 transition font-medium " +
+                  "bg-[color:var(--ws-accent)] text-[color:var(--ws-accent-fg)] rounded-lg px-6 py-3 transition font-medium " +
                   (isSubmitting
                     ? "opacity-70 cursor-not-allowed"
-                    : "hover:bg-white cursor-pointer")
+                    : "hover:opacity-90 cursor-pointer")
                 }
               >
                 {isSubmitting ? "Creating..." : "Create workspace"}

@@ -1,5 +1,5 @@
 import { Sidebar } from "../Sidebar";
-import { Project } from "./Project";
+import { Settings } from "./Settings";
 import { sql } from "../../../lib/db";
 import { notFound, redirect } from "next/navigation";
 
@@ -12,12 +12,12 @@ type PageProps = {
   }>;
 };
 
-export default async function ProjectPage({ params }: PageProps) {
+export default async function WorkspaceSettingsPage({ params }: PageProps) {
   const { user, workspace } = await params;
 
   const users = await sql`
-        SELECT id FROM users WHERE name = ${user} LIMIT 1
-    `;
+    SELECT id FROM users WHERE name = ${user} LIMIT 1
+  `;
 
   if (!users.length) {
     notFound();
@@ -26,31 +26,31 @@ export default async function ProjectPage({ params }: PageProps) {
   const userId = (users[0] as { id: number }).id;
 
   const workspaces = await sql`
-        SELECT w.id
-        FROM workspaces w
-        LEFT JOIN workspace_members wm
-          ON wm.workspace_id = w.id AND wm.user_id = ${userId}
-        WHERE w.workspace_name = ${workspace}
-          AND (w.owner_id = ${userId} OR wm.user_id IS NOT NULL)
-        ORDER BY w.id ASC
-        LIMIT 1
-    `;
+    SELECT w.id
+    FROM workspaces w
+    LEFT JOIN workspace_members wm
+      ON wm.workspace_id = w.id AND wm.user_id = ${userId}
+    WHERE w.workspace_name = ${workspace}
+      AND (w.owner_id = ${userId} OR wm.user_id IS NOT NULL)
+    ORDER BY w.id ASC
+    LIMIT 1
+  `;
 
   if (!workspaces.length) {
     const first = await sql`
-            SELECT workspace_name
-            FROM workspaces
-            WHERE owner_id = ${userId}
-            ORDER BY id ASC
-            LIMIT 1
-        `;
+      SELECT workspace_name
+      FROM workspaces
+      WHERE owner_id = ${userId}
+      ORDER BY id ASC
+      LIMIT 1
+    `;
 
     const firstName = (first[0] as { workspace_name: string } | undefined)
       ?.workspace_name;
 
     if (firstName) {
       redirect(
-        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/project`,
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstName)}/settings`,
       );
     }
 
@@ -69,7 +69,7 @@ export default async function ProjectPage({ params }: PageProps) {
 
     if (firstMemberName) {
       redirect(
-        `/${encodeURIComponent(user)}/${encodeURIComponent(firstMemberName)}/project`,
+        `/${encodeURIComponent(user)}/${encodeURIComponent(firstMemberName)}/settings`,
       );
     }
 
@@ -80,7 +80,7 @@ export default async function ProjectPage({ params }: PageProps) {
     <div>
       <Sidebar />
       <div className="md:ml-48 bg-[color:var(--ws-bg)]">
-        <Project />
+        <Settings />
       </div>
     </div>
   );

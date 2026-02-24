@@ -118,15 +118,15 @@ export function TaskModal({
                 animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
                 exit={{ opacity: 0, filter: "blur(10px)", scale: 0.98 }}
                 transition={{ duration: 0.2 }}
-                className="w-[92vw] max-w-3xl rounded-xl bg-[#181818] border border-[#2e2e2e] text-white"
+                className="w-[92vw] max-w-3xl rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)]"
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center justify-between px-4 py-3 border-b border-[#2e2e2e]">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--ws-border)]">
                   <h2 className="text-sm">Task details</h2>
                   <button
                     type="button"
                     onClick={onClose}
-                    className="text-xs px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-white/10"
+                    className="text-xs px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
                   >
                     Close
                   </button>
@@ -135,18 +135,20 @@ export function TaskModal({
                 {task && (
                   <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <section className="md:col-span-2 flex flex-col gap-1">
-                      <span className="text-xs text-neutral-400">Title</span>
+                      <span className="text-xs text-[color:var(--ws-fg-muted)]">
+                        Title
+                      </span>
                       <input
                         value={task.title}
                         onChange={(e) =>
                           onUpdate(task.id, "title", e.target.value)
                         }
-                        className="bg-transparent text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 focus:outline-none focus:border-neutral-300"
+                        className="bg-transparent text-sm rounded-lg border border-[color:var(--ws-border)] px-3 py-2 focus:outline-none"
                       />
                     </section>
 
                     <section className="md:col-span-2 flex flex-col gap-1">
-                      <span className="text-xs text-neutral-400">
+                      <span className="text-xs text-[color:var(--ws-fg-muted)]">
                         Description
                       </span>
                       <textarea
@@ -154,21 +156,23 @@ export function TaskModal({
                         onChange={(e) =>
                           onUpdate(task.id, "description", e.target.value)
                         }
-                        className="bg-transparent text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 h-32 resize-none focus:outline-none focus:border-neutral-300"
+                        className="bg-transparent text-sm rounded-lg border border-[color:var(--ws-border)] px-3 py-2 h-32 resize-none focus:outline-none"
                       />
                     </section>
 
                     <section className="flex flex-col gap-1">
-                      <span className="text-xs text-neutral-400">Priority</span>
+                      <span className="text-xs text-[color:var(--ws-fg-muted)]">
+                        Priority
+                      </span>
                       <Select.Root
                         value={selectPriorityValue}
                         onValueChange={(value) =>
                           onUpdate(task.id, "priority", value)
                         }
                       >
-                        <Select.Trigger className="text-neutral-200 text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
+                        <Select.Trigger className="text-[color:var(--ws-fg)] text-sm rounded-lg border border-[color:var(--ws-border)] px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
                           <Select.Value placeholder="Priority" />
-                          <Select.Icon className="text-neutral-400">
+                          <Select.Icon className="text-[color:var(--ws-fg-muted)]">
                             ▾
                           </Select.Icon>
                         </Select.Trigger>
@@ -176,14 +180,14 @@ export function TaskModal({
                           <Select.Content
                             position="popper"
                             sideOffset={6}
-                            className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818]"
+                            className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)]"
                           >
                             <Select.Viewport className="p-1">
                               {priorities.map((p) => (
                                 <Select.Item
                                   key={p}
                                   value={p}
-                                  className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                                  className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
                                 >
                                   <Select.ItemText>{p}</Select.ItemText>
                                 </Select.Item>
@@ -195,7 +199,9 @@ export function TaskModal({
                     </section>
 
                     <section className="flex flex-col gap-1">
-                      <span className="text-xs text-neutral-400">Due date</span>
+                      <span className="text-xs text-[color:var(--ws-fg-muted)]">
+                        Due date
+                      </span>
                       <input
                         type="date"
                         value={toDateInputValue(task.due_date)}
@@ -217,12 +223,14 @@ export function TaskModal({
                             dateInputToDateOnly(e.target.value),
                           )
                         }
-                        className="bg-transparent text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 focus:outline-none focus:border-neutral-300"
+                        className="bg-transparent text-sm rounded-lg border border-[color:var(--ws-border)] px-3 py-2 focus:outline-none"
                       />
                     </section>
 
                     <section className="flex flex-col gap-1">
-                      <span className="text-xs text-neutral-400">Assignee</span>
+                      <span className="text-xs text-[color:var(--ws-fg-muted)]">
+                        Assignee
+                      </span>
                       <Select.Root
                         value={selectAssigneeValue}
                         onValueChange={(value) =>
@@ -232,13 +240,13 @@ export function TaskModal({
                           assigneeLoading || assigneeOptions.length === 0
                         }
                       >
-                        <Select.Trigger className="text-neutral-200 text-sm rounded-lg border border-[#2e2e2e] px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer disabled:opacity-60">
+                        <Select.Trigger className="text-[color:var(--ws-fg)] text-sm rounded-lg border border-[color:var(--ws-border)] px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
                           <Select.Value
                             placeholder={
                               assigneeLoading ? "Loading..." : "Assignee"
                             }
                           />
-                          <Select.Icon className="text-neutral-400">
+                          <Select.Icon className="text-[color:var(--ws-fg-muted)]">
                             ▾
                           </Select.Icon>
                         </Select.Trigger>
@@ -246,14 +254,14 @@ export function TaskModal({
                           <Select.Content
                             position="popper"
                             sideOffset={6}
-                            className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818]"
+                            className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)]"
                           >
                             <Select.Viewport className="p-1">
                               {assigneeOptions.map((name) => (
                                 <Select.Item
                                   key={name}
                                   value={name}
-                                  className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                                  className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
                                 >
                                   <Select.ItemText>{name}</Select.ItemText>
                                 </Select.Item>
@@ -264,10 +272,10 @@ export function TaskModal({
                       </Select.Root>
                     </section>
 
-                    <section className="md:col-span-2 flex items-center justify-between rounded-lg border border-[#2e2e2e] px-3 py-3">
+                    <section className="md:col-span-2 flex items-center justify-between rounded-lg border border-[color:var(--ws-border)] px-3 py-3">
                       <div>
                         <div className="text-sm">Finished</div>
-                        <div className="text-xs text-neutral-400">
+                        <div className="text-xs text-[color:var(--ws-fg-muted)]">
                           Mark task as finished
                         </div>
                       </div>

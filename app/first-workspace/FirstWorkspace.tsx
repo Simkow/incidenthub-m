@@ -6,6 +6,11 @@ import Arrow from "../../public/assets/down-arrow.png";
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useI18n } from "../i18n/I18nProvider";
+import { WorkspaceThemePicker } from "../components/WorkspaceThemePicker";
+import {
+  WORKSPACE_THEMES,
+  type WorkspaceThemeId,
+} from "../[user]/[workspace]/theme";
 
 export const FirstWorkspace: React.FC = () => {
   const { t } = useI18n();
@@ -39,6 +44,7 @@ export const FirstWorkspace: React.FC = () => {
   const [isClicked, setIsClicked] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [error, setError] = useState("");
+  const [theme, setTheme] = useState<WorkspaceThemeId>("default-dark");
 
   const [pendingInvites, setPendingInvites] = useState<
     Array<{ id: number; workspace: string; inviter: string }>
@@ -187,6 +193,25 @@ export const FirstWorkspace: React.FC = () => {
 
       if (response.ok) {
         console.log("Workspace created successfully");
+
+        try {
+          window.localStorage.setItem(
+            `ws-theme:${normalizedUserName}:${trimmedProjectName}`,
+            theme,
+          );
+          await fetch("/api/workspace-theme", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: normalizedUserName,
+              workspace: trimmedProjectName,
+              theme,
+            }),
+          });
+        } catch {
+          // ignore
+        }
+
         localStorage.setItem("workspace", JSON.stringify(trimmedProjectName));
         window.location.href = `/${normalizedUserName}/${trimmedProjectName}/tasks`;
       }
@@ -335,6 +360,14 @@ export const FirstWorkspace: React.FC = () => {
                   className="text-neutral-400 bg-neutral-900/40 border border-neutral-800 rounded-lg px-4 py-2 w-full text-sm"
                   placeholder={t("firstWorkspace.workspaceUrlPh")}
                 />
+
+                <div className="mt-3">
+                  <WorkspaceThemePicker
+                    value={theme}
+                    onChange={setTheme}
+                    themes={WORKSPACE_THEMES}
+                  />
+                </div>
               </div>
               <span className="text-red-400 text-sm">{error}</span>
               <button

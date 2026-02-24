@@ -254,24 +254,24 @@ export const Members: React.FC = () => {
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[#121212] flex body-text"
+      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex body-text"
     >
       <section className="py-2 w-full">
-        <main className="w-full min-h-[calc(100vh-16px)] border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] p-3">
+        <main className="w-full min-h-[calc(100vh-16px)] border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col">
-              <h1 className="text-sm font-semibold text-white heading">
+              <h1 className="text-sm font-semibold heading">
                 {t("members.title")}
               </h1>
-              <p className="text-xs text-white/60">
+              <p className="text-xs text-[color:var(--ws-fg-muted)]">
                 {t("members.workspaceLabel")}:{" "}
-                <span className="text-white/80">{workspace}</span>
+                <span className="opacity-90">{workspace}</span>
               </p>
             </div>
           </div>
 
-          <div className="mt-4 border-t border-[#2e2e2e] pt-4">
-            <h2 className="text-xs font-semibold text-white/80">
+          <div className="mt-4 border-t border-[color:var(--ws-border)] pt-4">
+            <h2 className="text-xs font-semibold text-[color:var(--ws-fg-muted)]">
               {t("members.addTitle")}
             </h2>
             <form
@@ -282,12 +282,12 @@ export const Members: React.FC = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder={t("members.usernamePh")}
-                className="w-full sm:flex-1 rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-xs text-white outline-none focus:border-white/20"
+                className="w-full sm:flex-1 rounded-lg bg-[color:var(--ws-surface-2)] border border-[color:var(--ws-border)] px-3 py-2 text-xs outline-none"
               />
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 px-3 py-2 text-xs text-white disabled:opacity-60"
+                className="rounded-lg bg-[color:var(--ws-hover)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-3 py-2 text-xs disabled:opacity-60"
               >
                 {isSubmitting ? t("members.addingBtn") : t("members.addBtn")}
               </button>
@@ -305,16 +305,16 @@ export const Members: React.FC = () => {
             )}
           </div>
 
-          <div className="mt-6 border-t border-[#2e2e2e] pt-4">
+          <div className="mt-6 border-t border-[color:var(--ws-border)] pt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold text-white/80">
+              <h2 className="text-xs font-semibold text-[color:var(--ws-fg-muted)]">
                 {t("members.invitationsTitle")}
               </h2>
               <button
                 type="button"
                 onClick={() => void refreshInvitations(workspace)}
                 disabled={!workspace || invitationsLoading}
-                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 text-[11px] text-white/80 disabled:opacity-60"
+                className="rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] disabled:opacity-60"
               >
                 {invitationsLoading
                   ? t("members.refreshingBtn")
@@ -324,7 +324,9 @@ export const Members: React.FC = () => {
 
             <div className="mt-2">
               {invitationsLoading ? (
-                <p className="text-xs text-white/60">{t("members.loading")}</p>
+                <p className="text-xs text-[color:var(--ws-fg-muted)]">
+                  {t("members.loading")}
+                </p>
               ) : invitations.length ? (
                 <ul className="flex flex-col gap-2">
                   {invitations.map((inv) => {
@@ -340,41 +342,39 @@ export const Members: React.FC = () => {
                         ? "text-emerald-300"
                         : inv.status === "rejected"
                           ? "text-red-300"
-                          : "text-white/60";
+                          : "text-[color:var(--ws-fg-muted)]";
 
-                    return (
-                      (inv.status === "pending" ?
+                    return inv.status === "pending" ? (
                       <li
                         key={inv.id}
-                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white flex items-center justify-between gap-3"
+                        className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-2 text-xs flex items-center justify-between gap-3"
                       >
                         <span className="truncate">{inv.invitee}</span>
                         <span className={"text-[11px] " + statusColor}>
                           {statusLabel}
                         </span>
                       </li>
-                      :
+                    ) : (
                       ""
-                      )
                     );
                   })}
                 </ul>
               ) : (
-                <p className="text-xs text-white/60">—</p>
+                <p className="text-xs text-[color:var(--ws-fg-muted)]">—</p>
               )}
             </div>
           </div>
 
-          <div className="mt-6 border-t border-[#2e2e2e] pt-4">
+          <div className="mt-6 border-t border-[color:var(--ws-border)] pt-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-semibold text-white/80">
+              <h2 className="text-xs font-semibold text-[color:var(--ws-fg-muted)]">
                 {t("members.listTitle")}
               </h2>
               <button
                 type="button"
                 onClick={() => void refreshMembers(workspace)}
                 disabled={!workspace || membersLoading}
-                className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 text-[11px] text-white/80 disabled:opacity-60"
+                className="rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] disabled:opacity-60"
               >
                 {membersLoading
                   ? t("members.refreshingBtn")
@@ -384,13 +384,15 @@ export const Members: React.FC = () => {
 
             <div className="mt-2">
               {membersLoading ? (
-                <p className="text-xs text-white/60">{t("members.loading")}</p>
+                <p className="text-xs text-[color:var(--ws-fg-muted)]">
+                  {t("members.loading")}
+                </p>
               ) : members.length ? (
                 <ul className="flex flex-col gap-2">
                   {members.map((m) => (
                     <li
                       key={m}
-                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white flex items-center justify-between gap-3"
+                      className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-2 text-xs flex items-center justify-between gap-3"
                     >
                       <span className="truncate">{m}</span>
                       {m && m !== userFromRoute ? (
@@ -398,7 +400,7 @@ export const Members: React.FC = () => {
                           type="button"
                           onClick={() => void handleRemove(m)}
                           disabled={removingUser === m}
-                          className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 text-[11px] text-white/80 disabled:opacity-60"
+                          className="rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] disabled:opacity-60"
                         >
                           {removingUser === m
                             ? t("members.removingBtn")
@@ -409,7 +411,9 @@ export const Members: React.FC = () => {
                   ))}
                 </ul>
               ) : (
-                <p className="text-xs text-white/60">{t("members.empty")}</p>
+                <p className="text-xs text-[color:var(--ws-fg-muted)]">
+                  {t("members.empty")}
+                </p>
               )}
             </div>
           </div>

@@ -121,7 +121,7 @@ export const MyTaskDashboard: React.FC = () => {
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[#121212] flex"
+      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex"
     >
       <ProjectCompletionModal
         open={completionOpen}
@@ -131,30 +131,32 @@ export const MyTaskDashboard: React.FC = () => {
         }}
       />
       <section className="py-2 w-full">
-        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 gap-8 text-white relative">
+        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] flex flex-col items-center p-4 gap-8 text-[color:var(--ws-fg)] relative">
           {/* top bar */}
-          <section className="w-full rounded-xl border border-[#2e2e2e] flex flex-wrap items-center px-3 py-2 body-text text-xs gap-2">
+          <section className="w-full rounded-xl border border-[color:var(--ws-border)] flex flex-wrap items-center px-3 py-2 body-text text-xs gap-2">
             <button
               onClick={() => setOpen(!open)}
-              className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e] group hover:cursor-pointer"
+              className="px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)] group hover:cursor-pointer"
             >
               {!open ? (
                 <Image
                   src={plusIcon}
                   alt="icon"
-                  className="w-4 h-4 group-hover:scale-115 transition-all"
+                  className="ws-icon w-4 h-4 group-hover:scale-115 transition-all"
                 />
               ) : (
                 <Image
                   src={minusIcon}
                   alt="icon"
-                  className="w-4 h-4 group-hover:scale-115 transition-all"
+                  className="ws-icon w-4 h-4 group-hover:scale-115 transition-all"
                 />
               )}
             </button>
 
             {submitMessage && (
-              <div className="text-xs text-neutral-300">{submitMessage}</div>
+              <div className="text-xs text-[color:var(--ws-fg-muted)]">
+                {submitMessage}
+              </div>
             )}
             {submitError && (
               <div className="text-xs text-red-400">{submitError}</div>
@@ -174,19 +176,19 @@ export const MyTaskDashboard: React.FC = () => {
 
             <button
               onClick={() => setTaskView("All")}
-              className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e]"
+              className="px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
             >
               {t("tasks.allTasks")}
             </button>
             <button
               onClick={() => setTaskView("Active")}
-              className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e]"
+              className="px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
             >
               {t("tasks.active")}
             </button>
             <button
               onClick={() => setTaskView("Done")}
-              className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e]"
+              className="px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
             >
               {t("tasks.done")}
             </button>
@@ -196,19 +198,19 @@ export const MyTaskDashboard: React.FC = () => {
               value={search}
               onChange={handleChange}
               placeholder={t("tasks.searchPh")}
-              className="w-full md:w-72 px-2 py-1 rounded-lg border border-[#2e2e2e] focus:border-neutral-300 focus:outline-none"
+              className="w-full md:w-72 px-2 py-1 rounded-lg border border-[color:var(--ws-border)] bg-transparent text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] focus:outline-none"
             />
           </section>
 
           {/* main */}
           <section className="w-full flex flex-col gap-1">
             <p className="heading">{t("tasks.progress")}</p>
-            <div className="w-full rounded-xl border border-[#2e2e2e] px-3 py-2 flex items-center gap-3 mb-5">
-              <span className="text-xs text-neutral-300 whitespace-nowrap">
+            <div className="w-full rounded-xl border border-[color:var(--ws-border)] px-3 py-2 flex items-center gap-3 mb-5">
+              <span className="text-xs text-[color:var(--ws-fg-muted)] whitespace-nowrap">
                 {allTasksCount} : {doneTasksCount}
               </span>
               <div
-                className="flex-1 h-2 rounded-full bg-neutral-950/50 border border-[#2e2e2e] overflow-hidden"
+                className="flex-1 h-2 rounded-full bg-[color:var(--ws-surface-2)] border border-[color:var(--ws-border)] overflow-hidden"
                 role="progressbar"
                 aria-valuenow={progressPercent}
                 aria-valuemin={0}
@@ -227,13 +229,13 @@ export const MyTaskDashboard: React.FC = () => {
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
-              <span className="text-xs text-neutral-300 w-12 text-right">
+              <span className="text-xs text-[color:var(--ws-fg-muted)] w-12 text-right">
                 {progressPercent}%
               </span>
             </div>
 
             <h2 className="heading text-lg">{t("tasks.tasksHeading")}</h2>
-            <main className="border-t border-[#2e2e2e] w-full">
+            <main className="border-t border-[color:var(--ws-border)] w-full">
               {taskView === "All" ? (
                 <TaskSection search={search} scope="user" />
               ) : taskView === "Active" ? (

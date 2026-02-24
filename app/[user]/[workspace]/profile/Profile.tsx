@@ -184,61 +184,61 @@ export default function Profile({ user, workspace }: Props) {
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[#121212] flex"
+      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex"
     >
       <section className="py-2 w-full">
-        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 gap-8 text-white relative">
-          <div className="w-full md:min-h-screen text-white body-text flex flex-col gap-2 items-center justify-center">
+        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] flex flex-col items-center p-4 gap-8 text-[color:var(--ws-fg)] relative">
+          <div className="w-full md:min-h-screen text-[color:var(--ws-fg)] body-text flex flex-col gap-2 items-center justify-center">
             <Image
               src={ProfileIcon}
               alt={t("profile.alt.profileIcon")}
-              className="w-28 h-28"
+              className="ws-icon w-28 h-28"
             />
-            <span className="text-neutral-200 heading text-xl">
+            <span className="text-[color:var(--ws-fg)] heading text-xl">
               {t("profile.title")}
             </span>
-            <div className="text-sm text-neutral-500 body-text mb-3">
+            <div className="text-sm text-[color:var(--ws-fg-muted)] body-text mb-3">
               {workspace ? `${t("profile.workspaceLabel")}: ${workspace}` : ""}
             </div>
-            <section className="grid-cols-2 space-x-10 grid justify-center text-sm p-4 rounded-lg bg-neutral-950/40 border border-neutral-700">
+            <section className="grid-cols-2 space-x-10 grid justify-center text-sm p-4 rounded-lg bg-[color:var(--ws-surface-2)] border border-[color:var(--ws-border)]">
               <div className="flex flex-col items-start gap-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-neutral-200 font-medium">
+                  <span className="text-[color:var(--ws-fg)] font-medium">
                     {t("profile.accountOverviewTitle")}
                   </span>
                 </div>
 
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-col gap-1">
-                    <span className="text-neutral-400 text-xs">
+                    <span className="text-[color:var(--ws-fg-muted)] text-xs">
                       {t("profile.usernameLabel")}
                     </span>
-                    <span className="text-neutral-200">
+                    <span className="text-[color:var(--ws-fg)]">
                       {userData ? userData.name : ""}
                     </span>
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <span className="text-neutral-400 text-xs">
+                    <span className="text-[color:var(--ws-fg-muted)] text-xs">
                       {t("profile.emailLabel")}
                     </span>
-                    <span className="text-neutral-200">
+                    <span className="text-[color:var(--ws-fg)]">
                       {userData?.email ?? ""}
                     </span>
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <span className="text-neutral-400 text-xs">
+                    <span className="text-[color:var(--ws-fg-muted)] text-xs">
                       {t("profile.userIdLabel")}
                     </span>
-                    <span className="text-neutral-200">
+                    <span className="text-[color:var(--ws-fg)]">
                       {userData ? `#${userData.id}` : ""}
                     </span>
                   </div>
                 </div>
 
                 {loading && (
-                  <div className="text-xs text-neutral-500">
+                  <div className="text-xs text-[color:var(--ws-fg-muted)]">
                     {t("profile.loading")}
                   </div>
                 )}
@@ -246,48 +246,48 @@ export default function Profile({ user, workspace }: Props) {
               </div>
               <div className="flex flex-col items-start gap-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-neutral-200 font-medium">
+                  <span className="text-[color:var(--ws-fg)] font-medium">
                     {t("profile.accountSettingsTitle")}
                   </span>
-                  <span className="text-xs text-neutral-400 w-64">
+                  <span className="text-xs text-[color:var(--ws-fg-muted)] w-64">
                     {t("profile.accountSettingsDesc")}
                   </span>
                 </div>
 
-                <div className="w-64 rounded-lg border border-[#2e2e2e] p-3">
-                  <div className="text-xs text-neutral-300">
+                <div className="w-64 rounded-lg border border-[color:var(--ws-border)] p-3">
+                  <div className="text-xs text-[color:var(--ws-fg)]">
                     {t("profile.notesTitle")}
                   </div>
-                  <div className="mt-1 text-xs text-neutral-400">
+                  <div className="mt-1 text-xs text-[color:var(--ws-fg-muted)]">
                     {t("profile.notesRedirect")}
                   </div>
-                  <div className="mt-1 text-xs text-neutral-400">
+                  <div className="mt-1 text-xs text-[color:var(--ws-fg-muted)]">
                     {t("profile.notesConsistency")}
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2 w-full">
-                  <span className="text-neutral-400 text-xs">
+                  <span className="text-[color:var(--ws-fg-muted)] text-xs">
                     {t("profile.usernameLabel")}
                   </span>
                   <input
                     type="text"
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
-                    className="border w-64 border-neutral-700 rounded-lg px-2 py-1 bg-transparent"
+                    className="border w-64 border-[color:var(--ws-border)] text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] rounded-lg px-2 py-1 bg-transparent focus:outline-none"
                     placeholder={t("profile.usernamePlaceholder")}
                   />
                 </div>
 
                 <div className="flex flex-col gap-2 w-full">
-                  <span className="text-neutral-400 text-xs">
+                  <span className="text-[color:var(--ws-fg-muted)] text-xs">
                     {t("profile.emailLabel")}
                   </span>
                   <input
                     type="email"
                     value={draftEmail}
                     onChange={(e) => setDraftEmail(e.target.value)}
-                    className="border w-64 border-neutral-700 rounded-lg px-2 py-1 bg-transparent"
+                    className="border w-64 border-[color:var(--ws-border)] text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] rounded-lg px-2 py-1 bg-transparent focus:outline-none"
                     placeholder={t("profile.emailPlaceholder")}
                   />
                 </div>
@@ -297,7 +297,7 @@ export default function Profile({ user, workspace }: Props) {
                     type="button"
                     onClick={handleSave}
                     disabled={saving || !userData}
-                    className="px-3 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e] disabled:opacity-60"
+                    className="px-3 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)] disabled:opacity-60"
                   >
                     {saving ? t("profile.saving") : t("profile.save")}
                   </button>

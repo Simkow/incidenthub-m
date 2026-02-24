@@ -366,26 +366,26 @@ export const Project: React.FC = () => {
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[#121212] flex"
+      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex"
     >
       <section className="py-2 w-full">
-        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[#2e2e2e] bg-[#181818] flex flex-col items-center p-4 md:p-6 gap-6 text-white relative">
+        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] flex flex-col items-center p-4 md:p-6 gap-6 text-[color:var(--ws-fg)] relative">
           <div className="pt-6 flex flex-col items-center gap-4 w-full max-w-3xl">
             <div className="flex items-center justify-center">
-              <Image src={ProjectIcon} alt="Project" className="w-32" />
+              <Image src={ProjectIcon} alt="Project" className="ws-icon w-32" />
             </div>
             <div className="w-full flex flex-col gap-2">
-              <div className="text-xs text-neutral-400 heading">
+              <div className="text-xs text-[color:var(--ws-fg-muted)] heading">
                 {t("project.progressBar")}
               </div>
               <div className="w-full flex items-center gap-4">
-                <div className="flex-1 h-2 rounded-full bg-[#2e2e2e] overflow-hidden">
+                <div className="flex-1 h-2 rounded-full bg-[color:var(--ws-surface-2)] overflow-hidden">
                   <div
                     className="h-full bg-emerald-500"
                     style={{ width: `${clampedPct}%` }}
                   />
                 </div>
-                <div className="text-xs text-neutral-300 tabular-nums">
+                <div className="text-xs text-[color:var(--ws-fg-muted)] tabular-nums">
                   {clampedPct}%
                 </div>
               </div>
@@ -394,10 +394,10 @@ export const Project: React.FC = () => {
 
           <div className="w-full max-w-3xl flex flex-col gap-5">
             <div className="flex flex-col items-center gap-2">
-              <div className="text-xs text-neutral-400 heading">
+              <div className="text-xs text-[color:var(--ws-fg-muted)] heading">
                 {t("project.projectName")}
               </div>
-              <div className="w-full max-w-sm rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-6 py-5 text-center">
+              <div className="w-full max-w-sm rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-6 py-5 text-center">
                 <input
                   value={draft?.workspace_name ?? ""}
                   spellCheck={false}
@@ -417,13 +417,13 @@ export const Project: React.FC = () => {
                     });
                   }}
                   placeholder={isLoading ? "Loading…" : ""}
-                  className="w-full bg-transparent text-3xl font-semibold tracking-tight text-center outline-none"
+                  className="w-full bg-transparent text-3xl font-semibold tracking-tight text-center text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] outline-none"
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="text-xs text-neutral-400 heading text-center">
+              <div className="text-xs text-[color:var(--ws-fg-muted)] heading text-center">
                 {t("project.description")}
               </div>
               <textarea
@@ -446,15 +446,15 @@ export const Project: React.FC = () => {
                 placeholder={
                   isLoading ? t("project.loading") : t("project.descriptionPh")
                 }
-                className="min-h-44 rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-5 py-4 text-sm text-neutral-200 whitespace-pre-wrap outline-none resize-none"
+                className="min-h-44 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-5 py-4 text-sm text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] whitespace-pre-wrap outline-none resize-none"
               />
             </div>
 
             <div className="flex flex-col items-center gap-2 pt-2">
-              <div className="text-xs text-neutral-400 heading">
+              <div className="text-xs text-[color:var(--ws-fg-muted)] heading">
                 {t("project.dueDate")}
               </div>
-              <div className="w-full max-w-xs rounded-xl border border-[#2e2e2e] bg-neutral-950/30 px-6 py-4 text-center text-sm tabular-nums">
+              <div className="w-full max-w-xs rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-6 py-4 text-center text-sm tabular-nums">
                 <input
                   type="datetime-local"
                   value={dueDateInputValue}
@@ -484,7 +484,7 @@ export const Project: React.FC = () => {
                       return next;
                     });
                   }}
-                  className="w-full bg-transparent text-center outline-none"
+                  className="w-full bg-transparent text-center text-[color:var(--ws-fg)] outline-none"
                 />
               </div>
 
@@ -502,18 +502,18 @@ export const Project: React.FC = () => {
                     {t("project.deleteWorkspace")}
                   </button>
                 ) : (
-                  <div className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs text-neutral-300 text-center">
+                  <div className="w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-4 py-2 text-xs text-[color:var(--ws-fg-muted)] text-center">
                     {t("project.onlyOwnerDelete")}
                   </div>
                 )}
 
                 {isWorkspaceOwner && deleteOpen && (
                   <div
-                    className="absolute top-full mt-2 w-full rounded-xl bg-neutral-950 border border-neutral-700 p-4 flex flex-col items-center gap-3 z-10"
+                    className="absolute top-full mt-2 w-full rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] p-4 flex flex-col items-center gap-3 z-10"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className="text-sm text-neutral-300 font-light text-center">
+                    <span className="text-sm text-[color:var(--ws-fg-muted)] font-light text-center">
                       {t("project.deleteConfirm")}
                     </span>
                     <div className="flex gap-2">
@@ -521,7 +521,7 @@ export const Project: React.FC = () => {
                         type="button"
                         disabled={isDeleting}
                         onClick={() => setDeleteOpen(false)}
-                        className="border border-[#2e2e2e] text-sm text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800 disabled:opacity-60"
+                        className="border border-[color:var(--ws-border)] text-sm text-[color:var(--ws-fg-muted)] py-1 px-3 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] disabled:opacity-60"
                       >
                         {t("project.cancel")}
                       </button>
@@ -529,7 +529,7 @@ export const Project: React.FC = () => {
                         type="button"
                         disabled={isDeleting}
                         onClick={() => void handleDeleteWorkspace()}
-                        className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400 disabled:opacity-60"
+                        className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] hover:text-red-400 disabled:opacity-60"
                       >
                         {isDeleting
                           ? t("project.deleting")

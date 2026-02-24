@@ -14,7 +14,8 @@ import Friends from "../../../public/assets/friends.png";
 import Project from "../../../public/assets/current-project.png";
 import Arrow from "../../../public/assets/down-arrow.png";
 import Tasks from "../../../public/assets/tasks.png";
-import Profile from '../../../public/assets/profile.png'
+import Profile from "../../../public/assets/profile.png";
+import Settings from "../../../public/assets/settings.png";
 import { LocaleToggle } from "../../i18n/LocaleToggle";
 import { useI18n } from "../../i18n/I18nProvider";
 
@@ -101,6 +102,11 @@ export const Sidebar: React.FC = () => {
       name: t("sidebar.member"),
       to: `/${user}/${currentWorkspace}/members`,
       icon: Friends,
+    },
+    {
+      name: "Settings",
+      to: `/${user}/${currentWorkspace}/settings`,
+      icon: Settings,
     },
     // { name: "Incidents", to: "/incidents", icon: Incidents },
     // { name: "Settings", to: "/settings", icon: Settings },
@@ -326,47 +332,45 @@ export const Sidebar: React.FC = () => {
   }, [user, currentWorkspace, router, pathname]);
 
   return (
-    <div className="relative md:fixed flex flex-col items-start justify-start gap-6 md:left-0 md:top-0 p-3 w-full md:w-48 h-auto md:h-full bg-[#121212] manrope z-50">
+    <div className="relative md:fixed flex flex-col items-start justify-start gap-6 md:left-0 md:top-0 p-3 w-full md:w-48 h-auto md:h-full bg-[color:var(--ws-sidebar-bg)] text-[color:var(--ws-fg)] body-text z-50">
       <Link href={"/"}>
         <Image
           src={Logo}
           alt="IncidentHub Logo"
-          className="h-8 w-8"
+          className="h-8 w-8 ws-icon"
           width={32}
           height={32}
         />
       </Link>
       <section
         onClick={() => setIsOpen(!isOpen)}
-        className="mt-3 flex gap-2 items-center w-full md:w-40 py-2 pl-2 pr-3 bg-white/5 hover:bg-white/10 cursor-pointer rounded-lg"
+        className="mt-3 flex gap-2 items-center w-full md:w-40 py-2 pl-2 pr-3 bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] cursor-pointer rounded-lg"
       >
         <Image
           src={Project}
           alt="Current Project"
-          className="w-4 h-4"
+          className="w-4 h-4 ws-icon"
           width={16}
           height={16}
         />
-        <span className="text-white text-xs font-semibold">
-          {currentWorkspace}
-        </span>
+        <span className="text-xs font-semibold">{currentWorkspace}</span>
         <Image
           src={Arrow}
           alt="arrow"
-          className={`w-3 h-3 ${isOpen ? "rotate-180" : ""} transition-all`}
+          className={`w-3 h-3 ws-icon ${isOpen ? "rotate-180" : ""} transition-all`}
           width={12}
           height={12}
         />
         <div>
           {isOpen && (
-            <div className="absolute mt-2 w-40 max-h-60 overflow-y-auto bg-[#121212] border border-white/20 rounded-lg shadow-lg z-50">
-              <div className="px-4 pt-3 pb-1 text-[11px] text-white/50">
+            <div className="absolute mt-2 w-40 max-h-60 overflow-y-auto bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] rounded-lg shadow-lg z-50">
+              <div className="px-4 pt-3 pb-1 text-[11px] text-[color:var(--ws-fg-muted)]">
                 {t("sidebar.ownedWorkspaces")}
               </div>
               {workspaces.map((workspace) => (
                 <div
                   key={workspace.workspace_name}
-                  className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs"
+                  className="px-4 py-2 hover:bg-[color:var(--ws-hover)] cursor-pointer text-xs"
                   onClick={() => {
                     if (!user) return;
                     localStorage.setItem(
@@ -383,14 +387,14 @@ export const Sidebar: React.FC = () => {
 
               {memberWorkspaces.length ? (
                 <>
-                  <div className="mx-2 my-2 border-t border-white/10" />
-                  <div className="px-4 pb-1 text-[11px] text-white/50">
+                  <div className="mx-2 my-2 border-t border-[color:var(--ws-border)]" />
+                  <div className="px-4 pb-1 text-[11px] text-[color:var(--ws-fg-muted)]">
                     {t("sidebar.sharedWorkspaces")}
                   </div>
                   {memberWorkspaces.map((workspace) => (
                     <div
                       key={`member:${workspace.workspace_name}`}
-                      className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs"
+                      className="px-4 py-2 hover:bg-[color:var(--ws-hover)] cursor-pointer text-xs"
                       onClick={() => {
                         if (!user) return;
                         localStorage.setItem(
@@ -408,9 +412,9 @@ export const Sidebar: React.FC = () => {
                   ))}
                 </>
               ) : null}
-              <div className="mx-2 my-1 border-t border-white/10" />
+              <div className="mx-2 my-1 border-t border-[color:var(--ws-border)]" />
               <div
-                className="px-4 py-2 hover:bg-white/10 cursor-pointer text-white text-xs flex items-center gap-2"
+                className="px-4 py-2 hover:bg-[color:var(--ws-hover)] cursor-pointer text-xs flex items-center gap-2"
                 onClick={() => {
                   setIsOpen(false);
                   if (!user) return;
@@ -423,7 +427,7 @@ export const Sidebar: React.FC = () => {
                 <Image
                   src={Add}
                   alt="Add"
-                  className="w-3 h-3"
+                  className="w-3 h-3 ws-icon"
                   width={12}
                   height={12}
                 />
@@ -434,34 +438,34 @@ export const Sidebar: React.FC = () => {
         </div>
       </section>
       <button
-            onClick={() => {
-              if (!user) return;
-              const ownedFallback = workspaces[0]?.workspace_name ?? "";
-              const target = currentWorkspace || ownedFallback;
-              if (!target) return;
-              router.push(`/${user}/${target}/profile`);
-            }}
-            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full font-bold heading hover:bg-white/10 cursor-pointer"
-          >
-            <Image
-              src={Profile}
-              alt="profile"
-              className="w-4 h-4"
-              width={16}
-              height={16}
-            />
-            {user}
-          </button>
+        onClick={() => {
+          if (!user) return;
+          const ownedFallback = workspaces[0]?.workspace_name ?? "";
+          const target = currentWorkspace || ownedFallback;
+          if (!target) return;
+          router.push(`/${user}/${target}/profile`);
+        }}
+        className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full font-bold heading hover:bg-[color:var(--ws-hover)] cursor-pointer"
+      >
+        <Image
+          src={Profile}
+          alt="profile"
+          className="w-4 h-4 ws-icon"
+          width={16}
+          height={16}
+        />
+        {user}
+      </button>
       <section className="flex flex-col gap-2 w-full">
-        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-white/10 cursor-pointer w-full">
+        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-[color:var(--ws-hover)] cursor-pointer w-full">
           <Image
             src={Inbox}
             alt="Inbox"
-            className="w-4 h-4 opacity-50"
+            className="w-4 h-4 opacity-50 ws-icon"
             width={16}
             height={16}
           />
-          <span className="text-white text-xs font-medium opacity-50">
+          <span className="text-xs font-medium opacity-50">
             {t("sidebar.inbox")}
           </span>
         </div>
@@ -470,38 +474,41 @@ export const Sidebar: React.FC = () => {
           className={
             "flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 cursor-pointer w-full " +
             (isActiveLink(`/${user}/${currentWorkspace}/my-tasks`)
-              ? "bg-white/10"
-              : "hover:bg-white/10")
+              ? "bg-[color:var(--ws-hover)]"
+              : "hover:bg-[color:var(--ws-hover)]")
           }
         >
           <Image
             src={Incidents}
             alt="Issues"
-            className="w-4 h-4"
+            className="w-4 h-4 ws-icon"
             width={16}
             height={16}
           />
-          <span className="text-white text-xs font-medium">
-            {t("sidebar.myTasks")}
-          </span>
+          <span className="text-xs font-medium">{t("sidebar.myTasks")}</span>
         </Link>
       </section>
 
       {pendingInvites.length ? (
-        <section className="flex flex-col items-start gap-2 text-white w-full mt-2">
-          <h2 className="text-sm text-neutral-400">
+        <section className="flex flex-col items-start gap-2 w-full mt-2">
+          <h2 className="text-sm text-[color:var(--ws-fg-muted)]">
             {t("sidebar.invitations")}
           </h2>
           <div className="flex flex-col gap-2 w-full">
             {pendingInvites.map((inv) => (
               <div
                 key={inv.id}
-                className="rounded-lg border border-white/10 bg-white/5 px-2 py-2 text-[11px] text-white/80"
+                className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-2 py-2 text-[11px] text-[color:var(--ws-fg-muted)]"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="truncate">
-                    <span className="text-white/90">{inv.workspace}</span>
-                    <span className="text-white/50"> · {inv.inviter}</span>
+                    <span className="text-[color:var(--ws-fg)]">
+                      {inv.workspace}
+                    </span>
+                    <span className="text-[color:var(--ws-fg-muted)]">
+                      {" "}
+                      · {inv.inviter}
+                    </span>
                   </div>
                 </div>
                 <div className="mt-2 flex gap-2">
@@ -509,7 +516,7 @@ export const Sidebar: React.FC = () => {
                     type="button"
                     disabled={respondingInviteId === inv.id}
                     onClick={() => void respondInvite(inv.id, "accept")}
-                    className="rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 px-2 py-1 text-[11px] text-white disabled:opacity-60"
+                    className="rounded-lg bg-[color:var(--ws-hover)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-2 py-1 text-[11px] disabled:opacity-60"
                   >
                     {t("sidebar.accept")}
                   </button>
@@ -517,7 +524,7 @@ export const Sidebar: React.FC = () => {
                     type="button"
                     disabled={respondingInviteId === inv.id}
                     onClick={() => void respondInvite(inv.id, "reject")}
-                    className="rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-2 py-1 text-[11px] text-white/80 disabled:opacity-60"
+                    className="rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] disabled:opacity-60"
                   >
                     {t("sidebar.reject")}
                   </button>
@@ -536,8 +543,10 @@ export const Sidebar: React.FC = () => {
           </div>
         </section>
       ) : null}
-      <section className="flex flex-col items-start gap-2 text-white w-full">
-        <h2 className="text-sm text-neutral-400">{t("sidebar.workspace")}</h2>
+      <section className="flex flex-col items-start gap-2 w-full">
+        <h2 className="text-sm text-[color:var(--ws-fg-muted)]">
+          {t("sidebar.workspace")}
+        </h2>
         <div className="flex flex-col items-start gap-1 w-full">
           {Workspace_Links.map((link) => (
             <Link
@@ -545,13 +554,15 @@ export const Sidebar: React.FC = () => {
               href={link.to}
               className={
                 "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer " +
-                (isActiveLink(link.to) ? "bg-white/10" : "hover:bg-white/10")
+                (isActiveLink(link.to)
+                  ? "bg-[color:var(--ws-hover)]"
+                  : "hover:bg-[color:var(--ws-hover)]")
               }
             >
               <Image
                 src={link.icon}
                 alt={link.name}
-                className="w-4 h-4"
+                className="w-4 h-4 ws-icon"
                 width={16}
                 height={16}
               />
@@ -566,12 +577,12 @@ export const Sidebar: React.FC = () => {
               if (!target) return;
               router.push(`/${user}/${target}/create-workspace`);
             }}
-            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full hover:bg-white/10 cursor-pointer"
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full hover:bg-[color:var(--ws-hover)] cursor-pointer"
           >
             <Image
               src={Add}
               alt="Add"
-              className="w-4 h-4"
+              className="w-4 h-4 ws-icon"
               width={16}
               height={16}
             />
@@ -579,8 +590,8 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
       </section>
-      <section className="flex flex-col items-start gap-2 text-white w-full">
-        <h2 className="text-sm text-neutral-400">Project</h2>
+      <section className="flex flex-col items-start gap-2 w-full">
+        <h2 className="text-sm text-[color:var(--ws-fg-muted)]">Project</h2>
         <div className="flex flex-col items-start gap-1 w-full">
           {Teams_Links.map((link) => (
             <Link
@@ -588,13 +599,15 @@ export const Sidebar: React.FC = () => {
               href={link.to}
               className={
                 "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer " +
-                (isActiveLink(link.to) ? "bg-white/10" : "hover:bg-white/10")
+                (isActiveLink(link.to)
+                  ? "bg-[color:var(--ws-hover)]"
+                  : "hover:bg-[color:var(--ws-hover)]")
               }
             >
               <Image
                 src={link.icon}
                 alt={link.name}
-                className="w-4 h-4"
+                className="w-4 h-4 ws-icon"
                 width={16}
                 height={16}
               />
@@ -607,7 +620,7 @@ export const Sidebar: React.FC = () => {
           <Link
             href="/login"
             onClick={() => localStorage.removeItem("authToken")}
-            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-white/10"
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-[color:var(--ws-hover)]"
           >
             {t("navbar.logout")}
           </Link>

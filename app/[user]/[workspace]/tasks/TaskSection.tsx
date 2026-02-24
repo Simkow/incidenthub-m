@@ -290,7 +290,7 @@ export default function TaskSection({
         animate={{ opacity: 1, filter: "blur(0px)" }}
         transition={{ duration: 0.4 }}
         key={task.id}
-        className="grid grid-cols-1 md:grid-cols-7 body-text items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-neutral-950/50 hover:bg-neutral-950/30 px-3 py-2"
+        className="grid grid-cols-1 md:grid-cols-7 body-text items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] px-3 py-2"
         role="button"
         tabIndex={0}
         onClick={() => setActiveTaskId(task.id)}
@@ -302,7 +302,7 @@ export default function TaskSection({
           value={task.title}
           onChange={(e) => updateTask(task.id, "title", e.target.value)}
           onClick={(e) => e.stopPropagation()}
-          className="min-w-0 w-full bg-transparent text-sm text-neutral-200 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
+          className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
           placeholder="Title"
         />
 
@@ -310,7 +310,7 @@ export default function TaskSection({
           value={task.description}
           onChange={(e) => updateTask(task.id, "description", e.target.value)}
           onClick={(e) => e.stopPropagation()}
-          className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
+          className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
           placeholder="Description"
         />
 
@@ -319,22 +319,24 @@ export default function TaskSection({
             value={selectPriorityValue}
             onValueChange={(value) => updateTask(task.id, "priority", value)}
           >
-            <Select.Trigger className="text-neutral-300 text-sm rounded-lg border border-[#2e2e2e] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer">
+            <Select.Trigger className="text-[color:var(--ws-fg-muted)] text-sm rounded-lg border border-[color:var(--ws-border)] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
               <Select.Value placeholder="Priority" />
-              <Select.Icon className="text-neutral-400">▾</Select.Icon>
+              <Select.Icon className="text-[color:var(--ws-fg-muted)]">
+                ▾
+              </Select.Icon>
             </Select.Trigger>
             <Select.Portal>
               <Select.Content
                 position="popper"
                 sideOffset={6}
-                className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818] hover:cursor-pointer"
+                className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] hover:cursor-pointer"
               >
                 <Select.Viewport className="p-1">
                   {priorityOptions.map((p) => (
                     <Select.Item
                       key={p}
                       value={p}
-                      className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                      className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
                     >
                       <Select.ItemText>{p}</Select.ItemText>
                     </Select.Item>
@@ -363,7 +365,7 @@ export default function TaskSection({
               // ignore: some browsers require strict user-gesture activation
             }
           }}
-          className="min-w-0 w-full bg-transparent text-sm text-neutral-300 rounded-lg border border-[#2e2e2e] px-2 py-1 focus:outline-none focus:border-neutral-300"
+          className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
         />
 
         <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
@@ -380,17 +382,19 @@ export default function TaskSection({
             onValueChange={(value) => updateTask(task.id, "assignee", value)}
             disabled={assigneeLoading || assigneeOptions.length === 0}
           >
-            <Select.Trigger className="text-neutral-300 text-sm rounded-lg border border-[#2e2e2e] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none focus:border-neutral-300 hover:cursor-pointer disabled:opacity-60">
+            <Select.Trigger className="text-[color:var(--ws-fg-muted)] text-sm rounded-lg border border-[color:var(--ws-border)] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
               <Select.Value
                 placeholder={assigneeLoading ? "Loading..." : "Assignee"}
               />
-              <Select.Icon className="text-neutral-400">▾</Select.Icon>
+              <Select.Icon className="text-[color:var(--ws-fg-muted)]">
+                ▾
+              </Select.Icon>
             </Select.Trigger>
             <Select.Portal>
               <Select.Content
                 position="popper"
                 sideOffset={6}
-                className="z-50 overflow-hidden rounded-md border border-[#2e2e2e] bg-[#181818] hover:cursor-pointer"
+                className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] hover:cursor-pointer"
               >
                 <Select.Viewport className="p-1">
                   {(() => {
@@ -405,7 +409,7 @@ export default function TaskSection({
                     <Select.Item
                       key={name}
                       value={name}
-                      className="text-xs select-none rounded px-2 py-2 text-white outline-none data-highlighted:bg-white/10 data-state=checked:bg-white/10"
+                      className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
                     >
                       <Select.ItemText>{name}</Select.ItemText>
                     </Select.Item>
@@ -434,17 +438,17 @@ export default function TaskSection({
                 prev === task.id ? null : task.id,
               );
             }}
-            className="text-xs px-2 py-1 rounded-lg border text-red-300 border-[#2e2e2e] hover:bg-white/10"
+            className="text-xs px-2 py-1 rounded-lg border text-red-300 border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
           >
             Delete
           </button>
 
           <div
-            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-44 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-neutral-950/60 border border-neutral-700 absolute flex-col items-center justify-center p-4 backdrop-blur-sm`}
+            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-44 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] absolute flex-col items-center justify-center p-4 backdrop-blur-sm`}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <span className="text-xs text-neutral-300 font-light text-center">
+            <span className="text-xs text-[color:var(--ws-fg-muted)] font-light text-center">
               Are you sure to <br /> delete this task?
             </span>
             <div className="mt-2 flex gap-2">
@@ -454,7 +458,7 @@ export default function TaskSection({
                   e.stopPropagation();
                   setDeleteConfirmTaskId(null);
                 }}
-                className="border border-[#2e2e2e] text-xs text-neutral-300 py-1 px-3 rounded-lg bg-neutral-900 hover:bg-neutral-800"
+                className="border border-[color:var(--ws-border)] text-xs text-[color:var(--ws-fg-muted)] py-1 px-3 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)]"
               >
                 Cancel
               </button>
@@ -482,7 +486,7 @@ export default function TaskSection({
       transition={{ duration: 0.4 }}
       className="relative w-full min-h-125 flex flex-col justify-start gap-2"
     >
-      <div className="hidden md:grid grid-cols-7 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-neutral-400">
+      <div className="hidden md:grid grid-cols-7 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-[color:var(--ws-fg-muted)]">
         <span className="text-left">Title</span>
         <span className="text-left">Description</span>
         <span className="text-center">Priority</span>
@@ -494,7 +498,7 @@ export default function TaskSection({
 
       <div className="mt-2 flex flex-col gap-3">
         {tasks.length < 1 ? (
-          <div className="text-neutral-400 text-sm flex items-center gap-3 justify-center mt-3">
+          <div className="text-[color:var(--ws-fg-muted)] text-sm flex items-center gap-3 justify-center mt-3">
             <span className="text-base boxy-text">Add first task</span>
             <button
               type="button"
@@ -503,7 +507,7 @@ export default function TaskSection({
                 setSubmitError(null);
                 setIsAddOpen(true);
               }}
-              className="px-2 py-1 rounded-lg border border-[#2e2e2e] hover:bg-[#2e2e2e] group hover:cursor-pointer"
+              className="px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)] group hover:cursor-pointer"
             >
               <Image
                 src={plusIcon}
@@ -512,7 +516,9 @@ export default function TaskSection({
               />
             </button>
             {submitMessage && (
-              <span className="text-xs text-neutral-300">{submitMessage}</span>
+              <span className="text-xs text-[color:var(--ws-fg-muted)]">
+                {submitMessage}
+              </span>
             )}
             {submitError && (
               <span className="text-xs text-red-400">{submitError}</span>
@@ -528,7 +534,7 @@ export default function TaskSection({
             />
           </div>
         ) : filteredTasks.length < 1 ? (
-          <div className="text-neutral-400 text-sm flex items-center justify-center mt-3">
+          <div className="text-[color:var(--ws-fg-muted)] text-sm flex items-center justify-center mt-3">
             No results
           </div>
         ) : (
@@ -537,9 +543,8 @@ export default function TaskSection({
         {scope === "user"
           ? groupedTasks.map((group) => (
               <div key={group.key} className="flex flex-col gap-3">
-                <div className="px-3 pt-3 text-xs text-neutral-400">
-                  Workspace:{" "}
-                  <span className="text-neutral-200">{group.label}</span>
+                <div className="px-3 pt-3 text-xs text-[color:var(--ws-fg-muted)]">
+                  Workspace: <span className="opacity-90">{group.label}</span>
                 </div>
                 {group.tasks.map(renderTaskRow)}
               </div>

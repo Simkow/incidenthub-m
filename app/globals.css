@@ -25,6 +25,167 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/*
+  Workspace themes (scoped):
+  Applied only inside routes under `app/[user]/[workspace]` via `.ws-theme` wrapper.
+*/
+
+.ws-theme {
+  --ws-bg: #121212;
+  --ws-surface: #181818;
+  --ws-surface-2: rgba(0, 0, 0, 0.25);
+  --ws-border: #2e2e2e;
+  --ws-fg: #ffffff;
+  --ws-fg-muted: rgba(255, 255, 255, 0.78);
+  --ws-hover: rgba(255, 255, 255, 0.08);
+  --ws-accent: #60a5fa;
+  --ws-accent-fg: #0b1020;
+  --ws-sidebar-bg: var(--ws-bg);
+  --ws-icon-filter: none;
+  --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
+  --ws-scrollbar-thumb: rgba(255, 255, 255, 0.14);
+
+  background-color: var(--ws-bg);
+  color: var(--ws-fg);
+}
+
+.ws-theme[data-ws-theme="default-dark"] {
+  --ws-bg: #121212;
+  --ws-surface: #181818;
+  --ws-surface-2: rgba(0, 0, 0, 0.25);
+  --ws-border: #2e2e2e;
+  --ws-fg: #ffffff;
+  --ws-fg-muted: rgba(255, 255, 255, 0.78);
+  --ws-hover: rgba(255, 255, 255, 0.10);
+  --ws-accent: #60a5fa;
+  --ws-accent-fg: #0b1020;
+  --ws-sidebar-bg: #121212;
+  --ws-icon-filter: none;
+  --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
+  --ws-scrollbar-thumb: rgba(255, 255, 255, 0.14);
+}
+
+.ws-theme[data-ws-theme="blue-light"] {
+  --ws-bg: #eaf2ff;
+  --ws-surface: #ffffff;
+  --ws-surface-2: rgba(37, 99, 235, 0.08);
+  --ws-border: #b7c9e8;
+  --ws-fg: #0b1b33;
+  --ws-fg-muted: rgba(11, 27, 51, 0.72);
+  --ws-hover: rgba(11, 27, 51, 0.06);
+  --ws-accent: #2563eb;
+  --ws-accent-fg: #ffffff;
+  --ws-sidebar-bg: #ffffff;
+  --ws-icon-filter: invert(1);
+  --ws-scrollbar-track: rgba(11, 27, 51, 0.10);
+  --ws-scrollbar-thumb: rgba(11, 27, 51, 0.22);
+}
+
+.ws-theme[data-ws-theme="blue-dark"] {
+  --ws-bg: #0b1020;
+  --ws-surface: #111a33;
+  --ws-surface-2: rgba(96, 165, 250, 0.10);
+  --ws-border: #233155;
+  --ws-fg: #eaf2ff;
+  --ws-fg-muted: rgba(234, 242, 255, 0.76);
+  --ws-hover: rgba(234, 242, 255, 0.08);
+  --ws-accent: #60a5fa;
+  --ws-accent-fg: #0b1020;
+  --ws-sidebar-bg: #0b1020;
+  --ws-icon-filter: none;
+  --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
+  --ws-scrollbar-thumb: rgba(234, 242, 255, 0.16);
+}
+
+.ws-theme[data-ws-theme="beige-light"] {
+  --ws-bg: #f7f1e6;
+  --ws-surface: #fffaf0;
+  --ws-surface-2: rgba(180, 83, 9, 0.08);
+  --ws-border: #d8cbb5;
+  --ws-fg: #2a1f12;
+  --ws-fg-muted: rgba(42, 31, 18, 0.72);
+  --ws-hover: rgba(42, 31, 18, 0.06);
+  --ws-accent: #b45309;
+  --ws-accent-fg: #ffffff;
+  --ws-sidebar-bg: #fffaf0;
+  --ws-icon-filter: invert(1);
+  --ws-scrollbar-track: rgba(42, 31, 18, 0.10);
+  --ws-scrollbar-thumb: rgba(42, 31, 18, 0.20);
+}
+
+.ws-theme[data-ws-theme="beige-dark"] {
+  --ws-bg: #1b1610;
+  --ws-surface: #241f18;
+  --ws-surface-2: rgba(245, 158, 11, 0.12);
+  --ws-border: #4b3d2c;
+  --ws-fg: #f7f1e6;
+  --ws-fg-muted: rgba(247, 241, 230, 0.76);
+  --ws-hover: rgba(247, 241, 230, 0.08);
+  --ws-accent: #f59e0b;
+  --ws-accent-fg: #1b1610;
+  --ws-sidebar-bg: #1b1610;
+  --ws-icon-filter: none;
+  --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
+  --ws-scrollbar-thumb: rgba(247, 241, 230, 0.16);
+}
+
+.ws-theme[data-ws-theme="orange-light"] {
+  --ws-bg: #fff3e6;
+  --ws-surface: #ffffff;
+  --ws-surface-2: rgba(249, 115, 22, 0.10);
+  --ws-border: #f0c7a7;
+  --ws-fg: #2b1600;
+  --ws-fg-muted: rgba(43, 22, 0, 0.72);
+  --ws-hover: rgba(43, 22, 0, 0.06);
+  --ws-accent: #f97316;
+  --ws-accent-fg: #ffffff;
+  --ws-sidebar-bg: #ffffff;
+  --ws-icon-filter: invert(1);
+  --ws-scrollbar-track: rgba(43, 22, 0, 0.10);
+  --ws-scrollbar-thumb: rgba(43, 22, 0, 0.20);
+}
+
+.ws-theme[data-ws-theme="purple-dark"] {
+  --ws-bg: #120a1a;
+  --ws-surface: #1a1026;
+  --ws-surface-2: rgba(167, 139, 250, 0.12);
+  --ws-border: #3a2552;
+  --ws-fg: #f5edff;
+  --ws-fg-muted: rgba(245, 237, 255, 0.76);
+  --ws-hover: rgba(245, 237, 255, 0.08);
+  --ws-accent: #a78bfa;
+  --ws-accent-fg: #120a1a;
+  --ws-sidebar-bg: #120a1a;
+  --ws-icon-filter: none;
+  --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
+  --ws-scrollbar-thumb: rgba(245, 237, 255, 0.16);
+}
+
+.ws-theme .ws-icon {
+  filter: var(--ws-icon-filter);
+}
+
+.ws-theme .line {
+  background-color: var(--ws-fg);
+  outline: 3px solid var(--ws-bg);
+}
+
+/* Workspace-scoped scrollbar */
+.ws-theme * {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ws-scrollbar-thumb) var(--ws-scrollbar-track);
+}
+
+.ws-theme *::-webkit-scrollbar-track {
+  background: var(--ws-scrollbar-track);
+}
+
+.ws-theme *::-webkit-scrollbar-thumb {
+  background-color: var(--ws-scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid var(--ws-scrollbar-track);
+}
+
 .body-text {
   font-family: var(--font-manrope), system-ui, sans-serif;
 }
@@ -49,8 +210,8 @@ body {
   width: 1em;
   height: 1em;
   position: relative;
-  background-color: #000000; /* Black bars */
-  outline: 3px solid #ffffff; /* Thick white outline */
+  background-color: #000000; /* fallback */
+  outline: 3px solid #ffffff; /* fallback */
   border-radius: 1em;
   animation-name: a;
   animation-duration: 2s;

@@ -45,18 +45,18 @@ export function RoundedCheckbox({
       />
       <span
         className={
-          "flex h-5 w-5 items-center justify-center rounded-lg border border-[#2e2e2e] bg-neutral-950 " +
+          "flex h-5 w-5 items-center justify-center rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] " +
           "transition-colors " +
-          "peer-checked:bg-neutral-200 peer-checked:border-neutral-200 " +
-          "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-neutral-600 " +
-          "peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-neutral-950 " +
+          "peer-checked:bg-[color:var(--ws-accent)] peer-checked:border-[color:var(--ws-accent)] " +
+          "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-[color:var(--ws-border)] " +
+          "peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[color:var(--ws-bg)] " +
           "peer-disabled:opacity-50"
         }
       >
         <span
           className={
             checked
-              ? "h-2.5 w-1.5 rotate-45 border-b-2 border-r-2 border-neutral-950 mb-0.5"
+              ? "h-2.5 w-1.5 rotate-45 border-b-2 border-r-2 border-[color:var(--ws-accent-fg)] mb-0.5"
               : "hidden"
           }
         />

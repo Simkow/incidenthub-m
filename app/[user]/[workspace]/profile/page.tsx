@@ -77,7 +77,7 @@ export default async function ProfilePage({ params }: PageProps) {
   return (
     <div>
       <Sidebar />
-      <div className="md:ml-48 bg-[#121212]">
+      <div className="md:ml-48 bg-[color:var(--ws-bg)]">
         <Profile user={user} workspace={workspace} />
       </div>
     </div>

@@ -79,7 +79,7 @@ export default async function FriendsPage({ params }: PageProps) {
   return (
     <div>
       <Sidebar />
-      <div className="md:ml-48 bg-[#121212]">
+      <div className="md:ml-48 bg-[color:var(--ws-bg)]">
         <Members />
       </div>
     </div>
