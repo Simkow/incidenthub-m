@@ -46,6 +46,11 @@ export function toDateInputValue(value: string) {
     return `${dateOnly.year}-${pad2(dateOnly.month)}-${pad2(dateOnly.day)}`;
   }
 
+  // ISO-ish or DB timestamp strings (e.g. "2026-02-25T00:00:00.000Z" or "2026-02-25 00:00:00"):
+  // treat as date-only semantics to avoid timezone-based day shifts.
+  const isoLike = /^(\d{4}-\d{2}-\d{2})[T\s]/.exec(raw);
+  if (isoLike) return isoLike[1];
+
   // `datetime-local` value: keep date portion.
   const local = parseDateTimeLocal(raw);
   if (local) return `${local.year}-${pad2(local.month)}-${pad2(local.day)}`;

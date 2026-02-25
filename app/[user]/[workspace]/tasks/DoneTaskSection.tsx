@@ -170,6 +170,10 @@ export default function DoneTaskSection({
         setTasks(snapshot);
         return;
       }
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("tasks:refresh"));
+      }
     } catch (error) {
       console.error("Error deleting task", error);
       setTasks(snapshot);

@@ -60,7 +60,17 @@ export async function POST(req: Request) {
       }
 
       const data = await sql`
-        SELECT t.*, w.workspace_name
+        SELECT
+          t.id,
+          t.title,
+          t.priority,
+          t.description,
+          to_char(t.due_date::date, 'YYYY-MM-DD') AS due_date,
+          t.assignee,
+          t.assignee_id,
+          t.is_finished,
+          t.workspace_id,
+          w.workspace_name
         FROM tasks t
         LEFT JOIN workspaces w ON t.workspace_id = w.id
         WHERE t.workspace_id = ${workspaceId} AND t.is_finished = false
@@ -70,7 +80,17 @@ export async function POST(req: Request) {
     }
 
     const data = await sql`
-      SELECT t.*, w.workspace_name
+      SELECT
+        t.id,
+        t.title,
+        t.priority,
+        t.description,
+        to_char(t.due_date::date, 'YYYY-MM-DD') AS due_date,
+        t.assignee,
+        t.assignee_id,
+        t.is_finished,
+        t.workspace_id,
+        w.workspace_name
       FROM tasks t
       LEFT JOIN workspaces w ON t.workspace_id = w.id
       WHERE t.assignee_id = ${userId} AND t.is_finished = false
