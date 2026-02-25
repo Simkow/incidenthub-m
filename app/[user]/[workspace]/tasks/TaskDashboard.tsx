@@ -196,6 +196,17 @@ export const TaskDashboard: React.FC = () => {
       />
       <section className="py-2 w-full">
         <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] flex flex-col items-center p-4 gap-8 relative">
+          <AddTaskModal
+            open={open}
+            onClose={closeModal}
+            workspace={currentWorkspace}
+            createdBy={created_by}
+            onSuccessMessage={(m) => setSubmitMessage(m || null)}
+            onErrorMessage={(m) => setSubmitError(m || null)}
+            afterSuccess={() => {
+              router.refresh();
+            }}
+          />
           {/* top bar */}
           <section className="w-full rounded-xl border border-[color:var(--ws-border)] flex flex-wrap items-center px-3 py-2 body-text text-xs gap-2">
             <button
@@ -226,18 +237,6 @@ export const TaskDashboard: React.FC = () => {
             {submitError && (
               <div className="text-xs text-red-400">{submitError}</div>
             )}
-
-            <AddTaskModal
-              open={open}
-              onClose={closeModal}
-              workspace={currentWorkspace}
-              createdBy={created_by}
-              onSuccessMessage={(m) => setSubmitMessage(m || null)}
-              onErrorMessage={(m) => setSubmitError(m || null)}
-              afterSuccess={() => {
-                router.refresh();
-              }}
-            />
 
             <button
               onClick={() => setTaskView("All")}

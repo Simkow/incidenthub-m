@@ -192,7 +192,7 @@ export const CreateWorkspace: React.FC<Props> = ({
                     }
                   }}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className={inputClassName}
+                  className={`${inputClassName} no-date-icon`}
                 />
               </div>
 

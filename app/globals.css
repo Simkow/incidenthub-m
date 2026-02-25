@@ -45,6 +45,8 @@ body {
   --ws-checkbox-check: var(--ws-accent-fg);
   --ws-sidebar-bg: var(--ws-bg);
   --ws-icon-filter: none;
+  /* Stronger icon filter for the mobile menu toggle (Menu/Close) */
+  --ws-menu-icon-filter: brightness(1.25) contrast(1.15);
   --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
   --ws-scrollbar-thumb: rgba(255, 255, 255, 0.14);
 
@@ -67,6 +69,7 @@ body {
   --ws-checkbox-check: #121212;
   --ws-sidebar-bg: #121212;
   --ws-icon-filter: none;
+  --ws-menu-icon-filter: brightness(1.25) contrast(1.15);
   --ws-scrollbar-track: rgba(0, 0, 0, 0.65);
   --ws-scrollbar-thumb: rgba(255, 255, 255, 0.14);
 }
@@ -83,6 +86,7 @@ body {
   --ws-accent-fg: #ffffff;
   --ws-sidebar-bg: #ffffff;
   --ws-icon-filter: invert(1);
+  --ws-menu-icon-filter: invert(1) brightness(1.05) contrast(1.15);
   --ws-scrollbar-track: rgba(11, 27, 51, 0.10);
   --ws-scrollbar-thumb: rgba(11, 27, 51, 0.22);
 }
@@ -115,6 +119,7 @@ body {
   --ws-accent-fg: #ffffff;
   --ws-sidebar-bg: #fffaf0;
   --ws-icon-filter: invert(1);
+  --ws-menu-icon-filter: invert(1) brightness(1.05) contrast(1.15);
   --ws-scrollbar-track: rgba(42, 31, 18, 0.10);
   --ws-scrollbar-thumb: rgba(42, 31, 18, 0.20);
 }
@@ -147,6 +152,7 @@ body {
   --ws-accent-fg: #ffffff;
   --ws-sidebar-bg: #ffffff;
   --ws-icon-filter: invert(1);
+  --ws-menu-icon-filter: invert(1) brightness(1.05) contrast(1.15);
   --ws-scrollbar-track: rgba(43, 22, 0, 0.10);
   --ws-scrollbar-thumb: rgba(43, 22, 0, 0.20);
 }
@@ -169,6 +175,10 @@ body {
 
 .ws-theme .ws-icon {
   filter: var(--ws-icon-filter);
+}
+
+.ws-theme .ws-icon.ws-icon-menu {
+  filter: var(--ws-menu-icon-filter);
 }
 
 .ws-theme .line {
@@ -217,6 +227,25 @@ body {
 
 .heading {
   font-family: var(--font-jost), system-ui, sans-serif;
+}
+
+/*
+  Date inputs: hide native calendar indicator.
+  Some mobile browsers render a large indicator/button that can expand layouts.
+*/
+input[type="date"].no-date-icon {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="date"].no-date-icon::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+}
+
+input[type="date"].no-date-icon::-webkit-inner-spin-button,
+input[type="date"].no-date-icon::-webkit-clear-button {
+  display: none;
 }
 
 

@@ -375,7 +375,7 @@ export default function ActiveTaskSection({
               // ignore: some browsers require strict user-gesture activation
             }
           }}
-          className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
+          className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none no-date-icon"
         />
 
         <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>

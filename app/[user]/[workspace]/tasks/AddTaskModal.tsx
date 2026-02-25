@@ -237,7 +237,7 @@ export function AddTaskModal({
                       // ignore
                     }
                   }}
-                  className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] p-2 w-full md:w-72 bg-transparent focus:outline-none"
+                  className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] p-2 w-full md:w-72 bg-transparent focus:outline-none no-date-icon"
                 />
               </section>
             </div>

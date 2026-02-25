@@ -28,6 +28,8 @@ export const messages = {
       invitations: "Invitations",
       accept: "Accept",
       reject: "Reject",
+      menu: "Menu",
+      menuClose: "Close Menu",
     },
     hero: {
       titleA: "A modern way to",
@@ -239,6 +241,8 @@ export const messages = {
       invitations: "Zaproszenia",
       accept: "Akceptuj",
       reject: "Odrzuć",
+      menu: "Menu",
+      menuClose: "Zamknij Menu",
     },
     hero: {
       titleA: "Nowoczesny sposób na",

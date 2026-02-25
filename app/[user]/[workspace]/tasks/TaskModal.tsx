@@ -233,7 +233,7 @@ export function TaskModal({
                             dateInputToDateOnly(e.target.value),
                           )
                         }
-                        className="bg-transparent text-sm rounded-lg border border-[color:var(--ws-border)] px-3 py-2 focus:outline-none"
+                        className="bg-transparent text-sm rounded-lg border border-[color:var(--ws-border)] px-3 py-2 focus:outline-none no-date-icon"
                       />
                     </section>
 

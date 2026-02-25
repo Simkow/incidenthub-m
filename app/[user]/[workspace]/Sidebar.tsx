@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useCallback, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -34,6 +35,7 @@ export const Sidebar: React.FC = () => {
   };
 
   const [isOpen, setIsOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [memberWorkspaces, setMemberWorkspaces] = useState<Workspace[]>([]);
   const [currentWorkspace, setCurrentWorkspace] = useState("");
@@ -331,20 +333,11 @@ export const Sidebar: React.FC = () => {
     };
   }, [user, currentWorkspace, router, pathname]);
 
-  return (
-    <div className="relative md:fixed flex flex-col items-start justify-start gap-6 md:left-0 md:top-0 p-3 w-full md:w-48 h-auto md:h-full bg-[color:var(--ws-sidebar-bg)] text-[color:var(--ws-fg)] body-text z-50">
-      <Link href={"/"}>
-        <Image
-          src={Logo}
-          alt="IncidentHub Logo"
-          className="h-8 w-8 ws-icon"
-          width={32}
-          height={32}
-        />
-      </Link>
+  const sidebarSections = (
+    <>
       <section
         onClick={() => setIsOpen(!isOpen)}
-        className="mt-3 flex gap-2 items-center w-full md:w-40 py-2 pl-2 pr-3 bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] cursor-pointer rounded-lg"
+        className="mt-3 flex gap-2 items-center w-full md:w-40 py-2 pl-2 pr-3 bg-(--ws-surface-2) hover:bg-(--ws-hover) cursor-pointer rounded-lg"
       >
         <Image
           src={Project}
@@ -363,14 +356,14 @@ export const Sidebar: React.FC = () => {
         />
         <div>
           {isOpen && (
-            <div className="absolute mt-2 w-40 max-h-60 overflow-y-auto bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] rounded-lg shadow-lg z-50">
-              <div className="px-4 pt-3 pb-1 text-[11px] text-[color:var(--ws-fg-muted)]">
+            <div className="absolute mt-2 w-40 max-h-60 overflow-y-auto bg-(--ws-surface) border border-(--ws-border) rounded-lg shadow-lg z-50">
+              <div className="px-4 pt-3 pb-1 text-[11px] text-(--ws-fg-muted)">
                 {t("sidebar.ownedWorkspaces")}
               </div>
               {workspaces.map((workspace) => (
                 <div
                   key={workspace.workspace_name}
-                  className="px-4 py-2 hover:bg-[color:var(--ws-hover)] cursor-pointer text-xs"
+                  className="px-4 py-2 hover:bg-(--ws-hover) cursor-pointer text-xs"
                   onClick={() => {
                     if (!user) return;
                     localStorage.setItem(
@@ -378,6 +371,7 @@ export const Sidebar: React.FC = () => {
                       JSON.stringify(workspace.workspace_name),
                     );
                     setIsOpen(false);
+                    setMobileMenuOpen(false);
                     router.push(`/${user}/${workspace.workspace_name}/tasks`);
                   }}
                 >
@@ -387,14 +381,14 @@ export const Sidebar: React.FC = () => {
 
               {memberWorkspaces.length ? (
                 <>
-                  <div className="mx-2 my-2 border-t border-[color:var(--ws-border)]" />
-                  <div className="px-4 pb-1 text-[11px] text-[color:var(--ws-fg-muted)]">
+                  <div className="mx-2 my-2 border-t border-(--ws-border)" />
+                  <div className="px-4 pb-1 text-[11px] text-(--ws-fg-muted)">
                     {t("sidebar.sharedWorkspaces")}
                   </div>
                   {memberWorkspaces.map((workspace) => (
                     <div
                       key={`member:${workspace.workspace_name}`}
-                      className="px-4 py-2 hover:bg-[color:var(--ws-hover)] cursor-pointer text-xs"
+                      className="px-4 py-2 hover:bg-(--ws-hover) cursor-pointer text-xs"
                       onClick={() => {
                         if (!user) return;
                         localStorage.setItem(
@@ -402,9 +396,8 @@ export const Sidebar: React.FC = () => {
                           JSON.stringify(workspace.workspace_name),
                         );
                         setIsOpen(false);
-                        router.push(
-                          `/${user}/${workspace.workspace_name}/tasks`,
-                        );
+                        setMobileMenuOpen(false);
+                        router.push(`/${user}/${workspace.workspace_name}/tasks`);
                       }}
                     >
                       {workspace.workspace_name}
@@ -412,15 +405,16 @@ export const Sidebar: React.FC = () => {
                   ))}
                 </>
               ) : null}
-              <div className="mx-2 my-1 border-t border-[color:var(--ws-border)]" />
+              <div className="mx-2 my-1 border-t border-(--ws-border)" />
               <div
-                className="px-4 py-2 hover:bg-[color:var(--ws-hover)] cursor-pointer text-xs flex items-center gap-2"
+                className="px-4 py-2 hover:bg-(--ws-hover) cursor-pointer text-xs flex items-center gap-2"
                 onClick={() => {
                   setIsOpen(false);
                   if (!user) return;
                   const ownedFallback = workspaces[0]?.workspace_name ?? "";
                   const target = currentWorkspace || ownedFallback;
                   if (!target) return;
+                  setMobileMenuOpen(false);
                   router.push(`/${user}/${target}/create-workspace`);
                 }}
               >
@@ -437,15 +431,17 @@ export const Sidebar: React.FC = () => {
           )}
         </div>
       </section>
+
       <button
         onClick={() => {
           if (!user) return;
           const ownedFallback = workspaces[0]?.workspace_name ?? "";
           const target = currentWorkspace || ownedFallback;
           if (!target) return;
+          setMobileMenuOpen(false);
           router.push(`/${user}/${target}/profile`);
         }}
-        className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full font-bold heading hover:bg-[color:var(--ws-hover)] cursor-pointer"
+        className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full font-bold heading hover:bg-(--ws-hover) cursor-pointer"
       >
         <Image
           src={Profile}
@@ -456,8 +452,9 @@ export const Sidebar: React.FC = () => {
         />
         {user}
       </button>
+
       <section className="flex flex-col gap-2 w-full">
-        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-[color:var(--ws-hover)] cursor-pointer w-full">
+        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-(--ws-hover) cursor-pointer w-full">
           <Image
             src={Inbox}
             alt="Inbox"
@@ -471,11 +468,12 @@ export const Sidebar: React.FC = () => {
         </div>
         <Link
           href={`/${user}/${currentWorkspace}/my-tasks`}
+          onClick={() => setMobileMenuOpen(false)}
           className={
             "flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 cursor-pointer w-full " +
             (isActiveLink(`/${user}/${currentWorkspace}/my-tasks`)
-              ? "bg-[color:var(--ws-hover)]"
-              : "hover:bg-[color:var(--ws-hover)]")
+              ? "bg-(--ws-hover)"
+              : "hover:bg-(--ws-hover)")
           }
         >
           <Image
@@ -491,23 +489,22 @@ export const Sidebar: React.FC = () => {
 
       {pendingInvites.length ? (
         <section className="flex flex-col items-start gap-2 w-full mt-2">
-          <h2 className="text-sm text-[color:var(--ws-fg-muted)]">
+          <h2 className="text-sm text-(--ws-fg-muted)">
             {t("sidebar.invitations")}
           </h2>
           <div className="flex flex-col gap-2 w-full">
             {pendingInvites.map((inv) => (
               <div
                 key={inv.id}
-                className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-2 py-2 text-[11px] text-[color:var(--ws-fg-muted)]"
+                className="rounded-lg border border-(--ws-border) bg-(--ws-surface-2) px-2 py-2 text-[11px] text-(--ws-fg-muted)"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="truncate">
-                    <span className="text-[color:var(--ws-fg)]">
+                    <span className="text-(--ws-fg)">
                       {inv.workspace}
                     </span>
-                    <span className="text-[color:var(--ws-fg-muted)]">
-                      {" "}
-                      · {inv.inviter}
+                    <span className="text-(--ws-fg-muted)">
+                      {" "}· {inv.inviter}
                     </span>
                   </div>
                 </div>
@@ -516,7 +513,7 @@ export const Sidebar: React.FC = () => {
                     type="button"
                     disabled={respondingInviteId === inv.id}
                     onClick={() => void respondInvite(inv.id, "accept")}
-                    className="rounded-lg bg-[color:var(--ws-hover)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-2 py-1 text-[11px] disabled:opacity-60"
+                    className="rounded-lg bg-(--ws-hover) hover:bg-(--ws-hover) border border-(--ws-border) px-2 py-1 text-[11px] disabled:opacity-60"
                   >
                     {t("sidebar.accept")}
                   </button>
@@ -524,7 +521,7 @@ export const Sidebar: React.FC = () => {
                     type="button"
                     disabled={respondingInviteId === inv.id}
                     onClick={() => void respondInvite(inv.id, "reject")}
-                    className="rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] border border-[color:var(--ws-border)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] disabled:opacity-60"
+                    className="rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover) border border-(--ws-border) px-2 py-1 text-[11px] text-(--ws-fg-muted) disabled:opacity-60"
                   >
                     {t("sidebar.reject")}
                   </button>
@@ -533,9 +530,7 @@ export const Sidebar: React.FC = () => {
             ))}
 
             {inviteMessage ? (
-              <div className="text-[11px] text-emerald-300">
-                {inviteMessage}
-              </div>
+              <div className="text-[11px] text-emerald-300">{inviteMessage}</div>
             ) : null}
             {inviteError ? (
               <div className="text-[11px] text-red-300">{inviteError}</div>
@@ -543,8 +538,9 @@ export const Sidebar: React.FC = () => {
           </div>
         </section>
       ) : null}
+
       <section className="flex flex-col items-start gap-2 w-full">
-        <h2 className="text-sm text-[color:var(--ws-fg-muted)]">
+        <h2 className="text-sm text-(--ws-fg-muted)">
           {t("sidebar.workspace")}
         </h2>
         <div className="flex flex-col items-start gap-1 w-full">
@@ -552,11 +548,12 @@ export const Sidebar: React.FC = () => {
             <Link
               key={link.name}
               href={link.to}
+              onClick={() => setMobileMenuOpen(false)}
               className={
                 "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer " +
                 (isActiveLink(link.to)
-                  ? "bg-[color:var(--ws-hover)]"
-                  : "hover:bg-[color:var(--ws-hover)]")
+                  ? "bg-(--ws-hover)"
+                  : "hover:bg-(--ws-hover)")
               }
             >
               <Image
@@ -575,9 +572,10 @@ export const Sidebar: React.FC = () => {
               const ownedFallback = workspaces[0]?.workspace_name ?? "";
               const target = currentWorkspace || ownedFallback;
               if (!target) return;
+              setMobileMenuOpen(false);
               router.push(`/${user}/${target}/create-workspace`);
             }}
-            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full hover:bg-[color:var(--ws-hover)] cursor-pointer"
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full hover:bg-(--ws-hover) cursor-pointer"
           >
             <Image
               src={Add}
@@ -590,18 +588,20 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
       </section>
+
       <section className="flex flex-col items-start gap-2 w-full">
-        <h2 className="text-sm text-[color:var(--ws-fg-muted)]">Project</h2>
+        <h2 className="text-sm text-(--ws-fg-muted)">Project</h2>
         <div className="flex flex-col items-start gap-1 w-full">
           {Teams_Links.map((link) => (
             <Link
               key={link.name}
               href={link.to}
+              onClick={() => setMobileMenuOpen(false)}
               className={
                 "text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer " +
                 (isActiveLink(link.to)
-                  ? "bg-[color:var(--ws-hover)]"
-                  : "hover:bg-[color:var(--ws-hover)]")
+                  ? "bg-(--ws-hover)"
+                  : "hover:bg-(--ws-hover)")
               }
             >
               <Image
@@ -619,13 +619,67 @@ export const Sidebar: React.FC = () => {
           </div>
           <Link
             href="/login"
-            onClick={() => localStorage.removeItem("authToken")}
-            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-[color:var(--ws-hover)]"
+            onClick={() => {
+              setMobileMenuOpen(false);
+              localStorage.removeItem("authToken");
+            }}
+            className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-(--ws-hover)"
           >
             {t("navbar.logout")}
           </Link>
         </div>
       </section>
+    </>
+  );
+
+  return (
+    <div className="relative md:fixed flex flex-col items-start justify-start gap-3 md:gap-6 md:left-0 md:top-0 p-3 w-full md:w-48 h-auto md:h-full bg-(--ws-sidebar-bg) text-(--ws-fg) body-text z-50">
+      <div className="w-full flex items-center justify-between md:block">
+        <Link href={"/"} onClick={() => setMobileMenuOpen(false)}>
+          <Image
+            src={Logo}
+            alt="IncidentHub Logo"
+            className="h-8 w-8 ws-icon"
+            width={32}
+            height={32}
+          />
+        </Link>
+
+        <button
+          type="button"
+          className="md:hidden rounded-lg border border-(--ws-border) px-2 py-1 hover:bg-(--ws-hover) transition-colors"
+          aria-label="Toggle menu"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => {
+            setMobileMenuOpen((v) => !v);
+            setIsOpen(false);
+          }}
+        >
+          <span className="text-xs font-semibold text-center flex items-center">
+            {mobileMenuOpen ? `${t("sidebar.menuClose")}` : `${t("sidebar.menu")}`}
+          </span>
+        </button>
+      </div>
+
+      <div className="hidden md:flex w-full flex-col items-start justify-start gap-6">
+        {sidebarSections}
+      </div>
+
+      <AnimatePresence initial={false}>
+        {mobileMenuOpen ? (
+          <motion.div
+            key="mobile-sidebar"
+            className="flex md:hidden w-full flex-col items-start justify-start gap-6"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {sidebarSections}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
     </div>
   );
 };
