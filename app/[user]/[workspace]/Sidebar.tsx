@@ -397,7 +397,9 @@ export const Sidebar: React.FC = () => {
                         );
                         setIsOpen(false);
                         setMobileMenuOpen(false);
-                        router.push(`/${user}/${workspace.workspace_name}/tasks`);
+                        router.push(
+                          `/${user}/${workspace.workspace_name}/tasks`,
+                        );
                       }}
                     >
                       {workspace.workspace_name}
@@ -500,11 +502,10 @@ export const Sidebar: React.FC = () => {
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="truncate">
-                    <span className="text-(--ws-fg)">
-                      {inv.workspace}
-                    </span>
+                    <span className="text-(--ws-fg)">{inv.workspace}</span>
                     <span className="text-(--ws-fg-muted)">
-                      {" "}· {inv.inviter}
+                      {" "}
+                      · {inv.inviter}
                     </span>
                   </div>
                 </div>
@@ -530,7 +531,9 @@ export const Sidebar: React.FC = () => {
             ))}
 
             {inviteMessage ? (
-              <div className="text-[11px] text-emerald-300">{inviteMessage}</div>
+              <div className="text-[11px] text-emerald-300">
+                {inviteMessage}
+              </div>
             ) : null}
             {inviteError ? (
               <div className="text-[11px] text-red-300">{inviteError}</div>
@@ -656,7 +659,9 @@ export const Sidebar: React.FC = () => {
           }}
         >
           <span className="text-xs font-semibold text-center flex items-center">
-            {mobileMenuOpen ? `${t("sidebar.menuClose")}` : `${t("sidebar.menu")}`}
+            {mobileMenuOpen
+              ? `${t("sidebar.menuClose")}`
+              : `${t("sidebar.menu")}`}
           </span>
         </button>
       </div>
@@ -679,7 +684,6 @@ export const Sidebar: React.FC = () => {
           </motion.div>
         ) : null}
       </AnimatePresence>
-
     </div>
   );
 };
