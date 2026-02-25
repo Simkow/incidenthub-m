@@ -36,6 +36,7 @@ export default function DoneTaskSection({
 
   const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
+  const [assigneeRefreshNonce, setAssigneeRefreshNonce] = useState(0);
 
   const priorityOptions = useMemo<Priority[]>(
     () => ["Light", "Medium", "High", "Urgent"],
@@ -81,6 +82,13 @@ export default function DoneTaskSection({
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => setAssigneeRefreshNonce((n) => n + 1);
+    window.addEventListener("workspace-users:refresh", handler);
+    return () => window.removeEventListener("workspace-users:refresh", handler);
+  }, []);
+
+  useEffect(() => {
     if (!workspace) {
       setAssigneeOptions([]);
       return;
@@ -122,7 +130,7 @@ export default function DoneTaskSection({
     return () => {
       cancelled = true;
     };
-  }, [workspace]);
+  }, [workspace, assigneeRefreshNonce]);
 
   useEffect(() => {
     const timeouts = saveTimeoutsRef.current;

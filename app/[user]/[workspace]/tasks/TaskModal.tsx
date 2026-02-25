@@ -39,6 +39,14 @@ export function TaskModal({
 
   const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
+  const [assigneeRefreshNonce, setAssigneeRefreshNonce] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => setAssigneeRefreshNonce((n) => n + 1);
+    window.addEventListener("workspace-users:refresh", handler);
+    return () => window.removeEventListener("workspace-users:refresh", handler);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -87,7 +95,7 @@ export function TaskModal({
     return () => {
       cancelled = true;
     };
-  }, [open, workspaceForUsers, task?.assignee]);
+  }, [open, workspaceForUsers, task?.assignee, assigneeRefreshNonce]);
 
   return (
     <AnimatePresence>

@@ -77,6 +77,26 @@ export async function POST(req: Request) {
       );
     }
 
+    let ownerId: number | null =
+      typeof ownerCheck?.owner_id === "number" && Number.isFinite(ownerCheck.owner_id)
+        ? ownerCheck.owner_id
+        : null;
+    let ownerName: string = typeof ownerCheck?.owner === "string" ? ownerCheck.owner.trim() : "";
+
+    if (!ownerId && ownerName) {
+      const rows = await sql`SELECT id FROM users WHERE name = ${ownerName} LIMIT 1`;
+      ownerId = (rows[0] as { id: number } | undefined)?.id ?? null;
+    }
+
+    if (ownerId && !ownerName) {
+      const rows = await sql`SELECT name FROM users WHERE id = ${ownerId} LIMIT 1`;
+      ownerName = ((rows[0] as { name?: unknown } | undefined)?.name as string | undefined)?.trim?.() ?? "";
+    }
+
+    if (!ownerId || !ownerName) {
+      return Response.json({ message: "Workspace owner not found" }, { status: 500 });
+    }
+
     const usernameIdRow = await sql`
       SELECT id FROM users WHERE name = ${username} LIMIT 1
     `;
@@ -94,6 +114,13 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    await sql`
+      UPDATE tasks
+      SET assignee_id = ${ownerId}, assignee = ${ownerName}
+      WHERE workspace_id = ${ws.id}
+        AND assignee_id = ${user.id}
+    `;
 
     await sql`
       DELETE FROM workspace_members

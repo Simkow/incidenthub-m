@@ -42,6 +42,7 @@ export default function ActiveTaskSection({
 
   const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
+  const [assigneeRefreshNonce, setAssigneeRefreshNonce] = useState(0);
 
   const plusIcon = Plus;
 
@@ -89,6 +90,13 @@ export default function ActiveTaskSection({
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => setAssigneeRefreshNonce((n) => n + 1);
+    window.addEventListener("workspace-users:refresh", handler);
+    return () => window.removeEventListener("workspace-users:refresh", handler);
+  }, []);
+
+  useEffect(() => {
     if (!workspace) {
       setAssigneeOptions([]);
       return;
@@ -130,7 +138,7 @@ export default function ActiveTaskSection({
     return () => {
       cancelled = true;
     };
-  }, [workspace]);
+  }, [workspace, assigneeRefreshNonce]);
 
   useEffect(() => {
     const timeouts = saveTimeoutsRef.current;

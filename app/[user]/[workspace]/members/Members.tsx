@@ -307,6 +307,11 @@ export const Members: React.FC = () => {
 
         setSuccessMessage(msg || t("members.removeSuccess"));
         await refreshMembers(workspace);
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("workspace-users:refresh"));
+          window.dispatchEvent(new Event("tasks:refresh"));
+        }
       } catch {
         setErrorMessage(t("members.networkError"));
       } finally {

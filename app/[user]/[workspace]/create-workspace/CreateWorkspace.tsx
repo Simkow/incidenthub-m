@@ -179,6 +179,18 @@ export const CreateWorkspace: React.FC<Props> = ({
                   id="workspaceDueDate"
                   type="date"
                   value={dueDate}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    try {
+                      (
+                        e.currentTarget as HTMLInputElement & {
+                          showPicker?: () => void;
+                        }
+                      ).showPicker?.();
+                    } catch {
+                      // ignore: some browsers require strict user-gesture activation
+                    }
+                  }}
                   onChange={(e) => setDueDate(e.target.value)}
                   className={inputClassName}
                 />
