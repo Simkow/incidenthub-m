@@ -514,7 +514,7 @@ export default function TaskSection({
               <Image
                 src={plusIcon}
                 alt="icon"
-                className="w-4 h-4 group-hover:scale-115 transition-all"
+                className="w-4 h-4 group-hover:scale-115 transition-all ws-icon"
               />
             </button>
             {submitMessage && (
