@@ -55,7 +55,10 @@ export const Navbar: React.FC = () => {
 
   return (
     <div className="w-full fixed px-6 md:px-12 lg:px-56 py-4 bg-[#090909]/70 text-gray-400 flex flex-col md:flex-row items-center md:justify-between gap-4 heading border-b border-white/30 z-50 backdrop-blur-sm">
-      <div onClick={() => router.push("/")} className="flex gap-4 items-center justify-center shrink-0 cursor-pointer">
+      <div
+        onClick={() => router.push("/")}
+        className="flex gap-4 items-center justify-center shrink-0 cursor-pointer"
+      >
         <Image src={Logo} alt="IncidentHub Logo" className="h-12 w-12" />
         <span className="font-medium text-lg text-transparent bg-linear-to-r from-neutral-200 to-neutral-300 bg-clip-text">
           IncidentHub
