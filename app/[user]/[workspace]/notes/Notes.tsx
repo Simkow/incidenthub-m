@@ -25,7 +25,8 @@ export default function Notes({ user, workspace }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const activeNote = useMemo(
-    () => (activeNoteId ? notes.find((n) => n.id === activeNoteId) ?? null : null),
+    () =>
+      activeNoteId ? (notes.find((n) => n.id === activeNoteId) ?? null) : null,
     [activeNoteId, notes],
   );
 
@@ -49,7 +50,8 @@ export default function Notes({ user, workspace }: Props) {
               id: typeof n.id === "number" ? n.id : Number(n.id),
               title: typeof n.title === "string" ? n.title : "",
               content: typeof n.content === "string" ? n.content : "",
-              is_pinned: typeof n.is_pinned === "boolean" ? n.is_pinned : !!n.is_pinned,
+              is_pinned:
+                typeof n.is_pinned === "boolean" ? n.is_pinned : !!n.is_pinned,
               owner: typeof n.owner === "string" ? n.owner : "",
             }))
             .filter((n) => Number.isFinite(n.id) && n.id > 0 && n.title)

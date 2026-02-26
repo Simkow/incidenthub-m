@@ -205,9 +205,7 @@ export function NoteModal({
                   onClick={remove}
                   className="text-xs px-3 py-2 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover)"
                 >
-                  {deleteConfirm
-                    ? t("notes.confirmDelete")
-                    : t("notes.delete")}
+                  {deleteConfirm ? t("notes.confirmDelete") : t("notes.delete")}
                 </button>
                 {deleteConfirm ? (
                   <button
