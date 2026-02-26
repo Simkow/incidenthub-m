@@ -62,35 +62,29 @@ export async function POST(req: Request) {
     }
 
     const wsRow = await sql`
-      SELECT id
-      FROM workspaces
-      WHERE workspace_name = ${workspace}
+      SELECT w.id
+      FROM workspaces w
+      LEFT JOIN workspace_members wm
+        ON wm.workspace_id = w.id AND wm.user_id = ${userId}
+      WHERE w.workspace_name = ${workspace}
+        AND (w.owner_id = ${userId} OR wm.user_id IS NOT NULL)
+      ORDER BY w.id ASC
       LIMIT 1
     `;
 
     const workspaceId = (wsRow[0] as { id: number } | undefined)?.id;
     if (!workspaceId) {
-      return Response.json({ message: "Workspace not found" }, { status: 404 });
-    }
+      const anyWs = await sql`
+        SELECT 1
+        FROM workspaces
+        WHERE workspace_name = ${workspace}
+        LIMIT 1
+      `;
 
-    const access = await sql`
-      SELECT 1
-      FROM workspaces w
-      WHERE w.id = ${workspaceId}
-        AND (
-          w.owner = ${username}
-          OR EXISTS (
-            SELECT 1
-            FROM workspace_members wm
-            WHERE wm.workspace_id = w.id
-              AND wm.user_id = ${userId}
-          )
-        )
-      LIMIT 1
-    `;
-
-    if (access.length === 0) {
-      return Response.json({ message: "Forbidden" }, { status: 403 });
+      return Response.json(
+        { message: anyWs.length ? "Forbidden" : "Workspace not found" },
+        { status: anyWs.length ? 403 : 404 },
+      );
     }
 
     // Due in N days (date-only semantics). For "1 day left" use days=1 (due tomorrow).

@@ -17,8 +17,10 @@ import Arrow from "../../../public/assets/down-arrow.png";
 import Tasks from "../../../public/assets/tasks.png";
 import Profile from "../../../public/assets/profile.png";
 import Settings from "../../../public/assets/settings.png";
+import Notes from "../../../public/assets/note.png";
 import { LocaleToggle } from "../../i18n/LocaleToggle";
 import { useI18n } from "../../i18n/I18nProvider";
+import * as Select from "@radix-ui/react-select";
 
 export const Sidebar: React.FC = () => {
   const { t } = useI18n();
@@ -34,7 +36,9 @@ export const Sidebar: React.FC = () => {
     return current === target || current.startsWith(`${target}/`);
   };
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [workspaceSelectOpen, setWorkspaceSelectOpen] = useState(false);
+  const [selectPortalContainer, setSelectPortalContainer] =
+    useState<HTMLElement | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [memberWorkspaces, setMemberWorkspaces] = useState<Workspace[]>([]);
@@ -53,6 +57,11 @@ export const Sidebar: React.FC = () => {
       name: t("sidebar.tasks"),
       to: `/${user}/${currentWorkspace}/tasks`,
       icon: Tasks,
+    },
+    {
+      name: t("sidebar.notes"),
+      to: `/${user}/${currentWorkspace}/notes`,
+      icon: Notes,
     },
     {
       name: t("sidebar.project"),
@@ -98,6 +107,12 @@ export const Sidebar: React.FC = () => {
       setCurrentWorkspace(nextWorkspace);
     });
   }, [params]);
+
+  React.useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.querySelector(".ws-theme") as HTMLElement | null;
+    setSelectPortalContainer(root);
+  }, []);
 
   const Teams_Links = [
     {
@@ -335,104 +350,146 @@ export const Sidebar: React.FC = () => {
 
   const sidebarSections = (
     <>
-      <section
-        onClick={() => setIsOpen(!isOpen)}
-        className="mt-3 flex gap-2 items-center w-full md:w-40 py-2 pl-2 pr-3 bg-(--ws-surface-2) hover:bg-(--ws-hover) cursor-pointer rounded-lg"
-      >
-        <Image
-          src={Project}
-          alt="Current Project"
-          className="w-4 h-4 ws-icon"
-          width={16}
-          height={16}
-        />
-        <span className="text-xs font-semibold">{currentWorkspace}</span>
-        <Image
-          src={Arrow}
-          alt="arrow"
-          className={`w-3 h-3 ws-icon ${isOpen ? "rotate-180" : ""} transition-all`}
-          width={12}
-          height={12}
-        />
-        <div>
-          {isOpen && (
-            <div className="absolute mt-2 w-40 max-h-60 overflow-y-auto bg-(--ws-surface) border border-(--ws-border) rounded-lg shadow-lg z-50">
-              <div className="px-4 pt-3 pb-1 text-[11px] text-(--ws-fg-muted)">
-                {t("sidebar.ownedWorkspaces")}
-              </div>
-              {workspaces.map((workspace) => (
-                <div
-                  key={workspace.workspace_name}
-                  className="px-4 py-2 hover:bg-(--ws-hover) cursor-pointer text-xs"
-                  onClick={() => {
-                    if (!user) return;
-                    localStorage.setItem(
-                      "workspace",
-                      JSON.stringify(workspace.workspace_name),
-                    );
-                    setIsOpen(false);
-                    setMobileMenuOpen(false);
-                    router.push(`/${user}/${workspace.workspace_name}/tasks`);
-                  }}
-                >
-                  {workspace.workspace_name}
-                </div>
-              ))}
+      <div className="mt-3 w-full md:w-40">
+        <Select.Root
+          open={workspaceSelectOpen}
+          onOpenChange={setWorkspaceSelectOpen}
+          value={currentWorkspace || undefined}
+          onValueChange={(value) => {
+            if (!user) return;
+            if (!value) return;
 
-              {memberWorkspaces.length ? (
-                <>
-                  <div className="mx-2 my-2 border-t border-(--ws-border)" />
-                  <div className="px-4 pb-1 text-[11px] text-(--ws-fg-muted)">
-                    {t("sidebar.sharedWorkspaces")}
-                  </div>
-                  {memberWorkspaces.map((workspace) => (
-                    <div
-                      key={`member:${workspace.workspace_name}`}
-                      className="px-4 py-2 hover:bg-(--ws-hover) cursor-pointer text-xs"
-                      onClick={() => {
-                        if (!user) return;
-                        localStorage.setItem(
-                          "workspace",
-                          JSON.stringify(workspace.workspace_name),
-                        );
-                        setIsOpen(false);
-                        setMobileMenuOpen(false);
-                        router.push(
-                          `/${user}/${workspace.workspace_name}/tasks`,
-                        );
-                      }}
+            if (value === "__create_workspace__") {
+              const ownedFallback = workspaces[0]?.workspace_name ?? "";
+              const memberFallback = memberWorkspaces[0]?.workspace_name ?? "";
+              const target =
+                currentWorkspace || ownedFallback || memberFallback;
+              if (!target) return;
+              setMobileMenuOpen(false);
+              setWorkspaceSelectOpen(false);
+              router.push(`/${user}/${target}/create-workspace`);
+              return;
+            }
+
+            if (typeof window !== "undefined") {
+              window.localStorage.setItem("workspace", JSON.stringify(value));
+            }
+
+            setCurrentWorkspace(value);
+            setMobileMenuOpen(false);
+            router.push(`/${user}/${value}/tasks`);
+          }}
+        >
+          <Select.Trigger
+            aria-label={t("sidebar.workspace")}
+            className="flex gap-2 items-center w-full md:w-40 py-2 pl-2 pr-3 bg-(--ws-surface-2) hover:bg-(--ws-hover) cursor-pointer rounded-lg outline-none"
+          >
+            <Image
+              src={Project}
+              alt="Current Project"
+              className="w-4 h-4 ws-icon"
+              width={16}
+              height={16}
+            />
+            <span className="text-xs font-semibold">
+              <Select.Value placeholder={t("sidebar.workspace")} />
+            </span>
+            <Select.Icon asChild>
+              <Image
+                src={Arrow}
+                alt="arrow"
+                className={`w-3 h-3 ws-icon ${workspaceSelectOpen ? "rotate-180" : ""} transition-all ml-auto`}
+                width={12}
+                height={12}
+              />
+            </Select.Icon>
+          </Select.Trigger>
+
+          <Select.Portal container={selectPortalContainer ?? undefined}>
+            <Select.Content
+              position="popper"
+              sideOffset={8}
+              align="start"
+              className="z-50 w-40 max-h-60 overflow-y-auto bg-(--ws-surface) border border-(--ws-border) rounded-lg shadow-lg"
+            >
+              <Select.Viewport className="py-1">
+                <Select.Group>
+                  <Select.Label className="px-4 pt-3 pb-1 text-[11px] text-(--ws-fg-muted)">
+                    {t("sidebar.ownedWorkspaces")}
+                  </Select.Label>
+                  {currentWorkspace &&
+                  !workspaces.some(
+                    (w) => w.workspace_name === currentWorkspace,
+                  ) &&
+                  !memberWorkspaces.some(
+                    (w) => w.workspace_name === currentWorkspace,
+                  ) ? (
+                    <Select.Item
+                      value={currentWorkspace}
+                      disabled
+                      className="hidden"
                     >
-                      {workspace.workspace_name}
-                    </div>
+                      <Select.ItemText>{currentWorkspace}</Select.ItemText>
+                    </Select.Item>
+                  ) : null}
+                  {workspaces.map((workspace) => (
+                    <Select.Item
+                      key={workspace.workspace_name}
+                      value={workspace.workspace_name}
+                      className="px-4 py-2 cursor-pointer text-xs outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
+                    >
+                      <Select.ItemText>
+                        {workspace.workspace_name}
+                      </Select.ItemText>
+                    </Select.Item>
                   ))}
-                </>
-              ) : null}
-              <div className="mx-2 my-1 border-t border-(--ws-border)" />
-              <div
-                className="px-4 py-2 hover:bg-(--ws-hover) cursor-pointer text-xs flex items-center gap-2"
-                onClick={() => {
-                  setIsOpen(false);
-                  if (!user) return;
-                  const ownedFallback = workspaces[0]?.workspace_name ?? "";
-                  const target = currentWorkspace || ownedFallback;
-                  if (!target) return;
-                  setMobileMenuOpen(false);
-                  router.push(`/${user}/${target}/create-workspace`);
-                }}
-              >
-                <Image
-                  src={Add}
-                  alt="Add"
-                  className="w-3 h-3 ws-icon"
-                  width={12}
-                  height={12}
-                />
-                {t("sidebar.createWorkspace")}
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
+                </Select.Group>
+
+                {memberWorkspaces.length ? (
+                  <>
+                    <Select.Separator className="mx-2 my-2 h-px bg-(--ws-border)" />
+                    <Select.Group>
+                      <Select.Label className="px-4 pb-1 text-[11px] text-(--ws-fg-muted)">
+                        {t("sidebar.sharedWorkspaces")}
+                      </Select.Label>
+                      {memberWorkspaces.map((workspace) => (
+                        <Select.Item
+                          key={`member:${workspace.workspace_name}`}
+                          value={workspace.workspace_name}
+                          className="px-4 py-2 cursor-pointer text-xs outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
+                        >
+                          <Select.ItemText>
+                            {workspace.workspace_name}
+                          </Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                  </>
+                ) : null}
+
+                <Select.Separator className="mx-2 my-1 h-px bg-(--ws-border)" />
+                <Select.Item
+                  value="__create_workspace__"
+                  className="px-4 py-2 cursor-pointer text-xs flex items-center gap-2 outline-none data-highlighted:bg-(--ws-hover)"
+                >
+                  <Select.ItemText>
+                    <span className="flex items-center gap-2">
+                      <Image
+                        src={Add}
+                        alt="Add"
+                        className="w-3 h-3 ws-icon"
+                        width={12}
+                        height={12}
+                      />
+                      {t("sidebar.createWorkspace")}
+                    </span>
+                  </Select.ItemText>
+                </Select.Item>
+              </Select.Viewport>
+            </Select.Content>
+          </Select.Portal>
+        </Select.Root>
+      </div>
 
       <button
         onClick={() => {
@@ -655,7 +712,7 @@ export const Sidebar: React.FC = () => {
           aria-expanded={mobileMenuOpen}
           onClick={() => {
             setMobileMenuOpen((v) => !v);
-            setIsOpen(false);
+            setWorkspaceSelectOpen(false);
           }}
         >
           <span className="text-xs font-semibold text-center flex items-center">

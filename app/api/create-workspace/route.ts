@@ -118,6 +118,19 @@ export async function POST(req: Request) {
       `;
     }
 
+    await sql`
+      INSERT INTO notes (title, content, owner_id, workspace_id, is_pinned)
+      VALUES (
+        ${"Welcome to your workspace"},
+        ${
+          "This is a note. Use Notes to capture ideas, meeting summaries, or incident context.\n\nTip: Pin important notes so they stay on top."
+        },
+        ${owner_id},
+        ${workspaceId},
+        ${true}
+      )
+    `;
+
     await sql`COMMIT`;
 
     return Response.json(

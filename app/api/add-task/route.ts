@@ -53,17 +53,28 @@ export async function POST(req: Request) {
     let workspaceId: number | null = null;
 
     if (workspaceName) {
+      if (createdById === null) {
+        return Response.json(
+          { message: "created_by is required when workspace is provided" },
+          { status: 400 },
+        );
+      }
+
       const wsRow = await sql`
-        SELECT id
-        FROM workspaces
-        WHERE workspace_name = ${workspaceName}
+        SELECT w.id
+        FROM workspaces w
+        LEFT JOIN workspace_members wm
+          ON wm.workspace_id = w.id AND wm.user_id = ${createdById}
+        WHERE w.workspace_name = ${workspaceName}
+          AND (w.owner_id = ${createdById} OR wm.user_id IS NOT NULL)
+        ORDER BY w.id ASC
         LIMIT 1
       `;
 
       if (!wsRow.length) {
         return Response.json(
-          { message: "Workspace not found" },
-          { status: 400 },
+          { message: "Forbidden" },
+          { status: 403 },
         );
       }
 

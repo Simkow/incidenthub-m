@@ -162,10 +162,10 @@ export function AddTaskModal({
       >
         <h2 className="text-sm">{t("tasks.createTask")}</h2>
         <main className="w-full h-full border-t border-[color:var(--ws-border)] flex flex-col py-2">
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form className="flex flex-col gap-4 text-sm" onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row gap-3">
               <section className="flex flex-col gap-1 w-full">
-                <span>{t("tasks.title")}</span>
+                <span className="text-xs">{t("tasks.title")}</span>
                 <input
                   type="text"
                   value={title}
@@ -175,7 +175,7 @@ export function AddTaskModal({
                 />
               </section>
               <section className="flex flex-col gap-1 w-full">
-                <span>{t("tasks.priority")}</span>
+                <span className="text-xs">{t("tasks.priority")}</span>
                 <Select.Root
                   value={priority}
                   onValueChange={(value) => setPriority(value as Priority)}
@@ -212,7 +212,7 @@ export function AddTaskModal({
             </div>
             <div className="flex flex-col md:flex-row gap-3">
               <section className="flex flex-col gap-1 w-full">
-                <span>{t("tasks.description")}</span>
+                <span className="text-xs">{t("tasks.description")}</span>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -221,7 +221,7 @@ export function AddTaskModal({
                 />
               </section>
               <section className="flex flex-col gap-1 w-full">
-                <span>{t("tasks.dueDate")}</span>
+                <span className="text-xs">{t("tasks.dueDate")}</span>
                 <input
                   type="date"
                   value={dueDate}
@@ -243,7 +243,7 @@ export function AddTaskModal({
             </div>
             <div className="flex gap-3">
               <section className="flex flex-col gap-1 w-full">
-                <span>{t("tasks.assignee")}</span>
+                <span className="text-xs">{t("tasks.assignee")}</span>
                 <Select.Root
                   value={assignee}
                   onValueChange={(value) => setAssignee(value)}
