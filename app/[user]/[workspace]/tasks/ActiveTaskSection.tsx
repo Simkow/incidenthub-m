@@ -300,7 +300,7 @@ export default function ActiveTaskSection({
     return (
       <section
         key={task.id}
-        className="grid grid-cols-1 md:grid-cols-7 items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] px-3 py-2"
+        className="grid grid-cols-1 md:grid-cols-8 items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] px-3 py-2"
         role="button"
         tabIndex={0}
         onClick={() => setActiveTaskId(task.id)}
@@ -320,7 +320,7 @@ export default function ActiveTaskSection({
           value={task.description}
           onChange={(e) => updateTask(task.id, "description", e.target.value)}
           onClick={(e) => e.stopPropagation()}
-          className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
+          className="min-w-0 w-full md:col-span-2 bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
           placeholder="Description"
         />
 
@@ -491,9 +491,9 @@ export default function ActiveTaskSection({
 
   return (
     <div className="relative w-full min-h-125 flex flex-col justify-start gap-2">
-      <div className="hidden md:grid grid-cols-7 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-[color:var(--ws-fg-muted)]">
+      <div className="hidden md:grid grid-cols-8 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-[color:var(--ws-fg-muted)]">
         <span className="text-left">Title</span>
-        <span className="text-left">Description</span>
+        <span className="text-left md:col-span-2">Description</span>
         <span className="text-center">Priority</span>
         <span className="text-center">Due Date</span>
         <span className="text-center">Assignee</span>
