@@ -184,11 +184,11 @@ export default function Profile({ user, workspace }: Props) {
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex"
+      className="w-full min-h-screen md:h-screen bg-[color:var(--ws-bg)] flex"
     >
       <section className="py-2 w-full">
-        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] flex flex-col items-center p-4 gap-8 text-[color:var(--ws-fg)] relative">
-          <div className="w-full md:min-h-screen text-[color:var(--ws-fg)] body-text flex flex-col gap-2 items-center justify-center">
+        <main className="w-full md:h-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] flex flex-col items-center p-4 gap-8 text-[color:var(--ws-fg)] relative">
+          <div className="w-full md:h-screen text-[color:var(--ws-fg)] body-text flex flex-col gap-2 items-center justify-center">
             <Image
               src={ProfileIcon}
               alt={t("profile.alt.profileIcon")}
@@ -200,8 +200,8 @@ export default function Profile({ user, workspace }: Props) {
             <div className="text-sm text-[color:var(--ws-fg-muted)] body-text mb-3">
               {workspace ? `${t("profile.workspaceLabel")}: ${workspace}` : ""}
             </div>
-            <section className="grid-cols-2 space-x-10 grid justify-center text-sm p-4 rounded-lg bg-[color:var(--ws-surface-2)] border border-[color:var(--ws-border)]">
-              <div className="flex flex-col items-start gap-4">
+            <section className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl text-sm p-4 rounded-lg bg-[color:var(--ws-surface-2)] border border-[color:var(--ws-border)]">
+              <div className="flex flex-col items-start gap-4 min-w-0">
                 <div className="flex flex-col gap-1">
                   <span className="text-[color:var(--ws-fg)] font-medium">
                     {t("profile.accountOverviewTitle")}
@@ -244,17 +244,17 @@ export default function Profile({ user, workspace }: Props) {
                 )}
                 {error && <div className="text-xs text-red-400">{error}</div>}
               </div>
-              <div className="flex flex-col items-start gap-4">
+              <div className="flex flex-col items-start gap-4 min-w-0">
                 <div className="flex flex-col gap-1">
                   <span className="text-[color:var(--ws-fg)] font-medium">
                     {t("profile.accountSettingsTitle")}
                   </span>
-                  <span className="text-xs text-[color:var(--ws-fg-muted)] w-64">
+                  <span className="text-xs text-[color:var(--ws-fg-muted)] w-full max-w-sm">
                     {t("profile.accountSettingsDesc")}
                   </span>
                 </div>
 
-                <div className="w-64 rounded-lg border border-[color:var(--ws-border)] p-3">
+                <div className="w-full max-w-sm rounded-lg border border-[color:var(--ws-border)] p-3">
                   <div className="text-xs text-[color:var(--ws-fg)]">
                     {t("profile.notesTitle")}
                   </div>
@@ -266,7 +266,7 @@ export default function Profile({ user, workspace }: Props) {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-col gap-2 w-full max-w-sm">
                   <span className="text-[color:var(--ws-fg-muted)] text-xs">
                     {t("profile.usernameLabel")}
                   </span>
@@ -274,12 +274,12 @@ export default function Profile({ user, workspace }: Props) {
                     type="text"
                     value={draftName}
                     onChange={(e) => setDraftName(e.target.value)}
-                    className="border w-64 border-[color:var(--ws-border)] text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] rounded-lg px-2 py-1 bg-transparent focus:outline-none"
+                    className="border w-full border-[color:var(--ws-border)] text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] rounded-lg px-2 py-1 bg-transparent focus:outline-none"
                     placeholder={t("profile.usernamePlaceholder")}
                   />
                 </div>
 
-                <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-col gap-2 w-full max-w-sm">
                   <span className="text-[color:var(--ws-fg-muted)] text-xs">
                     {t("profile.emailLabel")}
                   </span>
@@ -287,7 +287,7 @@ export default function Profile({ user, workspace }: Props) {
                     type="email"
                     value={draftEmail}
                     onChange={(e) => setDraftEmail(e.target.value)}
-                    className="border w-64 border-[color:var(--ws-border)] text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] rounded-lg px-2 py-1 bg-transparent focus:outline-none"
+                    className="border w-full border-[color:var(--ws-border)] text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] rounded-lg px-2 py-1 bg-transparent focus:outline-none"
                     placeholder={t("profile.emailPlaceholder")}
                   />
                 </div>

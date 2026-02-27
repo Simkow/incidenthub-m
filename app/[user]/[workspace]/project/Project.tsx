@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "motion/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProjectIcon from "../../../../public/assets/project-icon.png";
 import { useI18n } from "../../../i18n/I18nProvider";
@@ -34,14 +34,14 @@ export const Project: React.FC = () => {
   const [completionPct, setCompletionPct] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [isQuitting, setIsQuitting] = useState(false);
   const [quitError, setQuitError] = useState<string | null>(null);
-
-  const saveTimeoutRef = useRef<number | null>(null);
 
   const isoToLocalInputValue = useCallback((iso: string | null) => {
     if (!iso) return "";
@@ -77,37 +77,45 @@ export const Project: React.FC = () => {
     });
   }, []);
 
-  const fetchProject = useCallback(async () => {
-    if (!username || !workspace) return;
+  const fetchProject = useCallback(
+    async (workspaceOverride?: string) => {
+      const targetWorkspace =
+        typeof workspaceOverride === "string" && workspaceOverride.trim()
+          ? workspaceOverride
+          : workspace;
 
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await fetch("/api/get-project", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, workspace }),
-      });
+      if (!username || !targetWorkspace) return;
 
-      if (!response.ok) {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch("/api/get-project", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, workspace: targetWorkspace }),
+        });
+
+        if (!response.ok) {
+          setProject(null);
+          setError(t("project.failedLoad"));
+          return;
+        }
+
+        const data = (await response.json()) as { project: ProjectData | null };
+        const nextProject = data.project ?? null;
+        setProject(nextProject);
+        setDraft(nextProject);
+      } catch (err) {
+        console.error("Error fetching project", err);
         setProject(null);
+        setDraft(null);
         setError(t("project.failedLoad"));
-        return;
+      } finally {
+        setIsLoading(false);
       }
-
-      const data = (await response.json()) as { project: ProjectData | null };
-      const nextProject = data.project ?? null;
-      setProject(nextProject);
-      setDraft(nextProject);
-    } catch (err) {
-      console.error("Error fetching project", err);
-      setProject(null);
-      setDraft(null);
-      setError(t("project.failedLoad"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [username, workspace, t]);
+    },
+    [username, workspace, t],
+  );
 
   const handleQuitWorkspace = useCallback(async () => {
     if (!username || !workspaceId || isWorkspaceOwner) return;
@@ -233,62 +241,84 @@ export const Project: React.FC = () => {
     }
   }, [username, workspace]);
 
-  console.log(project);
+  const hasChanges = useMemo(() => {
+    if (!project || !draft) return false;
+    const pDesc = project.description ?? "";
+    const dDesc = draft.description ?? "";
+    const pDue = project.due_date ?? null;
+    const dDue = draft.due_date ?? null;
+    return (
+      project.workspace_name !== draft.workspace_name ||
+      pDesc !== dDesc ||
+      pDue !== dDue
+    );
+  }, [project, draft]);
 
-  const scheduleSave = useCallback(
-    (nextDraft: ProjectData) => {
-      if (!username || !workspaceId || !isWorkspaceOwner) return;
+  const handleConfirmChanges = useCallback(async () => {
+    if (!username || !workspaceId || !isWorkspaceOwner || !draft) return;
 
-      const safeWorkspaceName = nextDraft.workspace_name.trim()
-        ? nextDraft.workspace_name
-        : "default title";
+    setIsSaving(true);
+    setSaveError(null);
 
-      if (saveTimeoutRef.current) {
-        window.clearTimeout(saveTimeoutRef.current);
+    const safeWorkspaceName = draft.workspace_name.trim()
+      ? draft.workspace_name.trim()
+      : "default title";
+
+    try {
+      const res = await fetch("/api/update-project", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: workspaceId,
+          owner: username,
+          workspace_name: safeWorkspaceName,
+          description: draft.description,
+          due_date: draft.due_date,
+        }),
+      });
+
+      const data = (await res.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+
+      if (!res.ok) {
+        setSaveError(data?.message ?? t("project.saveFailed"));
+        return;
       }
 
-      saveTimeoutRef.current = window.setTimeout(async () => {
-        try {
-          const res = await fetch("/api/update-project", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: workspaceId,
-              owner: username,
-              workspace_name: safeWorkspaceName,
-              description: nextDraft.description,
-              due_date: nextDraft.due_date,
-            }),
-          });
+      const previousWorkspace = workspace;
+      const nextWorkspace = safeWorkspaceName;
 
-          if (!res.ok) {
-            const data = (await res.json().catch(() => null)) as {
-              message?: string;
-            } | null;
-            console.error(
-              "Failed to update project",
-              data?.message ?? res.status,
-            );
-            return;
-          }
-
-          void fetchProject();
-        } catch (err) {
-          console.error("Error updating project", err);
-        }
-      }, 600);
-    },
-    [username, workspaceId, isWorkspaceOwner, fetchProject],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        window.clearTimeout(saveTimeoutRef.current);
-        saveTimeoutRef.current = null;
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem("workspace", nextWorkspace);
       }
-    };
-  }, []);
+
+      setWorkspace(nextWorkspace);
+      await fetchProject(nextWorkspace);
+
+      if (previousWorkspace !== nextWorkspace) {
+        router.replace(
+          `/${encodeURIComponent(username)}/${encodeURIComponent(nextWorkspace)}/project`,
+        );
+      }
+
+      router.refresh();
+    } catch (err) {
+      console.error("Error updating project", err);
+      setSaveError(t("project.internalError"));
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    username,
+    workspaceId,
+    isWorkspaceOwner,
+    draft,
+    workspace,
+    router,
+    fetchProject,
+    t,
+  ]);
 
   const fetchCompletion = useCallback(async () => {
     if (!username || !workspace) return;
@@ -475,9 +505,7 @@ export const Project: React.FC = () => {
                           description: null,
                           due_date: null,
                         } satisfies ProjectData);
-                      const next = { ...base, workspace_name: value };
-                      scheduleSave(next);
-                      return next;
+                      return { ...base, workspace_name: value };
                     });
                   }}
                   placeholder={isLoading ? "Loading…" : ""}
@@ -503,9 +531,7 @@ export const Project: React.FC = () => {
                         description: null,
                         due_date: null,
                       } satisfies ProjectData);
-                    const next = { ...base, description: value };
-                    scheduleSave(next);
-                    return next;
+                    return { ...base, description: value };
                   });
                 }}
                 placeholder={
@@ -545,14 +571,30 @@ export const Project: React.FC = () => {
                           description: null,
                           due_date: null,
                         } satisfies ProjectData);
-                      const next = { ...base, due_date: iso };
-                      scheduleSave(next);
-                      return next;
+                      return { ...base, due_date: iso };
                     });
                   }}
                   className="w-full bg-transparent text-center text-[color:var(--ws-fg)] outline-none disabled:opacity-60"
                 />
               </div>
+
+              {isWorkspaceOwner && (
+                <div className="w-full max-w-xs flex flex-col items-center gap-2 pt-3">
+                  <button
+                    type="button"
+                    disabled={isSaving || !hasChanges}
+                    onClick={() => void handleConfirmChanges()}
+                    className="w-full rounded-xl border border-[color:var(--ws-border)] cursor-pointer px-4 py-2 text-sm hover:bg-[color:var(--ws-hover)] disabled:opacity-60"
+                  >
+                    {isSaving ? t("project.saving") : t("project.save")}
+                  </button>
+                  {saveError && (
+                    <div className="text-xs text-red-300 text-center">
+                      {saveError}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="relative w-full max-w-xs flex flex-col items-center gap-2 pt-3">
                 {isWorkspaceOwner ? (
