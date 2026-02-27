@@ -17,13 +17,34 @@ export async function POST(req: Request) {
     const workspace =
       typeof body?.workspace === "string" ? body.workspace.trim() : "";
 
+    const hoursRaw = body?.hours;
+    const hours =
+      typeof hoursRaw === "number"
+        ? hoursRaw
+        : typeof hoursRaw === "string"
+          ? Number(hoursRaw)
+          : null;
+
     const daysRaw = body?.days;
-    const days =
+    const daysFromBody =
       typeof daysRaw === "number"
         ? daysRaw
         : typeof daysRaw === "string"
           ? Number(daysRaw)
-          : 1;
+          : null;
+
+    // due_date is DATE (no time). Map optional `hours`/`days` to a DATE window.
+    // - if `hours` is provided: days = ceil(hours/24)
+    // - else: days = `days` (default 1)
+    const windowDays = (() => {
+      if (hours !== null && Number.isFinite(hours)) {
+        return Math.ceil(hours / 24);
+      }
+      if (daysFromBody !== null && Number.isFinite(daysFromBody)) {
+        return Math.trunc(daysFromBody);
+      }
+      return 1;
+    })();
 
     const limitRaw = body?.limit;
     const limit =
@@ -41,13 +62,19 @@ export async function POST(req: Request) {
       return Response.json({ message: "workspace is invalid" }, { status: 400 });
     }
 
-    if (!Number.isFinite(days) || days < 1 || days > 30) {
-      return Response.json({ message: "days is invalid" }, { status: 400 });
+    if (!Number.isFinite(windowDays) || windowDays < 1 || windowDays > 30) {
+      return Response.json(
+        { message: "days/hours window is invalid" },
+        { status: 400 },
+      );
     }
 
     if (!Number.isFinite(limit) || limit <= 0 || limit > 50) {
       return Response.json({ message: "limit is invalid" }, { status: 400 });
     }
+
+    const windowDaysInt = Math.trunc(windowDays);
+    const limitInt = Math.trunc(limit);
 
     const userRow = await sql`
       SELECT id
@@ -87,16 +114,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // Due in N days (date-only semantics). For "1 day left" use days=1 (due tomorrow).
+    // due_date is DATE. Use date-only semantics: due between today and today + windowDays.
     const tasks = await sql`
-      SELECT t.id, t.title, t.due_date, t.priority
+      SELECT
+        t.id,
+        t.title,
+        to_char(t.due_date::date, 'YYYY-MM-DD') AS due_date,
+        t.priority
       FROM tasks t
       WHERE t.workspace_id = ${workspaceId}
         AND t.is_finished = false
         AND t.due_date IS NOT NULL
-        AND (t.due_date::date) = (CURRENT_DATE + ${days})
+        AND (t.due_date::date) >= CURRENT_DATE
+        AND (t.due_date::date) <= (CURRENT_DATE + (${windowDaysInt}::int))
       ORDER BY t.due_date ASC, t.id ASC
-      LIMIT ${limit}
+      LIMIT ${limitInt}
     `;
 
     const countRow = await sql`
@@ -105,7 +137,8 @@ export async function POST(req: Request) {
       WHERE t.workspace_id = ${workspaceId}
         AND t.is_finished = false
         AND t.due_date IS NOT NULL
-        AND (t.due_date::date) = (CURRENT_DATE + ${days})
+        AND (t.due_date::date) >= CURRENT_DATE
+        AND (t.due_date::date) <= (CURRENT_DATE + (${windowDaysInt}::int))
     `;
 
     const count = (countRow[0] as { count: number } | undefined)?.count ?? 0;

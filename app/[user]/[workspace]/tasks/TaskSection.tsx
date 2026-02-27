@@ -543,7 +543,9 @@ export default function TaskSection({
     >
       <div className="hidden md:grid grid-cols-8 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-[color:var(--ws-fg-muted)]">
         <span className="text-left">{t("tasks.title")}</span>
-        <span className="text-left md:col-span-2">{t("tasks.description")}</span>
+        <span className="text-left md:col-span-2">
+          {t("tasks.description")}
+        </span>
         <span className="text-center">{t("tasks.priority")}</span>
         <span className="text-center">{t("tasks.dueDate")}</span>
         <span className="text-center">{t("tasks.assignee")}</span>
