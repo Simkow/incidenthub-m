@@ -348,8 +348,7 @@ export const Sidebar: React.FC = () => {
     };
   }, [user, currentWorkspace, router, pathname]);
 
-  const sidebarSections = (
-    (variant: "desktop" | "mobile") => (
+  const sidebarSections = (variant: "desktop" | "mobile") => (
     <>
       <div className="mt-3 w-full md:w-40">
         <Select.Root
@@ -703,7 +702,6 @@ export const Sidebar: React.FC = () => {
         </div>
       </section>
     </>
-    )
   );
 
   return (
@@ -751,7 +749,7 @@ export const Sidebar: React.FC = () => {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
           >
-              {sidebarSections("mobile")}
+            {sidebarSections("mobile")}
           </motion.div>
         ) : null}
       </AnimatePresence>
