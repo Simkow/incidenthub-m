@@ -349,11 +349,24 @@ export const Sidebar: React.FC = () => {
   }, [user, currentWorkspace, router, pathname]);
 
   const sidebarSections = (
+    (variant: "desktop" | "mobile") => (
     <>
       <div className="mt-3 w-full md:w-40">
         <Select.Root
-          open={workspaceSelectOpen}
-          onOpenChange={setWorkspaceSelectOpen}
+          open={
+            variant === "mobile"
+              ? mobileMenuOpen
+                ? workspaceSelectOpen
+                : false
+              : mobileMenuOpen
+                ? false
+                : workspaceSelectOpen
+          }
+          onOpenChange={(nextOpen) => {
+            if (variant === "mobile" && !mobileMenuOpen) return;
+            if (variant === "desktop" && mobileMenuOpen) return;
+            setWorkspaceSelectOpen(nextOpen);
+          }}
           value={currentWorkspace || undefined}
           onValueChange={(value) => {
             if (!user) return;
@@ -690,6 +703,7 @@ export const Sidebar: React.FC = () => {
         </div>
       </section>
     </>
+    )
   );
 
   return (
@@ -724,7 +738,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <div className="hidden md:flex w-full flex-col items-start justify-start gap-6">
-        {sidebarSections}
+        {sidebarSections("desktop")}
       </div>
 
       <AnimatePresence initial={false}>
@@ -737,7 +751,7 @@ export const Sidebar: React.FC = () => {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
           >
-            {sidebarSections}
+              {sidebarSections("mobile")}
           </motion.div>
         ) : null}
       </AnimatePresence>
