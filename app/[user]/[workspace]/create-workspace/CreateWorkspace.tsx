@@ -117,7 +117,7 @@ export const CreateWorkspace: React.FC<Props> = ({
       className="w-full min-h-screen bg-[color:var(--ws-bg)] flex py-2 body-text"
     >
       <main className="w-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] items-center gap-8 text-[color:var(--ws-fg)] relative">
-        <div className="h-full md:max-h-screen manrope text-[color:var(--ws-fg)] flex items-center justify-center">
+        <div className="h-full manrope text-[color:var(--ws-fg)] flex items-center justify-center">
           <div className="w-full max-w-xl p-8">
             <h1 className="text-2xl font-semibold text-center heading">
               Create workspace
