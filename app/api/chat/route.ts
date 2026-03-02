@@ -123,3 +123,44 @@ export async function POST(req: Request) {
     return Response.json({ message: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const body = (await req.json().catch(() => null)) as {
+      id?: unknown;
+      username?: unknown;
+    } | null;
+
+    const idRaw = body?.id;
+    const messageId = typeof idRaw === "number" ? idRaw : Number(idRaw);
+
+    if (!Number.isFinite(messageId) || messageId <= 0) {
+      return Response.json({ message: "id is invalid" }, { status: 400 });
+    }
+
+    const username = trimOrEmpty(body?.username);
+    if (!username) {
+      return Response.json({ message: "username is invalid" }, { status: 400 });
+    }
+
+    const userId = await resolveUserId(username);
+    if (!userId) {
+      return Response.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const deleted = await sql`
+      DELETE FROM chat_messages
+      WHERE id = ${messageId} AND user_id = ${userId}
+      RETURNING id
+    `;
+
+    if (!deleted.length) {
+      return Response.json({ message: "Message not found" }, { status: 404 });
+    }
+
+    return Response.json({ message: "Message deleted" }, { status: 200 });
+  } catch (error) {
+    console.error("chat DELETE error", error);
+    return Response.json({ message: "Internal server error" }, { status: 500 });
+  }
+}

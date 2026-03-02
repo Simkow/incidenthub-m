@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react"
 type Props = {
   user: string;
   currentWorkspace: string;
@@ -28,6 +29,9 @@ export default function Inbox({ user, currentWorkspace }: Props) {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<
+      number | null
+    >(null);
 
     const formattedMessages = useMemo(() => {
       return [...messages]
@@ -95,6 +99,24 @@ export default function Inbox({ user, currentWorkspace }: Props) {
       await getMessages();
     }
 
+    async function deleteMessage(id: number) {
+      if (!user) return;
+
+      const response = await fetch("/api/chat", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, username: user }),
+      });
+
+      if (!response.ok) {
+        console.log("Something went wrong");
+        return;
+      }
+
+      setMessages((prev) => prev.filter((item) => item.id !== id));
+      setDeleteConfirmMessageId(null);
+    }
+
     useEffect(() => {
     if (!user || !currentWorkspace) return;
 
@@ -109,7 +131,11 @@ export default function Inbox({ user, currentWorkspace }: Props) {
   }, [user, currentWorkspace]);
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, filter: "blur(10px)" }}
+      animate={{ opacity: 1, filter: "blur(0px)" }}
+      transition={{ duration: 0.5 }}
+    >
       <div className="bg-[color:var(--ws-bg)] min-h-screen text-[color:var(--ws-fg)]">
         <div className="px-4 py-6 md:px-8">
           <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm">
@@ -124,7 +150,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                   </p>
                 </div>
                 <div className="rounded-full border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-1 text-xs text-[color:var(--ws-fg-muted)]">
-                  #inbox
+                  Inbox
                 </div>
               </div>
 
@@ -137,11 +163,63 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                   formattedMessages.map((item) => (
                     <div
                       key={item.id}
-                      className="w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] p-4"
+                      className="relative w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] p-4"
                     >
                       <div className="flex flex-col gap-1">
-                        <div className="text-xs font-semibold text-[color:var(--ws-fg-muted)]">
-                          {item.username ?? "Unknown"}
+                        <div className="flex items-center justify-between gap-3">
+                          <div
+                            className={`text-xs font-semibold ${
+                              user === item.username
+                                ? "text-[color:var(--ws-accent)]"
+                                : "text-[color:var(--ws-fg-muted)]"
+                            }`}
+                          >
+                            {item.username ?? "Unknown"}
+                          </div>
+                          {user === item.username ? (
+                            <div className="relative">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setDeleteConfirmMessageId((prev) =>
+                                    prev === item.id ? null : item.id,
+                                  )
+                                }
+                                className="text-[11px] cursor-pointer font-medium text-red-300 transition hover:text-red-400"
+                              >
+                                Delete
+                              </button>
+                              <div
+                                className={`${
+                                  deleteConfirmMessageId === item.id
+                                    ? "flex"
+                                    : "hidden"
+                                } absolute right-0 top-5 z-10 w-44 max-w-[calc(100vw-2rem)] flex-col items-center justify-center gap-2 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-3 text-center text-[11px] text-[color:var(--ws-fg-muted)] shadow-sm`}
+                                onClick={(e) => e.stopPropagation()}
+                                onMouseDown={(e) => e.stopPropagation()}
+                              >
+                                <span>Delete this message?</span>
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setDeleteConfirmMessageId(null)
+                                    }
+                                    className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] hover:bg-[color:var(--ws-hover)]"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => void deleteMessage(item.id)}
+                                    className="rounded-lg border border-red-300 bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-red-300 hover:bg-[color:var(--ws-hover)] hover:text-red-400"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
                         <div className="mt-2 whitespace-pre-wrap text-sm">
                           {item.message}
@@ -176,9 +254,9 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                       className="mt-2 min-h-[90px] w-full resize-none rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-2 text-sm text-[color:var(--ws-fg)] outline-none placeholder:text-[color:var(--ws-fg-muted)]"
                       placeholder="Write a message..."
                     />
-                    <div className="mt-2 text-[11px] text-[color:var(--ws-fg-muted)]">
+                    {/* <div className="mt-2 text-[11px] text-[color:var(--ws-fg-muted)]">
                       Tip: use @username to mention someone.
-                    </div>
+                    </div> */}
                   </div>
                   <button
                     type="submit"
@@ -193,6 +271,6 @@ export default function Inbox({ user, currentWorkspace }: Props) {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
