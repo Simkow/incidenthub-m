@@ -137,9 +137,9 @@ export default function Inbox({ user, currentWorkspace }: Props) {
       transition={{ duration: 0.5 }}
     >
       <div className="bg-[color:var(--ws-bg)] min-h-screen text-[color:var(--ws-fg)]">
-        <div className="px-4 py-6 md:px-8">
-          <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm">
-            <div className="flex flex-col gap-4">
+        <div className="p-4">
+          <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm md:h-[calc(100vh-160px)]">
+            <div className="flex h-full flex-col gap-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h1 className="text-2xl font-semibold heading">
@@ -154,7 +154,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                 </div>
               </div>
 
-              <div className="flex max-h-[60vh] w-full flex-col gap-4 overflow-y-auto pr-2">
+              <div className="flex w-full flex-1 flex-col gap-4 overflow-y-auto pr-2">
                 {formattedMessages.length === 0 ? (
                   <div className="w-full rounded-xl border border-dashed border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] p-4 text-sm text-[color:var(--ws-fg-muted)]">
                     {isLoading ? "Loading messages..." : "No messages yet."}
@@ -238,7 +238,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                   onSubmit={SubmitMessage}
                   className="flex w-full flex-col gap-3 md:flex-row md:items-end"
                 >
-                  <div className="w-full">
+                  <div className="w-full flex flex-col">
                     <label className="text-xs font-medium text-[color:var(--ws-fg-muted)]">
                       Message
                     </label>
