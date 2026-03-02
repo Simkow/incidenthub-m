@@ -79,7 +79,7 @@ export default async function WorkspacePage({ params }: PageProps) {
   return (
     <div>
       <Sidebar />
-      <div className="md:ml-48 bg-[color:var(--ws-bg)]">
+      <div className="md:ml-48 bg-(--ws-bg)">
         <TaskDashboard />
       </div>
     </div>

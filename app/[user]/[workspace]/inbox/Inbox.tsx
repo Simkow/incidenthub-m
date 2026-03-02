@@ -99,13 +99,17 @@ export default function Inbox({ user, currentWorkspace }: Props) {
       await getMessages();
     }
 
-    async function deleteMessage(id: number) {
-      if (!user) return;
+    async function deleteMessage(messageId: number) {
+      if (!user || !currentWorkspace) return;
 
       const response = await fetch("/api/chat", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, username: user }),
+        body: JSON.stringify({
+          messageId,
+          username: user,
+          workspace: currentWorkspace,
+        }),
       });
 
       if (!response.ok) {
@@ -113,7 +117,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
         return;
       }
 
-      setMessages((prev) => prev.filter((item) => item.id !== id));
+      setMessages((prev) => prev.filter((item) => item.id !== messageId));
       setDeleteConfirmMessageId(null);
     }
 
@@ -138,7 +142,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
     >
       <div className="bg-[color:var(--ws-bg)] min-h-screen text-[color:var(--ws-fg)]">
         <div className="p-4">
-          <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm md:h-[calc(100vh-160px)]">
+          <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm md:h-[800px]">
             <div className="flex h-full flex-col gap-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -211,8 +215,8 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                                   </button>
                                   <button
                                     type="button"
-                                    onClick={() => void deleteMessage(item.id)}
-                                    className="rounded-lg border border-red-300 bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-red-300 hover:bg-[color:var(--ws-hover)] hover:text-red-400"
+                                    onClick={() => deleteMessage(item.id)}
+                                    className="cursor-pointer rounded-lg border border-red-300 bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-red-300 hover:bg-[color:var(--ws-hover)] hover:text-red-400"
                                   >
                                     Delete
                                   </button>

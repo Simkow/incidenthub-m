@@ -127,20 +127,23 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as {
-      id?: unknown;
       username?: unknown;
+      workspace?: unknown;
+      messageId?: unknown;
     } | null;
 
-    const idRaw = body?.id;
-    const messageId = typeof idRaw === "number" ? idRaw : Number(idRaw);
-
-    if (!Number.isFinite(messageId) || messageId <= 0) {
-      return Response.json({ message: "id is invalid" }, { status: 400 });
-    }
-
     const username = trimOrEmpty(body?.username);
-    if (!username) {
-      return Response.json({ message: "username is invalid" }, { status: 400 });
+    const workspace = trimOrEmpty(body?.workspace);
+    const messageId =
+      typeof body?.messageId === "number"
+        ? body.messageId
+        : Number.parseInt(String(body?.messageId ?? ""), 10);
+
+    if (!username || !workspace || !Number.isFinite(messageId)) {
+      return Response.json(
+        { message: "username, workspace, and messageId are required" },
+        { status: 400 },
+      );
     }
 
     const userId = await resolveUserId(username);
@@ -148,17 +151,24 @@ export async function DELETE(req: Request) {
       return Response.json({ message: "User not found" }, { status: 404 });
     }
 
+    const workspaceId = await resolveWorkspaceId(workspace, userId);
+    if (!workspaceId) {
+      return Response.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     const deleted = await sql`
       DELETE FROM chat_messages
-      WHERE id = ${messageId} AND user_id = ${userId}
+      WHERE id = ${messageId}
+        AND user_id = ${userId}
+        AND workspace_id = ${workspaceId}
       RETURNING id
     `;
 
     if (!deleted.length) {
-      return Response.json({ message: "Message not found" }, { status: 404 });
+      return Response.json({ message: "Not found" }, { status: 404 });
     }
 
-    return Response.json({ message: "Message deleted" }, { status: 200 });
+    return Response.json({ deleted: true }, { status: 200 });
   } catch (error) {
     console.error("chat DELETE error", error);
     return Response.json({ message: "Internal server error" }, { status: 500 });

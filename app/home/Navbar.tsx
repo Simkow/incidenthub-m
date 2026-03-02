@@ -39,6 +39,24 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+    } catch {
+      // ignore
+    }
+
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("authToken");
+      window.localStorage.removeItem("users");
+      window.localStorage.removeItem("workspace");
+    }
+
+    setToken("");
+    setUsername("");
+    router.push("/login");
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const user1 = window.localStorage.getItem("users");
@@ -106,9 +124,9 @@ export const Navbar: React.FC = () => {
           <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
             <Link
               href="/login"
-              onClick={() => {
-                localStorage.removeItem("authToken");
-                queueMicrotask(() => setToken(""));
+              onClick={(e) => {
+                e.preventDefault();
+                void handleLogout();
               }}
               className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-white/50 transition-all duration-300"
             >

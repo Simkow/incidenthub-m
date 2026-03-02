@@ -93,11 +93,11 @@ export function AddNoteModal({
       }}
     >
       <div
-        className="w-[92vw] max-w-3xl rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] p-3 flex flex-col gap-3 text-[color:var(--ws-fg)]"
+        className="w-[92vw] max-w-3xl rounded-xl bg-(--ws-surface) border border-(--ws-border) p-3 flex flex-col gap-3 text-(--ws-fg)"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 className="text-sm">{t("notes.createNote")}</h2>
-        <main className="w-full h-full border-t border-[color:var(--ws-border)] flex flex-col py-2">
+        <main className="w-full h-full border-t border-(--ws-border) flex flex-col py-2">
           <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row gap-3">
               <section className="flex flex-col gap-1 w-full">
@@ -106,12 +106,12 @@ export function AddNoteModal({
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] p-2 w-full md:w-72 bg-transparent focus:outline-none"
+                  className="text-(--ws-fg) rounded-md border border-(--ws-border) p-2 w-full md:w-72 bg-transparent focus:outline-none"
                   placeholder={t("notes.titlePh")}
                 />
               </section>
               <section className="flex items-end gap-2 w-full">
-                <div className="flex items-center gap-2 text-xs text-[color:var(--ws-fg-muted)] select-none">
+                <div className="flex items-center gap-2 text-xs text-(--ws-fg-muted) select-none">
                   <RoundedCheckbox
                     checked={isPinned}
                     onCheckedChange={setIsPinned}
@@ -127,7 +127,7 @@ export function AddNoteModal({
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] p-2 w-full h-40 bg-transparent focus:outline-none resize-none"
+                className="text-(--ws-fg) rounded-md border border-(--ws-border) p-2 w-full h-40 bg-transparent focus:outline-none resize-none"
                 placeholder={t("notes.contentPh")}
               />
             </section>
@@ -136,14 +136,14 @@ export function AddNoteModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="text-xs px-3 py-2 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
+                className="text-xs px-3 py-2 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover)"
               >
                 {t("notes.close")}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="text-xs px-3 py-2 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)] disabled:opacity-60"
+                className="text-xs px-3 py-2 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover) disabled:opacity-60"
               >
                 {isSubmitting ? t("notes.saving") : t("notes.save")}
               </button>

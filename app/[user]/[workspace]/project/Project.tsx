@@ -365,7 +365,7 @@ export const Project: React.FC = () => {
 
   const dueDateLabel = useMemo(() => {
     const raw = project?.due_date;
-    if (!raw) return "—";
+    if (!raw) return "--";
     const dt = new Date(raw);
     if (Number.isNaN(dt.getTime())) return raw;
 
@@ -459,26 +459,26 @@ export const Project: React.FC = () => {
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex"
+      className="w-full min-h-screen bg-(--ws-bg) flex"
     >
       <section className="py-2 w-full">
-        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] flex flex-col items-center p-4 md:p-6 gap-6 text-[color:var(--ws-fg)] relative">
+        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-(--ws-border) bg-(--ws-surface) flex flex-col items-center p-4 md:p-6 gap-6 text-(--ws-fg) relative">
           <div className="pt-6 flex flex-col items-center gap-4 w-full max-w-3xl">
             <div className="flex items-center justify-center">
               <Image src={ProjectIcon} alt="Project" className="ws-icon w-32" />
             </div>
             <div className="w-full flex flex-col gap-2">
-              <div className="text-xs text-[color:var(--ws-fg-muted)] heading">
+              <div className="text-xs text-(--ws-fg-muted) heading">
                 {t("project.progressBar")}
               </div>
               <div className="w-full flex items-center gap-4">
-                <div className="flex-1 h-2 rounded-full bg-[color:var(--ws-surface-2)] overflow-hidden">
+                <div className="flex-1 h-2 rounded-full bg-(--ws-surface-2) overflow-hidden">
                   <div
                     className="h-full bg-emerald-500"
                     style={{ width: `${clampedPct}%` }}
                   />
                 </div>
-                <div className="text-xs text-[color:var(--ws-fg-muted)] tabular-nums">
+                <div className="text-xs text-(--ws-fg-muted) tabular-nums">
                   {clampedPct}%
                 </div>
               </div>
@@ -487,10 +487,10 @@ export const Project: React.FC = () => {
 
           <div className="w-full max-w-3xl flex flex-col gap-5">
             <div className="flex flex-col items-center gap-2">
-              <div className="text-xs text-[color:var(--ws-fg-muted)] heading">
+              <div className="text-xs text-(--ws-fg-muted) heading">
                 {t("project.projectName")}
               </div>
-              <div className="w-full max-w-sm rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-6 py-5 text-center">
+              <div className="w-full max-w-sm rounded-xl border border-(--ws-border) bg-(--ws-surface-2) px-6 py-5 text-center">
                 <input
                   value={draft?.workspace_name ?? ""}
                   spellCheck={false}
@@ -508,14 +508,14 @@ export const Project: React.FC = () => {
                       return { ...base, workspace_name: value };
                     });
                   }}
-                  placeholder={isLoading ? "Loading…" : ""}
-                  className="w-full bg-transparent text-3xl font-semibold tracking-tight text-center text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] outline-none disabled:opacity-60"
+                  placeholder={isLoading ? "Loading..." : ""}
+                  className="w-full bg-transparent text-3xl font-semibold tracking-tight text-center text-(--ws-fg) placeholder:text-(--ws-fg-muted) outline-none disabled:opacity-60"
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="text-xs text-[color:var(--ws-fg-muted)] heading text-center">
+              <div className="text-xs text-(--ws-fg-muted) heading text-center">
                 {t("project.description")}
               </div>
               <textarea
@@ -537,15 +537,15 @@ export const Project: React.FC = () => {
                 placeholder={
                   isLoading ? t("project.loading") : t("project.descriptionPh")
                 }
-                className="min-h-44 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-5 py-4 text-sm text-[color:var(--ws-fg)] placeholder:text-[color:var(--ws-fg-muted)] whitespace-pre-wrap outline-none resize-none disabled:opacity-60"
+                className="min-h-44 rounded-xl border border-(--ws-border) bg-(--ws-surface-2) px-5 py-4 text-sm text-(--ws-fg) placeholder:text-(--ws-fg-muted) whitespace-pre-wrap outline-none resize-none disabled:opacity-60"
               />
             </div>
 
             <div className="flex flex-col items-center gap-2 pt-2">
-              <div className="text-xs text-[color:var(--ws-fg-muted)] heading">
+              <div className="text-xs text-(--ws-fg-muted) heading">
                 {t("project.dueDate")}
               </div>
-              <div className="w-full max-w-xs rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-6 py-4 text-center text-sm tabular-nums">
+              <div className="w-full max-w-xs rounded-xl border border-(--ws-border) bg-(--ws-surface-2) px-6 py-4 text-center text-sm tabular-nums">
                 <input
                   type="datetime-local"
                   value={dueDateInputValue}
@@ -574,7 +574,7 @@ export const Project: React.FC = () => {
                       return { ...base, due_date: iso };
                     });
                   }}
-                  className="w-full bg-transparent text-center text-[color:var(--ws-fg)] outline-none disabled:opacity-60"
+                  className="w-full bg-transparent text-center text-(--ws-fg) outline-none disabled:opacity-60"
                 />
               </div>
 
@@ -584,7 +584,7 @@ export const Project: React.FC = () => {
                     type="button"
                     disabled={isSaving || !hasChanges}
                     onClick={() => void handleConfirmChanges()}
-                    className="w-full rounded-xl border border-[color:var(--ws-border)] cursor-pointer px-4 py-2 text-sm hover:bg-[color:var(--ws-hover)] disabled:opacity-60"
+                    className="w-full rounded-xl border border-(--ws-border) cursor-pointer px-4 py-2 text-sm hover:bg-(--ws-hover) disabled:opacity-60"
                   >
                     {isSaving ? t("project.saving") : t("project.save")}
                   </button>
@@ -626,7 +626,7 @@ export const Project: React.FC = () => {
                         {quitError}
                       </div>
                     )}
-                    <div className="w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-4 py-2 text-xs text-[color:var(--ws-fg-muted)] text-center">
+                    <div className="w-full rounded-xl border border-(--ws-border) bg-(--ws-surface-2) px-4 py-2 text-xs text-(--ws-fg-muted) text-center">
                       {t("project.onlyOwnerDelete")}
                     </div>
                   </>
@@ -634,11 +634,11 @@ export const Project: React.FC = () => {
 
                 {isWorkspaceOwner && deleteOpen && (
                   <div
-                    className="absolute bottom-10 w-full rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] p-4 flex flex-col items-center gap-3 z-10"
+                    className="absolute bottom-10 w-full rounded-xl bg-(--ws-surface) border border-(--ws-border) p-4 flex flex-col items-center gap-3 z-10"
                     onMouseDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className="text-sm text-[color:var(--ws-fg-muted)] font-light text-center">
+                    <span className="text-sm text-(--ws-fg-muted) font-light text-center">
                       {t("project.deleteConfirm")}
                     </span>
                     <div className="flex gap-2">
@@ -646,7 +646,7 @@ export const Project: React.FC = () => {
                         type="button"
                         disabled={isDeleting}
                         onClick={() => setDeleteOpen(false)}
-                        className="border border-[color:var(--ws-border)] text-sm text-[color:var(--ws-fg-muted)] py-1 px-3 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] disabled:opacity-60"
+                        className="border border-(--ws-border) text-sm text-(--ws-fg-muted) py-1 px-3 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover) disabled:opacity-60"
                       >
                         {t("project.cancel")}
                       </button>
@@ -654,7 +654,7 @@ export const Project: React.FC = () => {
                         type="button"
                         disabled={isDeleting}
                         onClick={() => void handleDeleteWorkspace()}
-                        className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] hover:text-red-400 disabled:opacity-60"
+                        className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover) hover:text-red-400 disabled:opacity-60"
                       >
                         {isDeleting
                           ? t("project.deleting")

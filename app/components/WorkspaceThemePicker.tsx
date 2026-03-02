@@ -57,15 +57,15 @@ export function WorkspaceThemePicker({
           }
         }}
         className={
-          "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none bg-[color:var(--ws-surface,#181818)] " +
-          "border-[color:var(--ws-border,#2e2e2e)] text-[color:var(--ws-fg,#ffffff)]"
+          "w-full rounded-lg border px-3 py-2 text-sm focus:outline-none bg-(--ws-surface,#181818) " +
+          "border-(--ws-border,#2e2e2e) text-(--ws-fg,#ffffff)"
         }
       >
         {themes.map((theme) => (
           <option
             key={theme.id}
             value={theme.id}
-            className="bg-[color:var(--ws-surface,#181818)] text-[color:var(--ws-fg,#ffffff)]"
+            className="bg-(--ws-surface,#181818) text-(--ws-fg,#ffffff)"
           >
             {themeLabel(
               theme.id,
@@ -82,24 +82,24 @@ export function WorkspaceThemePicker({
             {previewText}
           </div>
           <div
-            className="ws-theme mt-2 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-bg)] p-3"
+            className="ws-theme mt-2 rounded-xl border border-(--ws-border) bg-(--ws-bg) p-3"
             data-ws-theme={value}
           >
-            <div className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-3">
+            <div className="rounded-lg border border-(--ws-border) bg-(--ws-surface) p-3">
               <div className="text-sm font-medium">Aa</div>
-              <div className="mt-1 text-xs text-[color:var(--ws-fg-muted)]">
+              <div className="mt-1 text-xs text-(--ws-fg-muted)">
                 {t("settings.previewHint")}
               </div>
               <div className="mt-3 flex items-center gap-2">
                 <button
                   type="button"
-                  className="text-xs rounded-lg px-2 py-1 border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
+                  className="text-xs rounded-lg px-2 py-1 border border-(--ws-border) hover:bg-(--ws-hover)"
                 >
                   {t("settings.previewSecondary")}
                 </button>
                 <button
                   type="button"
-                  className="text-xs rounded-lg px-2 py-1 bg-[color:var(--ws-accent)] text-[color:var(--ws-accent-fg)] border border-[color:var(--ws-accent)]"
+                  className="text-xs rounded-lg px-2 py-1 bg-(--ws-accent) text-(--ws-accent-fg) border border-(--ws-accent)"
                 >
                   {t("settings.previewPrimary")}
                 </button>

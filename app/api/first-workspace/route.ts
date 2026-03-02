@@ -85,7 +85,7 @@ export async function POST(req: Request) {
       {
         title: "Delete your first task",
         description:
-          "Clean up tasks you no longer need — keep your list sharp.",
+          "Clean up tasks you no longer need -- keep your list sharp.",
       },
     ] as const;
 

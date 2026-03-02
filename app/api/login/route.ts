@@ -1,5 +1,6 @@
 import { sql } from "../../lib/db";
 import bcrypt from "bcryptjs";
+import { SignJWT } from "jose";
 
 export const dynamic = "force-dynamic";
 
@@ -35,13 +36,43 @@ export async function POST(req: Request) {
       return Response.json({ message: "Invalid email or password" }, { status: 401 });
     }
 
-    return Response.json(
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      return Response.json(
+        { message: "JWT_SECRET is not configured" },
+        { status: 500 },
+      );
+    }
+
+    const token = await new SignJWT({ name: user.name, email: user.email })
+      .setProtectedHeader({ alg: "HS256" })
+      .setSubject(String(user.id))
+      .setIssuedAt()
+      .setExpirationTime("7d")
+      .sign(new TextEncoder().encode(secret));
+
+    const isProd = process.env.NODE_ENV === "production";
+    const cookie = [
+      `auth_token=${token}`,
+      "HttpOnly",
+      "Path=/",
+      "SameSite=Lax",
+      "Max-Age=604800",
+      isProd ? "Secure" : "",
+    ]
+      .filter(Boolean)
+      .join("; ");
+
+    const response = Response.json(
       {
         message: "Login successful",
         user: { id: user.id, email: user.email, name: user.name },
       },
       { status: 200 },
     );
+
+    response.headers.set("Set-Cookie", cookie);
+    return response;
   } catch (error) {
     console.error(error);
     return Response.json({ message: "Internal server error" }, { status: 500 });

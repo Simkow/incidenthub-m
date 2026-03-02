@@ -58,7 +58,7 @@ export const Login: React.FC = () => {
         localStorage.setItem("userEmail", JSON.stringify(data.user.email));
         setUser(data.user);
 
-        // sprawdź w bazie, czy user ma już workspace
+        // sprawdĹş w bazie, czy user ma juĹĽ workspace
         try {
           const wsRes = await fetch("/api/get-workspace", {
             method: "POST",
@@ -82,7 +82,7 @@ export const Login: React.FC = () => {
             }
           }
 
-          // brak workspace w bazie lub błąd API -> first-workspace
+          // brak workspace w bazie lub bĹ‚Ä…d API -> first-workspace
           router.push("/first-workspace");
           return;
         } catch {
@@ -188,7 +188,7 @@ export const Login: React.FC = () => {
             className={inputClassName}
             value={password}
             onChange={handlePasswordChange}
-            placeholder="••••••••"
+            placeholder="********"
             autoComplete="current-password"
             required
           />

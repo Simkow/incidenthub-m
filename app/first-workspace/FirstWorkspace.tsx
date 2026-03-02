@@ -266,7 +266,7 @@ export const FirstWorkspace: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                       <div className="truncate">
                         <span className="text-white/90">{inv.workspace}</span>
-                        <span className="text-white/50"> · {inv.inviter}</span>
+                        <span className="text-white/50">  - · {inv.inviter}</span>
                       </div>
                     </div>
                     <div className="mt-2 flex gap-2">

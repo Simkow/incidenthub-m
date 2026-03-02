@@ -32,15 +32,15 @@ export function ProjectCompletionModal({
             animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
             exit={{ opacity: 0, filter: "blur(10px)", scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-xl rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)]"
+            className="w-full max-w-xl rounded-xl bg-(--ws-surface) border border-(--ws-border)"
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[color:var(--ws-border)]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-(--ws-border)">
               <h2 className="text-sm">Project complete</h2>
               <button
                 type="button"
                 onClick={onClose}
-                className="text-xs px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
+                className="text-xs px-2 py-1 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover)"
               >
                 Close
               </button>
@@ -48,15 +48,15 @@ export function ProjectCompletionModal({
 
             <div className="p-5 flex flex-col gap-2">
               <div className="text-lg">Congratulations!</div>
-              <div className="text-sm text-[color:var(--ws-fg-muted)]">
-                You’ve finished all {allTasksCount} tasks. Great work.
+              <div className="text-sm text-(--ws-fg-muted)">
+                You've finished all {allTasksCount} tasks. Great work.
               </div>
 
-              <div className="mt-3 rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-2 flex items-center justify-between">
-                <span className="text-xs text-[color:var(--ws-fg-muted)]">
+              <div className="mt-3 rounded-lg border border-(--ws-border) bg-(--ws-surface-2) px-3 py-2 flex items-center justify-between">
+                <span className="text-xs text-(--ws-fg-muted)">
                   Completion
                 </span>
-                <span className="text-xs px-2 py-1 rounded-lg border border-[color:var(--ws-border)]">
+                <span className="text-xs px-2 py-1 rounded-lg border border-(--ws-border)">
                   100%
                 </span>
               </div>

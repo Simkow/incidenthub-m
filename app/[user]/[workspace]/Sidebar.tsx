@@ -292,6 +292,25 @@ export const Sidebar: React.FC = () => {
     [fetchInvites, user],
   );
 
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+    } catch {
+      // ignore
+    }
+
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("authToken");
+      window.localStorage.removeItem("users");
+      window.localStorage.removeItem("workspace");
+    }
+
+    setUser("");
+    setCurrentWorkspace("");
+    setMobileMenuOpen(false);
+    router.push("/login");
+  }, [router]);
+
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     if (!user) return;
@@ -574,7 +593,7 @@ export const Sidebar: React.FC = () => {
                     <span className="text-(--ws-fg)">{inv.workspace}</span>
                     <span className="text-(--ws-fg-muted)">
                       {" "}
-                      · {inv.inviter}
+                       - · {inv.inviter}
                     </span>
                   </div>
                 </div>
@@ -691,9 +710,9 @@ export const Sidebar: React.FC = () => {
           </div>
           <Link
             href="/login"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              localStorage.removeItem("authToken");
+            onClick={(event) => {
+              event.preventDefault();
+              void handleLogout();
             }}
             className="text-xs flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 w-full cursor-pointer hover:bg-(--ws-hover)"
           >

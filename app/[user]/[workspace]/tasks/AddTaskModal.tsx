@@ -157,11 +157,11 @@ export function AddTaskModal({
       }}
     >
       <div
-        className="w-[92vw] max-w-3xl rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] p-3 flex flex-col gap-3"
+        className="w-[92vw] max-w-3xl rounded-xl bg-(--ws-surface) border border-(--ws-border) p-3 flex flex-col gap-3"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 className="text-sm">{t("tasks.createTask")}</h2>
-        <main className="w-full h-full border-t border-[color:var(--ws-border)] flex flex-col py-2">
+        <main className="w-full h-full border-t border-(--ws-border) flex flex-col py-2">
           <form className="flex flex-col gap-4 text-sm" onSubmit={handleSubmit}>
             <div className="flex flex-col md:flex-row gap-3">
               <section className="flex flex-col gap-1 w-full">
@@ -170,7 +170,7 @@ export function AddTaskModal({
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] p-2 w-full md:w-48 bg-transparent focus:outline-none"
+                  className="text-(--ws-fg) rounded-md border border-(--ws-border) p-2 w-full md:w-48 bg-transparent focus:outline-none"
                   placeholder={t("tasks.titlePh")}
                 />
               </section>
@@ -180,17 +180,15 @@ export function AddTaskModal({
                   value={priority}
                   onValueChange={(value) => setPriority(value as Priority)}
                 >
-                  <Select.Trigger className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] px-2 py-2 w-full md:w-48 flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
+                  <Select.Trigger className="text-(--ws-fg) rounded-md border border-(--ws-border) px-2 py-2 w-full md:w-48 flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
                     <Select.Value placeholder={t("tasks.priorityPh")} />
-                    <Select.Icon className="text-[color:var(--ws-fg-muted)]">
-                      ▾
-                    </Select.Icon>
+                    <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
                   </Select.Trigger>
                   <Select.Portal container={portalContainer ?? undefined}>
                     <Select.Content
                       position="popper"
                       sideOffset={6}
-                      className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] hover:cursor-pointer"
+                      className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface) hover:cursor-pointer"
                     >
                       <Select.Viewport className="p-1">
                         {(["Light", "Medium", "High", "Urgent"] as const).map(
@@ -198,7 +196,7 @@ export function AddTaskModal({
                             <Select.Item
                               key={p}
                               value={p}
-                              className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
+                              className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
                             >
                               <Select.ItemText>{p}</Select.ItemText>
                             </Select.Item>
@@ -216,7 +214,7 @@ export function AddTaskModal({
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] p-2 w-full md:w-72 h-40 bg-transparent focus:outline-none"
+                  className="text-(--ws-fg) rounded-md border border-(--ws-border) p-2 w-full md:w-72 h-40 bg-transparent focus:outline-none"
                   placeholder={t("tasks.descriptionPh")}
                 />
               </section>
@@ -237,7 +235,7 @@ export function AddTaskModal({
                       // ignore
                     }
                   }}
-                  className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] p-2 w-full md:w-72 bg-transparent focus:outline-none no-date-icon"
+                  className="text-(--ws-fg) rounded-md border border-(--ws-border) p-2 w-full md:w-72 bg-transparent focus:outline-none no-date-icon"
                 />
               </section>
             </div>
@@ -249,7 +247,7 @@ export function AddTaskModal({
                   onValueChange={(value) => setAssignee(value)}
                   disabled={assigneeLoading || assigneeOptions.length === 0}
                 >
-                  <Select.Trigger className="text-[color:var(--ws-fg)] rounded-md border border-[color:var(--ws-border)] px-2 py-2 w-full md:w-72 flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
+                  <Select.Trigger className="text-(--ws-fg) rounded-md border border-(--ws-border) px-2 py-2 w-full md:w-72 flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
                     <Select.Value
                       placeholder={
                         assigneeLoading
@@ -257,22 +255,20 @@ export function AddTaskModal({
                           : t("tasks.assigneePh")
                       }
                     />
-                    <Select.Icon className="text-[color:var(--ws-fg-muted)]">
-                      ▾
-                    </Select.Icon>
+                    <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
                   </Select.Trigger>
                   <Select.Portal container={portalContainer ?? undefined}>
                     <Select.Content
                       position="popper"
                       sideOffset={6}
-                      className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] hover:cursor-pointer"
+                      className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface) hover:cursor-pointer"
                     >
                       <Select.Viewport className="p-1">
                         {assigneeOptions.map((name) => (
                           <Select.Item
                             key={name}
                             value={name}
-                            className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
+                            className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
                           >
                             <Select.ItemText>{name}</Select.ItemText>
                           </Select.Item>
@@ -286,7 +282,7 @@ export function AddTaskModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-xl border border-[color:var(--ws-border)] p-2 w-full md:w-24 text-center hover:bg-[color:var(--ws-hover)] cursor-pointer disabled:opacity-60"
+              className="rounded-xl border border-(--ws-border) p-2 w-full md:w-24 text-center hover:bg-(--ws-hover) cursor-pointer disabled:opacity-60"
             >
               {isSubmitting ? t("tasks.sending") : t("tasks.submit")}
             </button>

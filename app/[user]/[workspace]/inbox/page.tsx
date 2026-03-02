@@ -78,7 +78,7 @@ export default async function InboxPage({ params }: PageProps) {
   return (
     <div>
       <Sidebar />
-      <div className="md:ml-48 bg-[color:var(--ws-bg)]">
+      <div className="md:ml-48 bg-(--ws-bg)">
         <Inbox user={user} currentWorkspace={workspace} />
       </div>
     </div>

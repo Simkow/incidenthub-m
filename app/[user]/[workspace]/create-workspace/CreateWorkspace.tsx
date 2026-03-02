@@ -33,7 +33,7 @@ export const CreateWorkspace: React.FC<Props> = ({
   const safeName = trimOrEmpty(name);
 
   const inputClassName =
-    "text-[color:var(--ws-fg)] bg-transparent border border-[color:var(--ws-border)] rounded-lg px-4 py-2 w-full focus:outline-none text-sm placeholder:text-[color:var(--ws-fg-muted)]";
+    "text-(--ws-fg) bg-transparent border border-(--ws-border) rounded-lg px-4 py-2 w-full focus:outline-none text-sm placeholder:text-(--ws-fg-muted)";
   const textareaClassName = inputClassName + " min-h-24 resize-y";
 
   function themeStorageKey(username: string, workspace: string) {
@@ -114,29 +114,29 @@ export const CreateWorkspace: React.FC<Props> = ({
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[color:var(--ws-bg)] flex py-2 body-text"
+      className="w-full min-h-screen bg-(--ws-bg) flex py-2 body-text"
     >
-      <main className="w-full border-y border-l rounded-l-xl border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] items-center gap-8 text-[color:var(--ws-fg)] relative">
-        <div className="h-full manrope text-[color:var(--ws-fg)] flex items-center justify-center">
+      <main className="w-full border-y border-l rounded-l-xl border-(--ws-border) bg-(--ws-surface) items-center gap-8 text-(--ws-fg) relative">
+        <div className="h-full manrope text-(--ws-fg) flex items-center justify-center">
           <div className="w-full max-w-xl p-8">
             <h1 className="text-2xl font-semibold text-center heading">
               Create workspace
             </h1>
-            <p className="text-[color:var(--ws-fg-muted)] text-sm mt-2 text-center">
+            <p className="text-(--ws-fg-muted) text-sm mt-2 text-center">
               Current workspace:{" "}
-              <span className="text-[color:var(--ws-fg)]">
+              <span className="text-(--ws-fg)">
                 {currentWorkspace}
               </span>
             </p>
 
             <form
               onSubmit={handleSubmit}
-              className="mt-6 flex flex-col gap-4 p-5 rounded-lg bg-[color:var(--ws-surface-2)] border border-[color:var(--ws-border)] relative"
+              className="mt-6 flex flex-col gap-4 p-5 rounded-lg bg-(--ws-surface-2) border border-(--ws-border) relative"
             >
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceName"
-                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
+                  className="text-(--ws-fg-muted) text-sm heading"
                 >
                   Workspace name
                 </label>
@@ -155,7 +155,7 @@ export const CreateWorkspace: React.FC<Props> = ({
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceDescription"
-                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
+                  className="text-(--ws-fg-muted) text-sm heading"
                 >
                   Description (optional)
                 </label>
@@ -171,7 +171,7 @@ export const CreateWorkspace: React.FC<Props> = ({
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceDueDate"
-                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
+                  className="text-(--ws-fg-muted) text-sm heading"
                 >
                   Due date (optional)
                 </label>
@@ -199,7 +199,7 @@ export const CreateWorkspace: React.FC<Props> = ({
               <div className="flex flex-col gap-2">
                 <label
                   htmlFor="workspaceUrl"
-                  className="text-[color:var(--ws-fg-muted)] text-sm heading"
+                  className="text-(--ws-fg-muted) text-sm heading"
                 >
                   Workspace URL
                 </label>
@@ -208,7 +208,7 @@ export const CreateWorkspace: React.FC<Props> = ({
                   readOnly
                   type="text"
                   value={`/${user}/${safeName || "<workspace>"}`}
-                  className="text-[color:var(--ws-fg-muted)] bg-transparent border border-[color:var(--ws-border)] rounded-lg px-4 py-2 w-full text-sm"
+                  className="text-(--ws-fg-muted) bg-transparent border border-(--ws-border) rounded-lg px-4 py-2 w-full text-sm"
                 />
               </div>
 
@@ -226,7 +226,7 @@ export const CreateWorkspace: React.FC<Props> = ({
                 type="submit"
                 disabled={isSubmitting}
                 className={
-                  "bg-[color:var(--ws-accent)] text-[color:var(--ws-accent-fg)] rounded-lg px-6 py-3 transition font-medium " +
+                  "bg-(--ws-accent) text-(--ws-accent-fg) rounded-lg px-6 py-3 transition font-medium " +
                   (isSubmitting
                     ? "opacity-70 cursor-not-allowed"
                     : "hover:opacity-90 cursor-pointer")

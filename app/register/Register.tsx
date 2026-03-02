@@ -157,7 +157,7 @@ export const Register: React.FC = () => {
             className={inputClassName}
             value={password}
             onChange={handlePasswordChange}
-            placeholder="••••••••"
+            placeholder="********"
             autoComplete="new-password"
             required
           />

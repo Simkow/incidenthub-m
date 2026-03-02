@@ -302,7 +302,7 @@ export default function ActiveTaskSection({
     return (
       <section
         key={task.id}
-        className="grid grid-cols-1 md:grid-cols-8 items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] px-3 py-2"
+        className="grid grid-cols-1 md:grid-cols-8 items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover) px-3 py-2"
         role="button"
         tabIndex={0}
         onClick={() => setActiveTaskId(task.id)}
@@ -311,13 +311,13 @@ export default function ActiveTaskSection({
         }}
       >
         <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-[color:var(--ws-fg-muted)] heading mb-1">
+          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
             {t("tasks.title")}
           </div>
           <input
             value={task.title}
             onChange={(e) => updateTask(task.id, "title", e.target.value)}
-            className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
+            className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg) rounded-lg border border-(--ws-border) px-2 py-1 focus:outline-none"
             placeholder={t("tasks.title")}
           />
         </div>
@@ -326,43 +326,41 @@ export default function ActiveTaskSection({
           className="min-w-0 w-full md:col-span-2"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="md:hidden text-[10px] leading-4 text-[color:var(--ws-fg-muted)] heading mb-1">
+          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
             {t("tasks.description")}
           </div>
           <input
             value={task.description}
             onChange={(e) => updateTask(task.id, "description", e.target.value)}
-            className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none"
+            className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg-muted) rounded-lg border border-(--ws-border) px-2 py-1 focus:outline-none"
             placeholder={t("tasks.description")}
           />
         </div>
 
         <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-[color:var(--ws-fg-muted)] heading mb-1">
+          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
             {t("tasks.priority")}
           </div>
           <Select.Root
             value={selectPriorityValue}
             onValueChange={(value) => updateTask(task.id, "priority", value)}
           >
-            <Select.Trigger className="text-[color:var(--ws-fg-muted)] text-sm rounded-lg border border-[color:var(--ws-border)] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
+            <Select.Trigger className="text-(--ws-fg-muted) text-sm rounded-lg border border-(--ws-border) px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
               <Select.Value placeholder={t("tasks.priority")} />
-              <Select.Icon className="text-[color:var(--ws-fg-muted)]">
-                ▾
-              </Select.Icon>
+              <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
             </Select.Trigger>
             <Select.Portal container={portalContainer ?? undefined}>
               <Select.Content
                 position="popper"
                 sideOffset={6}
-                className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] hover:cursor-pointer"
+                className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface) hover:cursor-pointer"
               >
                 <Select.Viewport className="p-1">
                   {priorityOptions.map((p) => (
                     <Select.Item
                       key={p}
                       value={p}
-                      className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
+                      className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
                     >
                       <Select.ItemText>{p}</Select.ItemText>
                     </Select.Item>
@@ -374,7 +372,7 @@ export default function ActiveTaskSection({
         </div>
 
         <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-[color:var(--ws-fg-muted)] heading mb-1">
+          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
             {t("tasks.dueDate")}
           </div>
           <input
@@ -399,12 +397,12 @@ export default function ActiveTaskSection({
                 // ignore: some browsers require strict user-gesture activation
               }
             }}
-            className="min-w-0 w-full bg-transparent text-sm text-[color:var(--ws-fg-muted)] rounded-lg border border-[color:var(--ws-border)] px-2 py-1 focus:outline-none no-date-icon"
+            className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg-muted) rounded-lg border border-(--ws-border) px-2 py-1 focus:outline-none no-date-icon"
           />
         </div>
 
         <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-[color:var(--ws-fg-muted)] heading mb-1">
+          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
             {t("tasks.assignee")}
           </div>
           <Select.Root
@@ -420,7 +418,7 @@ export default function ActiveTaskSection({
             onValueChange={(value) => updateTask(task.id, "assignee", value)}
             disabled={assigneeLoading || assigneeOptions.length === 0}
           >
-            <Select.Trigger className="text-[color:var(--ws-fg-muted)] text-sm rounded-lg border border-[color:var(--ws-border)] px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
+            <Select.Trigger className="text-(--ws-fg-muted) text-sm rounded-lg border border-(--ws-border) px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
               <Select.Value
                 placeholder={
                   assigneeLoading
@@ -428,15 +426,13 @@ export default function ActiveTaskSection({
                     : t("tasks.assignee")
                 }
               />
-              <Select.Icon className="text-[color:var(--ws-fg-muted)]">
-                ▾
-              </Select.Icon>
+              <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
             </Select.Trigger>
             <Select.Portal container={portalContainer ?? undefined}>
               <Select.Content
                 position="popper"
                 sideOffset={6}
-                className="z-50 overflow-hidden rounded-md border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] hover:cursor-pointer"
+                className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface) hover:cursor-pointer"
               >
                 <Select.Viewport className="p-1">
                   {(() => {
@@ -451,7 +447,7 @@ export default function ActiveTaskSection({
                     <Select.Item
                       key={name}
                       value={name}
-                      className="text-xs select-none rounded px-2 py-2 text-[color:var(--ws-fg)] outline-none data-[highlighted]:bg-[color:var(--ws-hover)] data-[state=checked]:bg-[color:var(--ws-hover)]"
+                      className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
                     >
                       <Select.ItemText>{name}</Select.ItemText>
                     </Select.Item>
@@ -466,7 +462,7 @@ export default function ActiveTaskSection({
           className="flex flex-col items-center justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="md:hidden text-[10px] leading-4 text-[color:var(--ws-fg-muted)] heading mb-1">
+          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
             {t("tasks.finished")}
           </div>
           <RoundedCheckbox
@@ -481,7 +477,7 @@ export default function ActiveTaskSection({
           className="flex flex-col items-center justify-center"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="md:hidden text-[10px] leading-4 text-[color:var(--ws-fg-muted)] heading mb-1">
+          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
             {t("tasks.delete")}
           </div>
           <button
@@ -492,17 +488,17 @@ export default function ActiveTaskSection({
                 prev === task.id ? null : task.id,
               );
             }}
-            className="text-xs px-2 py-1 rounded-lg border text-red-300 border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)]"
+            className="text-xs px-2 py-1 rounded-lg border text-red-300 border-(--ws-border) hover:bg-(--ws-hover)"
           >
             {t("tasks.delete")}
           </button>
 
           <div
-            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-64 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-[color:var(--ws-surface)] border border-[color:var(--ws-border)] absolute mt-40 left-1/2 -translate-x-1/2 flex-col items-center justify-center p-4`}
+            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-64 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-(--ws-surface) border border-(--ws-border) absolute mt-40 left-1/2 -translate-x-1/2 flex-col items-center justify-center p-4`}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <span className="text-sm text-[color:var(--ws-fg-muted)] font-light text-center">
+            <span className="text-sm text-(--ws-fg-muted) font-light text-center">
               {t("tasks.deleteConfirm")}
             </span>
             <div className="mt-2 flex gap-2">
@@ -512,7 +508,7 @@ export default function ActiveTaskSection({
                   e.stopPropagation();
                   setDeleteConfirmTaskId(null);
                 }}
-                className="border border-[color:var(--ws-border)] text-sm text-[color:var(--ws-fg-muted)] py-1 px-3 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)]"
+                className="border border-(--ws-border) text-sm text-(--ws-fg-muted) py-1 px-3 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover)"
               >
                 {t("tasks.cancel")}
               </button>
@@ -522,7 +518,7 @@ export default function ActiveTaskSection({
                   e.stopPropagation();
                   void handleDelete(task.id);
                 }}
-                className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-[color:var(--ws-surface-2)] hover:bg-[color:var(--ws-hover)] hover:text-red-400"
+                className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover) hover:text-red-400"
               >
                 {t("tasks.delete")}
               </button>
@@ -535,7 +531,7 @@ export default function ActiveTaskSection({
 
   return (
     <div className="relative w-full min-h-125 flex flex-col justify-start gap-2">
-      <div className="hidden md:grid grid-cols-8 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-[color:var(--ws-fg-muted)]">
+      <div className="hidden md:grid grid-cols-8 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-(--ws-fg-muted)">
         <span className="text-left">{t("tasks.title")}</span>
         <span className="text-left md:col-span-2">
           {t("tasks.description")}
@@ -549,7 +545,7 @@ export default function ActiveTaskSection({
 
       <div className="mt-2 flex flex-col gap-3">
         {tasks.length < 1 ? (
-          <div className="text-[color:var(--ws-fg-muted)] text-sm flex items-center gap-3 justify-center mt-3">
+          <div className="text-(--ws-fg-muted) text-sm flex items-center gap-3 justify-center mt-3">
             <span className="text-base">Add first task</span>
             <button
               type="button"
@@ -558,7 +554,7 @@ export default function ActiveTaskSection({
                 setSubmitError(null);
                 setIsAddOpen(true);
               }}
-              className="px-2 py-1 rounded-lg border border-[color:var(--ws-border)] hover:bg-[color:var(--ws-hover)] group hover:cursor-pointer"
+              className="px-2 py-1 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover) group hover:cursor-pointer"
             >
               <Image
                 src={plusIcon}
@@ -567,7 +563,7 @@ export default function ActiveTaskSection({
               />
             </button>
             {submitMessage && (
-              <span className="text-xs text-[color:var(--ws-fg-muted)]">
+              <span className="text-xs text-(--ws-fg-muted)">
                 {submitMessage}
               </span>
             )}
