@@ -525,18 +525,18 @@ export const Sidebar: React.FC = () => {
       </button>
 
       <section className="flex flex-col gap-2 w-full">
-        <div className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-(--ws-hover) cursor-pointer w-full">
+        <Link href={`/${user}/${currentWorkspace}/inbox`} className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-(--ws-hover) cursor-pointer w-full">
           <Image
             src={Inbox}
             alt="Inbox"
-            className="w-4 h-4 opacity-50 ws-icon"
+            className="w-4 h-4 ws-icon"
             width={16}
             height={16}
           />
-          <span className="text-xs font-medium opacity-50">
+          <span className="text-xs font-medium">
             {t("sidebar.inbox")}
           </span>
-        </div>
+        </Link>
         <Link
           href={`/${user}/${currentWorkspace}/my-tasks`}
           onClick={() => setMobileMenuOpen(false)}
