@@ -153,7 +153,7 @@ export default function Notes({ user, workspace }: Props) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("notes.searchPh")}
-              className="ml-auto min-w-55 flex-1 md:flex-none md:w-80 bg-transparent rounded-lg border border-(--ws-border) px-3 py-2 focus:outline-none"
+              className="min-w-55 flex-1 md:flex-none md:w-80 bg-transparent rounded-lg border border-(--ws-border) px-3 py-2 focus:outline-none"
             />
           </section>
 
