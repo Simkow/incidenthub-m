@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { motion } from "motion/react"
+import { motion } from "motion/react";
 type Props = {
   user: string;
   currentWorkspace: string;
@@ -26,102 +26,102 @@ function formatTimestamp(value: string) {
 }
 
 export default function Inbox({ user, currentWorkspace }: Props) {
-    const [message, setMessage] = useState("");
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<
-      number | null
-    >(null);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<
+    number | null
+  >(null);
 
-    const formattedMessages = useMemo(() => {
-      return [...messages]
-        .sort((a, b) => {
-          const timeA = new Date(a.created_at).getTime();
-          const timeB = new Date(b.created_at).getTime();
-          if (timeA !== timeB) {
-            return timeB - timeA;
-          }
-          return b.id - a.id;
-        })
-        .map((item) => ({
-          ...item,
-          formattedDate: formatTimestamp(item.created_at),
-        }));
-    }, [messages]);
+  const formattedMessages = useMemo(() => {
+    return [...messages]
+      .sort((a, b) => {
+        const timeA = new Date(a.created_at).getTime();
+        const timeB = new Date(b.created_at).getTime();
+        if (timeA !== timeB) {
+          return timeB - timeA;
+        }
+        return b.id - a.id;
+      })
+      .map((item) => ({
+        ...item,
+        formattedDate: formatTimestamp(item.created_at),
+      }));
+  }, [messages]);
 
-    async function getMessages() {
-      if (!user || !currentWorkspace) return;
-      setIsLoading(true);
+  async function getMessages() {
+    if (!user || !currentWorkspace) return;
+    setIsLoading(true);
 
-      const params = new URLSearchParams({
+    const params = new URLSearchParams({
+      username: user,
+      workspace: currentWorkspace,
+    });
+
+    const response = await fetch(`/api/chat?${params.toString()}`);
+    if (!response.ok) {
+      setIsLoading(false);
+      console.log("Something went wrong");
+      return;
+    }
+
+    const data = (await response.json().catch(() => null)) as {
+      messages?: ChatMessage[];
+    } | null;
+
+    setMessages(data?.messages ?? []);
+    setIsLoading(false);
+  }
+
+  async function SubmitMessage(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!message.trim()) {
+      return;
+    }
+
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         username: user,
         workspace: currentWorkspace,
-      });
+        message,
+      }),
+    });
 
-      const response = await fetch(`/api/chat?${params.toString()}`);
-      if (!response.ok) {
-        setIsLoading(false);
-        console.log("Something went wrong");
-        return;
-      }
-
-      const data = (await response.json().catch(() => null)) as {
-        messages?: ChatMessage[];
-      } | null;
-
-      setMessages(data?.messages ?? []);
-      setIsLoading(false);
-    }
-    
-    async function SubmitMessage(e: React.FormEvent) {
-      e.preventDefault();
-
-      if (!message.trim()) {
-        return;
-      }
-
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: user,
-          workspace: currentWorkspace,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        console.log("Something went wrong");
-        return;
-      }
-
-      setMessage("");
-      await getMessages();
+    if (!response.ok) {
+      console.log("Something went wrong");
+      return;
     }
 
-    async function deleteMessage(messageId: number) {
-      if (!user || !currentWorkspace) return;
+    setMessage("");
+    await getMessages();
+  }
 
-      const response = await fetch("/api/chat", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messageId,
-          username: user,
-          workspace: currentWorkspace,
-        }),
-      });
+  async function deleteMessage(messageId: number) {
+    if (!user || !currentWorkspace) return;
 
-      if (!response.ok) {
-        console.log("Something went wrong");
-        return;
-      }
+    const response = await fetch("/api/chat", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messageId,
+        username: user,
+        workspace: currentWorkspace,
+      }),
+    });
 
-      setMessages((prev) => prev.filter((item) => item.id !== messageId));
-      setDeleteConfirmMessageId(null);
+    if (!response.ok) {
+      console.log("Something went wrong");
+      return;
     }
 
-    useEffect(() => {
+    setMessages((prev) => prev.filter((item) => item.id !== messageId));
+    setDeleteConfirmMessageId(null);
+  }
+
+  useEffect(() => {
     if (!user || !currentWorkspace) return;
 
     getMessages();
@@ -142,7 +142,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
     >
       <div className="bg-[color:var(--ws-bg)] min-h-screen text-[color:var(--ws-fg)]">
         <div className="p-4">
-          <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm md:h-[800px]">
+          <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm max-md:h-screen md:h-[800px]">
             <div className="flex h-full flex-col gap-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -255,7 +255,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                           void SubmitMessage(e);
                         }
                       }}
-                      className="mt-2 min-h-[90px] w-full resize-none rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-2 text-sm text-[color:var(--ws-fg)] outline-none placeholder:text-[color:var(--ws-fg-muted)]"
+                      className="mt-2 min-h-[40px] w-full resize-none rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-3 py-2 text-sm text-[color:var(--ws-fg)] outline-none placeholder:text-[color:var(--ws-fg-muted)]"
                       placeholder="Write a message..."
                     />
                     {/* <div className="mt-2 text-[11px] text-[color:var(--ws-fg-muted)]">
