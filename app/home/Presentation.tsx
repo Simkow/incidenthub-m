@@ -10,6 +10,7 @@ import { useI18n } from "../i18n/I18nProvider";
 
 export const Presentation = () => {
   const { t } = useI18n();
+
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -18,9 +19,15 @@ export const Presentation = () => {
     },
   };
 
+  const cardEase: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
   const cardVariants = {
     hidden: { opacity: 0, y: 18 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" } },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.45, ease: cardEase },
+    },
   };
 
   return (
