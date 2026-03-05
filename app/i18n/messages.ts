@@ -73,6 +73,23 @@ export const messages = {
       title: "Contact",
       desc: "Contact page is not set up yet.",
     },
+    sponsors: {
+      title: "Our sponsors",
+    },
+    footer: {
+      description:
+        "Calm, focused space for your team workflows. Keep tasks, notes, and projects aligned without noise.",
+      product: "Product",
+      home: "Home",
+      dashboard: "Dashboard",
+      contact: "Contact",
+      company: "Company",
+      createAccount: "Create account",
+      signIn: "Sign in",
+      rights: "© 2026 IncidentHub. All rights reserved.",
+      support: "Support",
+      status: "Status",
+    },
     settings: {
       title: "Workspace settings",
       desc: "Theme is saved per user and workspace.",
@@ -82,6 +99,7 @@ export const messages = {
       previewHint: "Background, surface, muted text and accent",
       previewPrimary: "Primary",
       previewSecondary: "Secondary",
+      toggle: "Select language",
     },
     workspaceThemes: {
       "default-dark": "Default (recommended)",
@@ -348,6 +366,23 @@ export const messages = {
       title: "Kontakt",
       desc: "Strona kontaktu nie jest jeszcze gotowa.",
     },
+    sponsors: {
+      title: "Nasi sponsorzy",
+    },
+    footer: {
+      description:
+        "Spokojna przestrzeń dla zespołów. Zadania, notatki i projekty zawsze spójne i bez chaosu.",
+      product: "Produkt",
+      home: "Start",
+      dashboard: "Panel",
+      contact: "Kontakt",
+      company: "Firma",
+      createAccount: "Utwórz konto",
+      signIn: "Zaloguj się",
+      rights: "© 2026 IncidentHub. Wszelkie prawa zastrzeżone.",
+      support: "Wsparcie",
+      status: "Status",
+    },
     settings: {
       title: "Ustawienia workspacu",
       desc: "Motyw jest zapisywany per użytkownik i workspace.",
@@ -357,6 +392,7 @@ export const messages = {
       previewHint: "Tło, powierzchnie, tekst i akcent",
       previewPrimary: "Główny",
       previewSecondary: "Drugorzędny",
+      toggle: "Wybierz język",
     },
     workspaceThemes: {
       "default-dark": "Domyślny (zalecany)",

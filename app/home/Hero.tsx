@@ -51,7 +51,7 @@ export const Hero: FC = () => {
   };
 
   return (
-    <main className="w-full max-md:max-h-screen max-md:justify-center min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-40 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-10 md:pb-12">
+    <main className="w-full max-md:max-h-screen max-md:justify-center md:min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-44 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-20 md:pb-8">
       <div className="w-full h-full z-0">
         <div className="w-37.5 h-37.5 rounded-full bg-[#dceef6] absolute blur-3xl right-0 top-32 opacity-20 md:opacity-50"></div>
         <div className="w-24 h-32 md:w-50 md:h-75 rounded-full bg-[#dceef6] absolute blur-3xl left-16 bottom-4 md:left-40 md:bottom-40 opacity-20 md:opacity-50 -rotate-10"></div>

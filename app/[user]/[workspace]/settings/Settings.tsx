@@ -4,6 +4,7 @@ import React from "react";
 import { useI18n } from "../../../i18n/I18nProvider";
 import { useWorkspaceTheme } from "../WorkspaceThemeProvider";
 import { WorkspaceThemePicker } from "../../../components/WorkspaceThemePicker";
+import { LocaleToggle } from "../../../i18n/LocaleToggle";
 
 export function Settings() {
   const { theme, setTheme, themes } = useWorkspaceTheme();
@@ -17,7 +18,12 @@ export function Settings() {
           <p className="mt-1 text-sm text-(--ws-fg-muted)">
             {t("settings.desc")}
           </p>
-
+          <div className="my-8 flex flex-col gap-3">
+            <span>{t("settings.toggle")}</span>
+            <div>
+              <LocaleToggle />
+            </div>
+          </div>
           <div className="mt-6 max-w-md rounded-xl border border-(--ws-border) p-4">
             <WorkspaceThemePicker
               value={theme}

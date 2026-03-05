@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useCurrentWorkspace } from "./CurrentWorkspace";
 import { useRouter } from "next/navigation";
+import { useI18n } from "../i18n/I18nProvider";
 
 export const Footer = () => {
   const router = useRouter();
+  const { t } = useI18n();
   const [token, setToken] = useState("");
   const [username, setUsername] = useState("");
 
@@ -55,60 +57,59 @@ export const Footer = () => {
             INCIDENTHUB
           </span>
           <p className="text-sm leading-6 text-neutral-400 max-w-sm">
-            Calm, focused space for your team workflows. Keep tasks, notes, and
-            projects aligned without noise.
+            {t("footer.description")}
           </p>
         </div>
         <div className="grid gap-3">
           <span className="text-sm uppercase tracking-[0.2em] text-neutral-500">
-            Product
+            {t("footer.product")}
           </span>
           <span className="text-sm text-neutral-300 hover:text-white transition-colors cursor-pointer">
-            Home
+            {t("footer.home")}
           </span>
           <Link
             className="text-sm text-neutral-300 hover:text-white transition-colors"
             href={dashboardHref}
             onClick={guardDashboardClick}
           >
-            Dashboard
+            {t("footer.dashboard")}
           </Link>
           <a
             className="text-sm text-neutral-300 hover:text-white transition-colors"
             href="/contact"
           >
-            Contact
+            {t("footer.contact")}
           </a>
         </div>
         <div className="grid gap-3">
           <span className="text-sm uppercase tracking-[0.2em] text-neutral-500">
-            Company
+            {t("footer.company")}
           </span>
           <Link
             className="text-sm text-neutral-300 hover:text-white transition-colors"
             href="/register"
           >
-            Create account
+            {t("footer.createAccount")}
           </Link>
           <Link
             className="text-sm text-neutral-300 hover:text-white transition-colors"
             href="/login"
           >
-            Sign in
+            {t("footer.signIn")}
           </Link>
           <span className="text-xs text-neutral-500">contact@genwizer.com</span>
         </div>
       </div>
       <div className="px-6 md:px-12 lg:px-56 py-6 border-t border-neutral-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <span className="text-xs text-neutral-500">
-          © 2026 IncidentHub. All rights reserved.
+          {t("footer.rights")}
         </span>
         <div className="flex items-center gap-4 text-xs text-neutral-500">
           <a className="hover:text-white transition-colors" href="/contact">
-            Support
+            {t("footer.support")}
           </a>
           <a className="hover:text-white transition-colors" href="/home">
-            Status
+            {t("footer.status")}
           </a>
         </div>
       </div>
