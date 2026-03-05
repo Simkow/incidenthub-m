@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import BgImage from "../../public/assets/hero-bg.png";
-import BgImage2 from "../../public/assets/hero-bg2.png";
+import BgImage from "../../public/assets/dashboard-view.png";
 import { useEffect, useState, type FC } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -52,10 +51,10 @@ export const Hero: FC = () => {
   };
 
   return (
-    <main className="w-full max-md:max-h-screen max-md:justify-center min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-40 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-32 md:pb-40">
+    <main className="w-full max-md:max-h-screen max-md:justify-center min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-40 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-10 md:pb-12">
       <div className="w-full h-full z-0">
         <div className="w-37.5 h-37.5 rounded-full bg-[#dceef6] absolute blur-3xl right-0 top-32 opacity-20 md:opacity-50"></div>
-        <div className="w-24 h-32 md:w-50 md:h-75 rounded-full bg-[#dceef6] absolute blur-3xl left-16 bottom-4 md:left-40 md:bottom-20 opacity-20 md:opacity-50 -rotate-10"></div>
+        <div className="w-24 h-32 md:w-50 md:h-75 rounded-full bg-[#dceef6] absolute blur-3xl left-16 bottom-4 md:left-40 md:bottom-40 opacity-20 md:opacity-50 -rotate-10"></div>
       </div>
       <div className="justify-start flex flex-col gap-4 mt-10 md:mt-20 z-40 relative pl-5">
         <motion.div
@@ -125,20 +124,14 @@ export const Hero: FC = () => {
           </motion.button>
         </div>
       </div>
-      <div className="w-full relative h-full z-40 hidden md:block">
+      <div className="w-full relative z-40 hidden md:block mt-16">
         <MotionImage
-          animate={{ opacity: 1, scale: 1, filter: "blur(1px)" }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+          animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.7 }}
           src={BgImage}
           alt="Hero Background"
-          className="w-full max-w-5xl h-auto -rotate-10 scale-110 hover:scale-115 transition-all duration-1000"
-        />
-        <MotionImage
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2 }}
-          src={BgImage2}
-          alt="Hero Background 2"
-          className="w-full max-w-5xl h-auto absolute top-5 left-0 md:left-40 -rotate-10 scale-110 hover:scale-115 transition-all duration-1000 blur-[0.5px] hover:blur-none"
+          className="w-full max-w-5xl h-auto left-0 scale-110 transition-all duration-1000 rounded-xl border border-neutral-800"
         />
       </div>
     </main>

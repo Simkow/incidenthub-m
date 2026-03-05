@@ -43,6 +43,32 @@ export const messages = {
       learnMore: "Learn More...",
       resolvingWorkspaceTitle: "Resolving workspace...",
     },
+    presentation: {
+      kicker: "Presentation",
+      title: "How it works",
+      cards: {
+        workspace: {
+          title: "1. Workspace & roles",
+          body:
+            "Create a workspace, invite people, and assign roles. Access control keeps teams focused and aligned.",
+        },
+        inbox: {
+          title: "2. Inbox & notifications",
+          body:
+            "One place for alerts, deadlines, and status changes. Nothing gets lost, everything updates in real time.",
+        },
+        projects: {
+          title: "3. Projects & tasks",
+          body:
+            "Plan projects, set priorities, and assign ownership. Clear progress tracking and faster delivery.",
+        },
+        notes: {
+          title: "4. Notes & insights",
+          body:
+            "Capture incident notes, outcomes, and change history. Learn faster and build better processes.",
+        },
+      },
+    },
     contact: {
       title: "Contact",
       desc: "Contact page is not set up yet.",
@@ -291,6 +317,32 @@ export const messages = {
       opening: "Otwieranie...",
       learnMore: "Dowiedz się więcej...",
       resolvingWorkspaceTitle: "Trwa ustalanie workspace...",
+    },
+    presentation: {
+      kicker: "Prezentacja",
+      title: "Jak to działa",
+      cards: {
+        workspace: {
+          title: "1. Workspace i role",
+          body:
+            "Twórz workspace, zapraszaj osoby i nadaj role. Kontrola dostępu utrzymuje porządek i jasne zasady.",
+        },
+        inbox: {
+          title: "2. Inbox i powiadomienia",
+          body:
+            "Jedno miejsce na alerty, terminy i zmiany statusów. Nic nie ginie, wszystko dzieje się na bieżąco.",
+        },
+        projects: {
+          title: "3. Projekty i zadania",
+          body:
+            "Planuj projekty, ustawiaj priorytety i przypisuj odpowiedzialność. Przejrzysty postęp i szybsze domykanie.",
+        },
+        notes: {
+          title: "4. Notatki i wnioski",
+          body:
+            "Zapisuj notatki z incydentów, wnioski i historię zmian. Szybciej uczysz się i ulepszasz procesy.",
+        },
+      },
     },
     contact: {
       title: "Kontakt",

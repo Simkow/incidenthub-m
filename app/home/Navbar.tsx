@@ -82,57 +82,61 @@ export const Navbar: React.FC = () => {
           IncidentHub
         </span>
       </div>
-      <div className="flex items-center gap-3">
-        <Link
-          href={dashboardHref}
-          onClick={guardDashboardClick}
-          className=" hover:text-neutral-300 transition-all duration-300 mr-4"
-        >
-          {t("navbar.dashboard")}
-        </Link>
-        <Link
-          href="/contact"
-          className=" hover:text-neutral-300 transition-all duration-300 opacity-50 mr-4"
-        >
-          {t("navbar.contact")}
-        </Link>
-        <LocaleToggle />
-        {!token ? (
-          <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
-            <Link
-              href="/login"
-              className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-neutral-800 transition-all duration-300"
-            >
-              {t("navbar.login")}
-            </Link>
-            <Link
-              href="/login"
-              className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-neutral-800 transition-all duration-300"
-            >
-              {t("navbar.openApp")}
-            </Link>
-          </div>
-        ) : (
-          <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
-            <Link
-              href="/login"
-              onClick={(e) => {
-                e.preventDefault();
-                void handleLogout();
-              }}
-              className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-neutral-800 transition-all duration-300"
-            >
-              {t("navbar.logout")}
-            </Link>
-            <Link
-              href={dashboardHref}
-              onClick={guardDashboardClick}
-              className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-neutral-800 transition-all duration-300"
-            >
-              {t("navbar.openApp")}
-            </Link>
-          </div>
-        )}
+      {/* <LocaleToggle /> */}
+      <div className="flex items-center gap-3 max-md:flex-col">
+        <div className="flex max-md:gap-5">
+          <Link
+            href={dashboardHref}
+            onClick={guardDashboardClick}
+            className=" hover:text-neutral-300 transition-all duration-300 md:mr-8"
+          >
+            {t("navbar.dashboard")}
+          </Link>
+          <Link
+            href="/contact"
+            className=" hover:text-neutral-300 transition-all duration-300 opacity-50 md:mr-8"
+          >
+            {t("navbar.contact")}
+          </Link>
+        </div> 
+        <div>
+          {!token ? (
+            <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
+              <Link
+                href="/login"
+                className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-neutral-800 transition-all duration-300"
+              >
+                {t("navbar.login")}
+              </Link>
+              <Link
+                href="/login"
+                className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-neutral-800 transition-all duration-300"
+              >
+                {t("navbar.openApp")}
+              </Link>
+            </div>
+          ) : (
+            <div className="flex gap-3 md:gap-4 text-sm md:text-base flex-wrap justify-center">
+              <Link
+                href="/login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  void handleLogout();
+                }}
+                className="font-base hover:text-neutral-300 px-8 py-1 bg-black/40 hover:bg-black/50 rounded-xl border border-neutral-800 transition-all duration-300"
+              >
+                {t("navbar.logout")}
+              </Link>
+              <Link
+                href={dashboardHref}
+                onClick={guardDashboardClick}
+                className="font-base hover:text-black text-black/90 px-8 py-1 bg-white/90 hover:bg-white rounded-xl border border-neutral-800 transition-all duration-300"
+              >
+                {t("navbar.openApp")}
+              </Link>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
