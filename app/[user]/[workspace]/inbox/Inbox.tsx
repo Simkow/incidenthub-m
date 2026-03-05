@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 type Props = {
   user: string;
@@ -49,7 +49,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
       }));
   }, [messages]);
 
-  async function getMessages() {
+  const getMessages = useCallback(async () => {
     if (!user || !currentWorkspace) return;
     setIsLoading(true);
 
@@ -71,7 +71,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
 
     setMessages(data?.messages ?? []);
     setIsLoading(false);
-  }
+  }, [currentWorkspace, user]);
 
   async function SubmitMessage(e: React.FormEvent) {
     e.preventDefault();
@@ -124,7 +124,8 @@ export default function Inbox({ user, currentWorkspace }: Props) {
   useEffect(() => {
     if (!user || !currentWorkspace) return;
 
-    getMessages();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void getMessages();
     const intervalId = window.setInterval(() => {
       void getMessages();
     }, 5000);
@@ -132,7 +133,7 @@ export default function Inbox({ user, currentWorkspace }: Props) {
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [user, currentWorkspace]);
+  }, [currentWorkspace, getMessages, user]);
 
   return (
     <motion.div

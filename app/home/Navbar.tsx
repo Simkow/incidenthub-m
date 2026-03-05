@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useCurrentWorkspace } from "./CurrentWorkspace";
-import { LocaleToggle } from "../i18n/LocaleToggle";
+// import { LocaleToggle } from "../i18n/LocaleToggle";
 import { useI18n } from "../i18n/I18nProvider";
 import { useRouter } from "next/navigation";
 
