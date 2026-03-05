@@ -101,9 +101,7 @@ export const Footer = () => {
         </div>
       </div>
       <div className="px-6 md:px-12 lg:px-56 py-6 border-t border-neutral-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <span className="text-xs text-neutral-500">
-          {t("footer.rights")}
-        </span>
+        <span className="text-xs text-neutral-500">{t("footer.rights")}</span>
         <div className="flex items-center gap-4 text-xs text-neutral-500">
           <a className="hover:text-white transition-colors" href="/contact">
             {t("footer.support")}
