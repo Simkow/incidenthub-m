@@ -67,7 +67,8 @@ export async function POST(req: Request) {
           w.workspace_name
         FROM tasks t
         LEFT JOIN workspaces w ON t.workspace_id = w.id
-        WHERE t.workspace_id = ${workspaceId} ORDER BY t.is_finished
+        WHERE t.workspace_id = ${workspaceId}
+        ORDER BY t.is_finished, t.assignee_id, t.id
       `;
 
       return Response.json({ tasks: data ?? [] }, { status: 200 });
@@ -88,7 +89,7 @@ export async function POST(req: Request) {
       FROM tasks t
       LEFT JOIN workspaces w ON t.workspace_id = w.id
       WHERE t.assignee_id = ${userId}
-      ORDER BY t.is_finished
+      ORDER BY t.is_finished, t.assignee_id, t.id
     `;
     return Response.json({ tasks: data ?? [] }, { status: 200 });
   } catch (error) {

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             SELECT *
             FROM tasks
             WHERE assignee_id = ${userId}
-            ORDER BY is_finished
+            ORDER BY is_finished, assignee_id, id
         `
 
     if (!tasksRow.length) {
