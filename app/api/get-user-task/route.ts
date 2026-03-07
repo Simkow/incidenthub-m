@@ -16,7 +16,12 @@ export async function POST(req: Request) {
         return Response.json({ project: null }, { status: 404 });
     }
 
-    const tasksRow = await sql`SELECT * FROM tasks WHERE assignee_id = ${userId}`
+        const tasksRow = await sql`
+            SELECT *
+            FROM tasks
+            WHERE assignee_id = ${userId}
+            ORDER BY is_finished
+        `
 
     if (!tasksRow.length) {
         return Response.json({status: 400});
