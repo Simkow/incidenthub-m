@@ -8,6 +8,7 @@ import { Sponsors } from "./home/Sponsors";
 import { Footer } from "./home/Footer";
 
 export default function Home() {
+  // test
 
   useEffect(() => {
     window.scrollTo(0, 0);
