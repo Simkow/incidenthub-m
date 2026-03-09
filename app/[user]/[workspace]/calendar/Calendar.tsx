@@ -449,8 +449,8 @@ export default function Calendar({ user, currentWorkspace }: Props) {
     >
       <section className="py-2 w-full">
         <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-(--ws-border) bg-(--ws-surface) flex flex-col gap-6 p-4">
-          <header className="w-full rounded-xl border border-(--ws-border) flex flex-wrap items-center justify-between gap-3 px-3 py-2 text-xs">
-            <div className="flex items-center gap-2">
+          <header className="w-full rounded-xl border border-(--ws-border) flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-3 py-2 text-xs">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={() => setIsAddOpen((prev) => !prev)}
                 className="px-2 py-1 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover) flex items-center gap-2"
@@ -492,10 +492,12 @@ export default function Calendar({ user, currentWorkspace }: Props) {
               </button>
             </div>
 
-            <div className="text-sm font-semibold">{monthLabel}</div>
+            <div className="text-sm font-semibold md:text-right">
+              {monthLabel}
+            </div>
           </header>
 
-          <section className="grid grid-cols-7 gap-2 text-xs text-(--ws-fg-muted)">
+          <section className="hidden md:grid grid-cols-7 gap-2 text-xs text-(--ws-fg-muted)">
             {weekdayLabels.map((label) => (
               <div key={label} className="px-2 py-1 text-center">
                 {label}
@@ -503,7 +505,7 @@ export default function Calendar({ user, currentWorkspace }: Props) {
             ))}
           </section>
 
-          <section className="grid grid-cols-7 gap-2">
+          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-2">
             {gridDays.map((day) => {
               const key = toDateKey(day);
               const dayEvents = eventsByDay.get(key) ?? [];
@@ -517,7 +519,7 @@ export default function Calendar({ user, currentWorkspace }: Props) {
               return (
                 <div
                   key={key}
-                  className={`min-h-[140px] rounded-xl border border-(--ws-border) bg-(--ws-bg) p-2 flex flex-col gap-2 ${
+                  className={`min-h-[120px] md:min-h-[140px] rounded-xl border border-(--ws-border) bg-(--ws-bg) p-2 flex flex-col gap-2 ${
                     isCurrentMonth ? "" : "opacity-50"
                   } ${isToday ? "ring-1 ring-(--ws-accent)" : ""}`}
                   onDoubleClick={() => startNewEvent(key)}
@@ -555,13 +557,9 @@ export default function Calendar({ user, currentWorkspace }: Props) {
                           </div>
                           {!event.all_day && (
                             <div className="text-[9px] text-(--ws-fg-muted)">
-                              {new Date(event.start_at)
-                                .toTimeString()
-                                .slice(0, 5)}{" "}
-                              -{" "}
-                              {new Date(event.end_at)
-                                .toTimeString()
-                                .slice(0, 5)}
+                              {toTimeInputValue(event.start_at)} -
+                              {" "}
+                              {toTimeInputValue(event.end_at)}
                             </div>
                           )}
                         </button>
