@@ -557,8 +557,7 @@ export default function Calendar({ user, currentWorkspace }: Props) {
                           </div>
                           {!event.all_day && (
                             <div className="text-[9px] text-(--ws-fg-muted)">
-                              {toTimeInputValue(event.start_at)} -
-                              {" "}
+                              {toTimeInputValue(event.start_at)} -{" "}
                               {toTimeInputValue(event.end_at)}
                             </div>
                           )}
