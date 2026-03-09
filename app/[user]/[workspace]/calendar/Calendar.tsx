@@ -8,6 +8,7 @@ import Minus from "../../../../public/assets/minus.png";
 import { useI18n } from "../../../i18n/I18nProvider";
 import { messages } from "../../../i18n/messages";
 import { dateInputToDateOnly, toDateInputValue } from "../tasks/dateTime";
+import { RoundedCheckbox } from "../tasks/RoundedCheckbox";
 
 type Props = {
   user: string;
@@ -513,8 +514,10 @@ export default function Calendar({ user, currentWorkspace }: Props) {
                 day.getMonth() === anchorDate.getMonth() &&
                 day.getFullYear() === anchorDate.getFullYear();
               const isToday = key === toDateKey(new Date());
-              const visibleEvents = dayEvents.slice(0, 3);
-              const moreCount = dayEvents.length - visibleEvents.length;
+              const shouldScroll = dayEvents.length > 3;
+              const listClass = shouldScroll
+                ? "max-h-[92px] md:max-h-[104px] overflow-y-auto pr-1"
+                : "";
 
               return (
                 <div
@@ -534,13 +537,13 @@ export default function Calendar({ user, currentWorkspace }: Props) {
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    {visibleEvents.length === 0 ? (
-                      <span className="text-[10px] text-(--ws-fg-muted)">
+                  <div className={`flex flex-col gap-1 ${listClass}`}>
+                    {dayEvents.length === 0 ? (
+                      <span className="text-[10px] text-(--ws-fg-muted)/60">
                         {t("calendar.emptyDay")}
                       </span>
                     ) : (
-                      visibleEvents.map((event) => (
+                      dayEvents.map((event) => (
                         <button
                           key={`${event.id}-${key}`}
                           onClick={() => openEdit(event)}
@@ -563,11 +566,6 @@ export default function Calendar({ user, currentWorkspace }: Props) {
                           )}
                         </button>
                       ))
-                    )}
-                    {moreCount > 0 && (
-                      <span className="text-[10px] text-(--ws-fg-muted)">
-                        +{moreCount}
-                      </span>
                     )}
                   </div>
                 </div>
@@ -695,13 +693,12 @@ export default function Calendar({ user, currentWorkspace }: Props) {
                   />
                 </label>
                 <label className="text-xs flex items-center gap-2 mt-4">
-                  <input
-                    type="checkbox"
+                  <RoundedCheckbox
                     checked={form.allDay}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, allDay: e.target.checked }))
+                    onCheckedChange={(checked) =>
+                      setForm((prev) => ({ ...prev, allDay: checked }))
                     }
-                    className="accent-(--ws-accent)"
+                    ariaLabel={t("calendar.allDay")}
                   />
                   {t("calendar.allDay")}
                 </label>
@@ -863,13 +860,12 @@ export default function Calendar({ user, currentWorkspace }: Props) {
                   />
                 </label>
                 <label className="text-xs flex items-center gap-2 mt-4">
-                  <input
-                    type="checkbox"
+                  <RoundedCheckbox
                     checked={form.allDay}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, allDay: e.target.checked }))
+                    onCheckedChange={(checked) =>
+                      setForm((prev) => ({ ...prev, allDay: checked }))
                     }
-                    className="accent-(--ws-accent)"
+                    ariaLabel={t("calendar.allDay")}
                   />
                   {t("calendar.allDay")}
                 </label>
