@@ -81,30 +81,72 @@ export async function POST(req: Request) {
       workspaceId = (wsRow[0] as { id: number }).id;
     }
 
+    let taskId: number | null = null;
+    const eventCreatorId = createdById ?? id;
+
     if (workspaceId !== null) {
       if (createdById !== null) {
-        await sql`
+        const inserted = await sql`
           INSERT INTO tasks (title, description, priority, due_date, assignee_id, workspace_id, created_by, assignee)
           VALUES (${title}, ${description}, ${priority}, ${due_date}, ${id}, ${workspaceId}, ${createdById}, ${assignee})
+          RETURNING id
         `;
+        taskId = (inserted[0] as { id: number } | undefined)?.id ?? null;
       } else {
-        await sql`
+        const inserted = await sql`
           INSERT INTO tasks (title, description, priority, due_date, assignee_id, workspace_id, assignee)
           VALUES (${title}, ${description}, ${priority}, ${due_date}, ${id}, ${workspaceId}, ${assignee})
+          RETURNING id
         `;
+        taskId = (inserted[0] as { id: number } | undefined)?.id ?? null;
       }
     } else {
       if (createdById !== null) {
-        await sql`
+        const inserted = await sql`
           INSERT INTO tasks (title, description, priority, due_date, assignee_id, created_by, assignee)
           VALUES (${title}, ${description}, ${priority}, ${due_date}, ${id}, ${createdById}, ${assignee})
+          RETURNING id
         `;
+        taskId = (inserted[0] as { id: number } | undefined)?.id ?? null;
       } else {
-        await sql`
+        const inserted = await sql`
           INSERT INTO tasks (title, description, priority, due_date, assignee_id, assignee)
           VALUES (${title}, ${description}, ${priority}, ${due_date}, ${id}, ${assignee})
+          RETURNING id
         `;
+        taskId = (inserted[0] as { id: number } | undefined)?.id ?? null;
       }
+    }
+
+    if (taskId && workspaceId !== null) {
+      await sql`
+        INSERT INTO calendar_events (
+          workspace_id,
+          created_by,
+          assignee_id,
+          title,
+          description,
+          start_at,
+          end_at,
+          all_day,
+          color,
+          status,
+          linked_task_id
+        )
+        VALUES (
+          ${workspaceId},
+          ${eventCreatorId},
+          ${id},
+          ${title},
+          ${description},
+          ${due_date},
+          ${due_date},
+          ${true},
+          ${null},
+          ${"planned"},
+          ${taskId}
+        )
+      `;
     }
 
     return Response.json({ message: "Task added successfully" }, { status: 200 });
