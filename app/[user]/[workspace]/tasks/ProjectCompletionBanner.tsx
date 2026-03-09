@@ -53,9 +53,7 @@ export function ProjectCompletionModal({
               </div>
 
               <div className="mt-3 rounded-lg border border-(--ws-border) bg-(--ws-surface-2) px-3 py-2 flex items-center justify-between">
-                <span className="text-xs text-(--ws-fg-muted)">
-                  Completion
-                </span>
+                <span className="text-xs text-(--ws-fg-muted)">Completion</span>
                 <span className="text-xs px-2 py-1 rounded-lg border border-(--ws-border)">
                   100%
                 </span>
