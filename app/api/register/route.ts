@@ -5,10 +5,23 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const {
+      name,
+      email,
+      password,
+      isRulesConfirmed,
+      isPrivacyConfirmed,
+    } = await req.json();
 
     if (!name || !email || !password) {
       return Response.json({ message: "All fields are required" }, { status: 400 });
+    }
+
+    if (!isRulesConfirmed || !isPrivacyConfirmed) {
+      return Response.json(
+        { message: "You must accept the terms and privacy policy" },
+        { status: 400 },
+      );
     }
 
     const existingUsers = await sql`
@@ -35,8 +48,20 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await sql`
-      INSERT INTO users (name, email, password_hash)
-      VALUES (${name}, ${email}, ${hashedPassword})
+      INSERT INTO users (
+        name,
+        email,
+        password_hash,
+        is_rules_confirmed,
+        is_privacy_confirmed
+      )
+      VALUES (
+        ${name},
+        ${email},
+        ${hashedPassword},
+        ${isRulesConfirmed},
+        ${isPrivacyConfirmed}
+      )
     `;
 
     return Response.json({ message: "User registered successfully" }, { status: 201 });

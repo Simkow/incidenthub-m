@@ -256,6 +256,11 @@ export const messages = {
       invalidCredentials: "Invalid credentials",
       loginFailed: "Login failed",
       registerFailed: "Registration failed",
+      legalConsentRequired: "You must accept the terms and privacy policy.",
+      acceptRulesPrefix: "I accept the",
+      acceptPrivacyPrefix: "I accept the",
+      rulesLink: "Terms of Service",
+      privacyLink: "Privacy Policy",
       genericError: "An error occurred. Please try again later.",
     },
     members: {
@@ -601,6 +606,12 @@ export const messages = {
       invalidCredentials: "Nieprawidłowe dane logowania",
       loginFailed: "Logowanie nieudane",
       registerFailed: "Rejestracja nieudana",
+      legalConsentRequired:
+        "Musisz zaakceptować regulamin oraz politykę prywatności.",
+      acceptRulesPrefix: "Akceptuję",
+      acceptPrivacyPrefix: "Akceptuję",
+      rulesLink: "regulamin",
+      privacyLink: "politykę prywatności",
       genericError: "Wystąpił błąd. Spróbuj ponownie później.",
     },
     members: {

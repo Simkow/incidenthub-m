@@ -13,6 +13,8 @@ export const Register: React.FC = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isRulesConfirmed, setIsRulesConfirmed] = useState(false);
+  const [isPrivacyConfirmed, setIsPrivacyConfirmed] = useState(false);
   const [isBlurred, setIsBlurred] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -37,6 +39,12 @@ export const Register: React.FC = () => {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!isRulesConfirmed || !isPrivacyConfirmed) {
+      setError(t("auth.legalConsentRequired"));
+      return;
+    }
+
     try {
       const response = await fetch("/api/register", {
         method: "POST",
@@ -47,6 +55,8 @@ export const Register: React.FC = () => {
           name: name.trim(),
           email: email.trim(),
           password,
+          isRulesConfirmed,
+          isPrivacyConfirmed,
         }),
       });
 
@@ -161,6 +171,46 @@ export const Register: React.FC = () => {
             autoComplete="new-password"
             required
           />
+        </div>
+        <div className="w-full flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-4">
+          <label className="flex items-start gap-3 text-sm text-neutral-300">
+            <input
+              type="checkbox"
+              checked={isRulesConfirmed}
+              onChange={(event) => setIsRulesConfirmed(event.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-neutral-700 bg-neutral-950 text-white focus:ring-neutral-500"
+              required
+            />
+            <span className="leading-6">
+              {t("auth.acceptRulesPrefix")}{" "}
+              <Link
+                href="/rules"
+                className="text-white underline underline-offset-4"
+              >
+                {t("auth.rulesLink")}
+              </Link>
+              .
+            </span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-neutral-300">
+            <input
+              type="checkbox"
+              checked={isPrivacyConfirmed}
+              onChange={(event) => setIsPrivacyConfirmed(event.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-neutral-700 bg-neutral-950 text-white focus:ring-neutral-500"
+              required
+            />
+            <span className="leading-6">
+              {t("auth.acceptPrivacyPrefix")}{" "}
+              <Link
+                href="/privacy"
+                className="text-white underline underline-offset-4"
+              >
+                {t("auth.privacyLink")}
+              </Link>
+              .
+            </span>
+          </label>
         </div>
         <div className="w-full flex flex-col items-start gap-1">
           <button
