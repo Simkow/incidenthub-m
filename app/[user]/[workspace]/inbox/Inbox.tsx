@@ -1,5 +1,12 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { motion } from "motion/react";
 type Props = {
   user: string;
@@ -32,6 +39,8 @@ export default function Inbox({ user, currentWorkspace }: Props) {
   const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<
     number | null
   >(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const shouldStickToBottomRef = useRef(true);
 
   const formattedMessages = useMemo(() => {
     return [...messages]
@@ -39,15 +48,38 @@ export default function Inbox({ user, currentWorkspace }: Props) {
         const timeA = new Date(a.created_at).getTime();
         const timeB = new Date(b.created_at).getTime();
         if (timeA !== timeB) {
-          return timeB - timeA;
+          return timeA - timeB;
         }
-        return b.id - a.id;
+        return a.id - b.id;
       })
       .map((item) => ({
         ...item,
         formattedDate: formatTimestamp(item.created_at),
       }));
   }, [messages]);
+
+  useLayoutEffect(() => {
+    const container = messagesContainerRef.current;
+
+    if (!container || !shouldStickToBottomRef.current) {
+      return;
+    }
+
+    container.scrollTop = container.scrollHeight;
+  }, [formattedMessages]);
+
+  function handleMessagesScroll() {
+    const container = messagesContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+
+    shouldStickToBottomRef.current = distanceFromBottom < 48;
+  }
 
   const getMessages = useCallback(async () => {
     if (!user || !currentWorkspace) return;
@@ -159,7 +191,11 @@ export default function Inbox({ user, currentWorkspace }: Props) {
                 </div>
               </div>
 
-              <div className="flex w-full flex-1 flex-col gap-4 overflow-y-auto pr-2">
+              <div
+                ref={messagesContainerRef}
+                onScroll={handleMessagesScroll}
+                className="flex w-full flex-1 flex-col justify-end gap-4 overflow-y-auto pr-2"
+              >
                 {formattedMessages.length === 0 ? (
                   <div className="w-full rounded-xl border border-dashed border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] p-4 text-sm text-[color:var(--ws-fg-muted)]">
                     {isLoading ? "Loading messages..." : "No messages yet."}
