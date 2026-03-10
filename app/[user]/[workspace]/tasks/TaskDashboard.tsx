@@ -26,6 +26,37 @@ type DeadlineTask = {
   priority?: string;
 };
 
+const DEADLINE_DISMISSALS_STORAGE_KEY = "tasks:deadline-dismissals";
+
+function getDeadlineTaskStorageKey(task: DeadlineTask) {
+  return `${String(task.id)}::${task.due_date}`;
+}
+
+function readDismissedDeadlineTasks(storageKey: string) {
+  if (typeof window === "undefined") return {} as Record<string, boolean>;
+
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return {} as Record<string, boolean>;
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object") {
+      return {} as Record<string, boolean>;
+    }
+
+    return Object.entries(parsed as Record<string, unknown>).reduce<
+      Record<string, boolean>
+    >((acc, [key, value]) => {
+      if (value === true) {
+        acc[key] = true;
+      }
+      return acc;
+    }, {});
+  } catch {
+    return {} as Record<string, boolean>;
+  }
+}
+
 export const TaskDashboard: React.FC = () => {
   const { t } = useI18n();
   const params = useParams();
@@ -40,6 +71,9 @@ export const TaskDashboard: React.FC = () => {
   const [completionDismissed, setCompletionDismissed] = useState(false);
   const [deadlineCount, setDeadlineCount] = useState(0);
   const [deadlineTasks, setDeadlineTasks] = useState<DeadlineTask[]>([]);
+  const [dismissedDeadlineTasks, setDismissedDeadlineTasks] = useState<
+    Record<string, boolean>
+  >({});
   const plusIcon = Plus;
   const minusIcon = Minus;
 
@@ -63,6 +97,11 @@ export const TaskDashboard: React.FC = () => {
     ];
     return Array.isArray(raw) ? (raw[0] ?? "") : (raw ?? "");
   }, [params]);
+
+  const deadlineDismissalsStorageKey = useMemo(() => {
+    if (!user || !currentWorkspace) return "";
+    return `${DEADLINE_DISMISSALS_STORAGE_KEY}:${user}:${currentWorkspace}`;
+  }, [user, currentWorkspace]);
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
     setSearch(e.target.value);
@@ -101,7 +140,7 @@ export const TaskDashboard: React.FC = () => {
           username: user,
           workspace: currentWorkspace,
           days: 1,
-          limit: 3,
+          limit: 50,
         }),
       });
 
@@ -158,6 +197,19 @@ export const TaskDashboard: React.FC = () => {
     return () => window.removeEventListener("tasks:refresh", handler);
   }, [fetchTasks, fetchDeadlineNotifications]);
 
+  useEffect(() => {
+    if (!deadlineDismissalsStorageKey) {
+      queueMicrotask(() => setDismissedDeadlineTasks({}));
+      return;
+    }
+
+    queueMicrotask(() => {
+      setDismissedDeadlineTasks(
+        readDismissedDeadlineTasks(deadlineDismissalsStorageKey),
+      );
+    });
+  }, [deadlineDismissalsStorageKey]);
+
   const doneTasksCount = useMemo(
     () => tasks.filter((t) => t.is_finished).length,
     [tasks],
@@ -171,8 +223,49 @@ export const TaskDashboard: React.FC = () => {
   const completionOpen =
     allTasksCount > 0 && progressPercent === 100 && !completionDismissed;
 
-  const showDeadlineToast = deadlineCount > 0;
-  const nextDeadlineTask = deadlineTasks[0] ?? null;
+  const visibleDeadlineTasks = useMemo(
+    () =>
+      deadlineTasks.filter(
+        (task) => !dismissedDeadlineTasks[getDeadlineTaskStorageKey(task)],
+      ),
+    [deadlineTasks, dismissedDeadlineTasks],
+  );
+
+  const dismissedCurrentDeadlineCount = useMemo(
+    () =>
+      deadlineTasks.reduce(
+        (count, task) =>
+          count +
+          (dismissedDeadlineTasks[getDeadlineTaskStorageKey(task)] ? 1 : 0),
+        0,
+      ),
+    [deadlineTasks, dismissedDeadlineTasks],
+  );
+
+  const visibleDeadlineCount = Math.max(
+    deadlineCount - dismissedCurrentDeadlineCount,
+    visibleDeadlineTasks.length,
+  );
+
+  const showDeadlineToast = visibleDeadlineTasks.length > 0;
+  const nextDeadlineTask = visibleDeadlineTasks[0] ?? null;
+
+  const dismissCurrentDeadlineAlert = useCallback(() => {
+    if (!deadlineDismissalsStorageKey || !nextDeadlineTask) return;
+
+    const taskKey = getDeadlineTaskStorageKey(nextDeadlineTask);
+
+    setDismissedDeadlineTasks((prev) => {
+      const next = { ...prev, [taskKey]: true };
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          deadlineDismissalsStorageKey,
+          JSON.stringify(next),
+        );
+      }
+      return next;
+    });
+  }, [deadlineDismissalsStorageKey, nextDeadlineTask]);
 
   useEffect(() => {
     if (allTasksCount > 0 && progressPercent === 100) return;
@@ -319,9 +412,20 @@ export const TaskDashboard: React.FC = () => {
           transition={{ duration: 0.5 }}
           className="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl border border-(--ws-border) bg-(--ws-surface) px-4 py-3 text-sm"
         >
-          <div className="font-medium">{t("tasks.deadlineToastTitle")}</div>
-          <div className="text-(--ws-fg-muted)">
-            {t("tasks.deadlineToastBody", { count: deadlineCount })}
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="font-medium">{t("tasks.deadlineToastTitle")}</div>
+              <div className="text-(--ws-fg-muted)">
+                {t("tasks.deadlineToastBody", { count: visibleDeadlineCount })}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={dismissCurrentDeadlineAlert}
+              className="shrink-0 rounded-lg border border-(--ws-border) px-2 py-1 text-xs text-(--ws-fg-muted) hover:bg-(--ws-hover) hover:text-(--ws-fg)"
+            >
+              {t("tasks.deadlineToastDismiss")}
+            </button>
           </div>
           {nextDeadlineTask && (
             <div className="mt-1 text-(--ws-fg-muted) opacity-80 truncate">

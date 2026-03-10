@@ -61,7 +61,7 @@ body {
   --ws-border: #2e2e2e;
   --ws-fg: #ffffff;
   --ws-fg-muted: rgba(255, 255, 255, 0.78);
-  --ws-hover: rgba(255, 255, 255, 0.10);
+  --ws-hover: rgba(72, 70, 70, 0.1);
   --ws-accent: #60a5fa;
   --ws-accent-fg: #0b1020;
   --ws-checkbox-bg: #ffffff;
