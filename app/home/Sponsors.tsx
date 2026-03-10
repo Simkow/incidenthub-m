@@ -13,7 +13,7 @@ export const Sponsors = () => {
       <h2 className="text-3xl sm:text-4xl font-medium heading text-white">
         {t("sponsors.title")}
       </h2>
-      <div className="w-40 sm:w-[300px] h-[1px] bg-neutral-400"></div>
+      <div className="w-40 sm:w-[300px] h-[1px] bg-gradient-to-r from-20%-transparent via-neutral-400 to-80%-transparent"></div>
       <div className="grid w-full gap-6 sm:gap-8 mt-8 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
         <div className="flex items-center justify-center gap-3 sm:gap-4 py-4 px-6 sm:px-8 rounded-2xl border-x border-neutral-800/70 bg-neutral-950/30">
           <Image

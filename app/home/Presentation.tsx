@@ -44,7 +44,7 @@ export const Presentation = () => {
           <h2 className="max-md:text-3xl text-5xl heading font-bold">
             {t("presentation.title")}
           </h2>
-          <div className="max-md:w-[90%] md:w-[400px] h-[1px] bg-neutral-400 mt-3"></div>
+          <div className="max-md:w-[90%] md:w-[400px] h-[1px] bg-gradient-to-r from-20%-transparent via-neutral-400 to-80%-transparent mt-3"></div>
         </div>
         <motion.div
           className="grid w-full gap-6 mt-10 grid-cols-1 lg:grid-cols-2"

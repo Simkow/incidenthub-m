@@ -36,17 +36,17 @@ export function CreatedFor() {
       </div>
 
       <section className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center gap-8 text-neutral-100">
-        <div className="flex max-w-2xl flex-col items-center gap-3 text-center">
+        <div className="flex max-w-4xl flex-col items-center gap-3 text-center">
           <span className="heading text-base sm:text-lg text-neutral-400">
             {t("createdFor.kicker")}
           </span>
           <h2 className="heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             {t("createdFor.title")}
           </h2>
-          {/* <div className="h-px w-36 sm:w-52 bg-white to-transparent" /> */}
           <p className="body-text max-w-2xl text-sm leading-7 text-neutral-300 sm:text-base">
             {t("createdFor.intro")}
           </p>
+          <div className="h-px w-36 sm:w-92 to-transparent bg-gradient-to-r from-20%-transparent via-neutral-400 to-80%-transparent mt-2" />
         </div>
 
         <div className="grid w-full gap-5 md:gap-6 lg:grid-cols-2">
