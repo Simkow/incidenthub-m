@@ -43,7 +43,7 @@ export function CreatedFor() {
           <h2 className="heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             {t("createdFor.title")}
           </h2>
-          <div className="h-px w-36 sm:w-52 bg-white to-transparent" />
+          {/* <div className="h-px w-36 sm:w-52 bg-white to-transparent" /> */}
           <p className="body-text max-w-2xl text-sm leading-7 text-neutral-300 sm:text-base">
             {t("createdFor.intro")}
           </p>
