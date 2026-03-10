@@ -70,6 +70,30 @@ export const messages = {
         },
       },
     },
+    createdFor: {
+      kicker: "Built for",
+      title: "Flexible enough for every work rhythm",
+      intro:
+        "IncidentHub scales from solo execution to full team coordination, so the interface stays clear whether you move fast alone or collaborate across roles.",
+      footerLabel: "Best fit",
+      footerValue: "Daily operations",
+      cards: {
+        teams: {
+          badge: "Teams",
+          title: "Companies & growing teams",
+          subtitle: "Shared visibility without extra process overhead",
+          description:
+            "Coordinate incidents, ownership, and follow-ups in one flow. Teams get a cleaner handoff between members, clearer priorities, and less time lost switching tools.",
+        },
+        individual: {
+          badge: "Solo",
+          title: "Independent operators",
+          subtitle: "A focused workspace for people who move fast",
+          description:
+            "Keep personal tasks, notes, and deadlines organized in one place. The interface stays lightweight, so planning work never feels heavier than the work itself.",
+        },
+      },
+    },
     contact: {
       title: "Contact",
       desc: "Contact page is not set up yet.",
@@ -417,6 +441,30 @@ export const messages = {
           title: "4. Notatki i wnioski",
           body:
             "Zapisuj notatki z incydentów, wnioski i historię zmian. Szybciej uczysz się i ulepszasz procesy.",
+        },
+      },
+    },
+    createdFor: {
+      kicker: "Stworzone dla",
+      title: "Elastyczne dla każdego trybu pracy",
+      intro:
+        "IncidentHub sprawdza się zarówno przy samodzielnej pracy, jak i w koordynacji całego zespołu, więc interfejs pozostaje czytelny niezależnie od skali działania.",
+      footerLabel: "Najlepiej działa w",
+      footerValue: "codziennej operacyjności",
+      cards: {
+        teams: {
+          badge: "Zespoły",
+          title: "Firmy i rosnące zespoły",
+          subtitle: "Wspólna widoczność bez dokładania zbędnego procesu",
+          description:
+            "Koordynuj incydenty, odpowiedzialność i follow-upy w jednym przepływie. Zespół dostaje czytelniejsze przekazania, lepsze priorytety i mniej strat czasu na przełączanie narzędzi.",
+        },
+        individual: {
+          badge: "Solo",
+          title: "Osoby pracujące samodzielnie",
+          subtitle: "Skupione miejsce pracy dla tych, którzy działają szybko",
+          description:
+            "Trzymaj własne zadania, notatki i terminy w jednym miejscu. Interfejs pozostaje lekki, dzięki czemu planowanie nie staje się cięższe niż sama realizacja.",
         },
       },
     },

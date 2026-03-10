@@ -31,7 +31,7 @@ export const Presentation = () => {
   };
 
   return (
-    <main className="w-full max-md:min-h-screen max-md:justify-center h-full bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-10 md:pt-10 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-32 md:pb-40">
+    <main className="w-full max-md:min-h-screen max-md:justify-center h-full bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-10 md:pt-10 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-32 md:pb-20">
       <div className="w-full h-full z-0">
         <div className="w-37.5 h-37.5 md:w-52 md:h-52 rounded-full bg-[#dceef6] absolute blur-3xl left-0 top-32 opacity-20 md:opacity-50"></div>
         <div className="w-24 h-32 md:w-64 md:h-82 rounded-full bg-[#dceef6] absolute blur-3xl max-md:right-8 md:right-0 bottom-4 md:bottom-40 opacity-20 md:opacity-30 -rotate-10"></div>
