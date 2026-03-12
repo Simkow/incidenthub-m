@@ -93,7 +93,7 @@ export function AddNoteModal({
       }}
     >
       <div
-        className="w-[92vw] max-w-3xl rounded-xl bg-(--ws-surface) border border-(--ws-border) p-3 flex flex-col gap-3 text-(--ws-fg)"
+        className="w-[92vw] mt-[400px] max-w-3xl rounded-xl bg-(--ws-surface) border border-(--ws-border) p-3 flex flex-col gap-3 text-(--ws-fg)"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 className="text-sm">{t("notes.createNote")}</h2>
