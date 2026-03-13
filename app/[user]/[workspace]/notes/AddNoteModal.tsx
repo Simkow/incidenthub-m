@@ -154,5 +154,3 @@ export function AddNoteModal({
     </motion.div>
   );
 }
-
-//
