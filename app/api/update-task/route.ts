@@ -29,6 +29,7 @@ export async function PATCH(req: Request) {
     const due_date = typeof body?.due_date === "string" ? body.due_date : null;
 
     const is_finished = typeof body?.is_finished === "boolean" ? body.is_finished : null;
+    const isFinishedProvided = typeof body?.is_finished === "boolean";
 
     let assigneeName: string | null = null;
     let assigneeId: number | null = null;
@@ -64,6 +65,25 @@ export async function PATCH(req: Request) {
         assignee = COALESCE(${assigneeName}, assignee),
         assignee_id = COALESCE(${assigneeId}, assignee_id)
       WHERE id = ${taskId}
+    `;
+
+    await sql`
+      UPDATE calendar_events
+      SET
+        title = COALESCE(${title}, title),
+        description = COALESCE(${description}, description),
+        start_at = COALESCE(${due_date}, start_at),
+        end_at = COALESCE(${due_date}, end_at),
+        assignee_id = COALESCE(${assigneeId}, assignee_id),
+        status = CASE
+          WHEN ${isFinishedProvided} THEN CASE
+            WHEN ${is_finished} THEN ${"done"}
+            ELSE ${"planned"}
+          END
+          ELSE status
+        END,
+        updated_at = NOW()
+      WHERE linked_task_id = ${taskId}
     `;
 
     return Response.json({ message: "Task updated" }, { status: 200 });
