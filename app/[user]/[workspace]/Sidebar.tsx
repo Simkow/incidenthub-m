@@ -34,6 +34,42 @@ function getInboxReadStorageKey(username: string, workspace: string) {
   return `inbox:lastRead:${username}:${workspace}`;
 }
 
+function parseInboxReadMarker(raw: string | null) {
+  if (!raw) return { at: 0, lastMessageId: 0 };
+
+  try {
+    const parsed = JSON.parse(raw) as {
+      at?: unknown;
+      lastMessageId?: unknown;
+    };
+
+    const atNum = Number(parsed?.at);
+    const msgIdNum = Number(parsed?.lastMessageId);
+
+    return {
+      at: Number.isFinite(atNum) ? atNum : 0,
+      lastMessageId: Number.isFinite(msgIdNum) ? msgIdNum : 0,
+    };
+  } catch {
+    const fallbackAt = new Date(raw).getTime();
+    return {
+      at: Number.isFinite(fallbackAt) ? fallbackAt : 0,
+      lastMessageId: 0,
+    };
+  }
+}
+
+function toTimeMs(value: string) {
+  const direct = new Date(value).getTime();
+  if (Number.isFinite(direct)) return direct;
+
+  const normalized = value.includes(" ")
+    ? value.replace(" ", "T")
+    : `${value}T00:00:00`;
+  const parsed = new Date(normalized).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 export const Sidebar: React.FC = () => {
   const { t } = useI18n();
   const router = useRouter();
@@ -63,6 +99,7 @@ export const Sidebar: React.FC = () => {
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [hasUnreadInbox, setHasUnreadInbox] = useState(false);
+  const [unreadInboxCount, setUnreadInboxCount] = useState(0);
   const [respondingInviteId, setRespondingInviteId] = useState<number | null>(
     null,
   );
@@ -141,6 +178,7 @@ export const Sidebar: React.FC = () => {
     if (typeof window === "undefined") return;
     if (!user || !currentWorkspace) {
       setHasUnreadInbox(false);
+      setUnreadInboxCount(0);
       return;
     }
 
@@ -150,8 +188,13 @@ export const Sidebar: React.FC = () => {
 
     if (isInboxOpen) {
       const key = getInboxReadStorageKey(user, currentWorkspace);
-      window.localStorage.setItem(key, new Date().toISOString());
+      const prev = parseInboxReadMarker(window.localStorage.getItem(key));
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({ at: Date.now(), lastMessageId: prev.lastMessageId }),
+      );
       setHasUnreadInbox(false);
+      setUnreadInboxCount(0);
       return;
     }
 
@@ -163,6 +206,7 @@ export const Sidebar: React.FC = () => {
       const response = await fetch(`/api/chat?${params.toString()}`);
       if (!response.ok) {
         setHasUnreadInbox(false);
+        setUnreadInboxCount(0);
         return;
       }
 
@@ -172,24 +216,27 @@ export const Sidebar: React.FC = () => {
 
       const messages = Array.isArray(data?.messages) ? data.messages : [];
       const key = getInboxReadStorageKey(user, currentWorkspace);
-      const lastReadRaw = window.localStorage.getItem(key);
-      const lastReadAt = lastReadRaw ? new Date(lastReadRaw).getTime() : 0;
+      const marker = parseInboxReadMarker(window.localStorage.getItem(key));
+      const lastReadAt = marker.at;
+      const lastReadMessageId = marker.lastMessageId;
       const threshold = Date.now() - 12 * 60 * 60 * 1000;
 
-      const hasUnread = messages.some((m) => {
-        const createdAt = new Date(m.created_at).getTime();
-        if (!Number.isFinite(createdAt)) return false;
-        return (
-          createdAt >= threshold &&
-          createdAt > lastReadAt &&
-          !!m.username &&
-          m.username !== user
-        );
-      });
+      const unreadCount = messages.filter((m) => {
+        const createdAt = toTimeMs(m.created_at);
+        const newerThanReadMarker =
+          createdAt > lastReadAt || m.id > lastReadMessageId;
 
-      setHasUnreadInbox(hasUnread);
+        if (!newerThanReadMarker) return false;
+
+        const insideWindow = createdAt >= threshold || m.id > lastReadMessageId;
+        return insideWindow && !!m.username && m.username !== user;
+      }).length;
+
+      setUnreadInboxCount(unreadCount);
+      setHasUnreadInbox(unreadCount > 0);
     } catch {
       setHasUnreadInbox(false);
+      setUnreadInboxCount(0);
     }
   }, [currentWorkspace, pathname, user]);
 
@@ -198,17 +245,23 @@ export const Sidebar: React.FC = () => {
 
     const intervalId = window.setInterval(() => {
       void checkUnreadInbox();
-    }, 30000);
+    }, 5000);
 
     const onReadUpdated = () => {
       void checkUnreadInbox();
     };
 
+    const onNewMessage = () => {
+      void checkUnreadInbox();
+    };
+
     window.addEventListener("inbox:read-updated", onReadUpdated);
+    window.addEventListener("inbox:new-message", onNewMessage);
 
     return () => {
       window.clearInterval(intervalId);
       window.removeEventListener("inbox:read-updated", onReadUpdated);
+      window.removeEventListener("inbox:new-message", onNewMessage);
     };
   }, [checkUnreadInbox]);
 
@@ -652,8 +705,16 @@ export const Sidebar: React.FC = () => {
             if (typeof window === "undefined") return;
             if (!user || !currentWorkspace) return;
             const key = getInboxReadStorageKey(user, currentWorkspace);
-            window.localStorage.setItem(key, new Date().toISOString());
+            const prev = parseInboxReadMarker(window.localStorage.getItem(key));
+            window.localStorage.setItem(
+              key,
+              JSON.stringify({
+                at: Date.now(),
+                lastMessageId: prev.lastMessageId,
+              }),
+            );
             setHasUnreadInbox(false);
+            setUnreadInboxCount(0);
           }}
           className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-(--ws-hover) cursor-pointer w-full"
         >
@@ -668,8 +729,10 @@ export const Sidebar: React.FC = () => {
           {hasUnreadInbox ? (
             <span
               aria-label="Unread group messages"
-              className="ml-auto inline-block h-2.5 w-2.5 rounded-full bg-(--ws-accent) ring-2 ring-(--ws-sidebar-bg)"
-            />
+              className="ml-auto inline-flex min-w-4 h-4 items-center justify-center rounded-full bg-(--ws-accent) text-[10px] font-semibold text-(--ws-accent-fg) px-1 ring-2 ring-(--ws-sidebar-bg)"
+            >
+              {unreadInboxCount > 99 ? "99+" : unreadInboxCount}
+            </span>
           ) : null}
         </Link>
         <Link

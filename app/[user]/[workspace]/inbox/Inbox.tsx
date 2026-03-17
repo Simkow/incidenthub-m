@@ -24,6 +24,10 @@ function getInboxReadStorageKey(username: string, workspace: string) {
   return `inbox:lastRead:${username}:${workspace}`;
 }
 
+function latestMessageId(messages: ChatMessage[]) {
+  return messages.reduce((max, m) => (m.id > max ? m.id : max), 0);
+}
+
 function formatTimestamp(value: string) {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -51,14 +55,20 @@ export default function Inbox({ user, currentWorkspace }: Props) {
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const shouldStickToBottomRef = useRef(true);
 
-  const markInboxAsRead = useCallback(() => {
-    if (typeof window === "undefined") return;
-    if (!user || !currentWorkspace) return;
+  const markInboxAsRead = useCallback(
+    (lastMessageId: number = 0) => {
+      if (typeof window === "undefined") return;
+      if (!user || !currentWorkspace) return;
 
-    const key = getInboxReadStorageKey(user, currentWorkspace);
-    window.localStorage.setItem(key, new Date().toISOString());
-    window.dispatchEvent(new Event("inbox:read-updated"));
-  }, [currentWorkspace, user]);
+      const key = getInboxReadStorageKey(user, currentWorkspace);
+      window.localStorage.setItem(
+        key,
+        JSON.stringify({ at: Date.now(), lastMessageId }),
+      );
+      window.dispatchEvent(new Event("inbox:read-updated"));
+    },
+    [currentWorkspace, user],
+  );
 
   const formattedMessages = useMemo(() => {
     return [...messages]
@@ -153,8 +163,9 @@ export default function Inbox({ user, currentWorkspace }: Props) {
       messages?: ChatMessage[];
     } | null;
 
-    setMessages(data?.messages ?? []);
-    markInboxAsRead();
+    const nextMessages = data?.messages ?? [];
+    setMessages(nextMessages);
+    markInboxAsRead(latestMessageId(nextMessages));
     setIsLoading(false);
   }, [currentWorkspace, markInboxAsRead, user]);
 
@@ -178,6 +189,10 @@ export default function Inbox({ user, currentWorkspace }: Props) {
     if (!response.ok) {
       console.log("Something went wrong");
       return;
+    }
+
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("inbox:new-message"));
     }
 
     setMessage("");
