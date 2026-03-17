@@ -186,6 +186,9 @@ export const messages = {
       progress: "Progress",
       tasksHeading: "Tasks",
       searchPh: "Search by title, description or assignee",
+      openDetails: "Open details",
+      openDetailsHint: "Open task details to edit full content",
+      edit: "Edit",
     },
     calendar: {
       title: "Calendar",
@@ -561,6 +564,9 @@ export const messages = {
       progress: "Postęp",
       tasksHeading: "Taski",
       searchPh: "Szukaj po tytule, opisie lub osobie",
+      openDetails: "Szczegóły",
+      openDetailsHint: "Otwórz szczegóły taska, aby edytować pełną zawartość",
+      edit: "Edytuj",
     },
     calendar: {
       title: "Kalendarz",

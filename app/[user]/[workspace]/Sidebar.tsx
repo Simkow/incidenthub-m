@@ -23,6 +23,17 @@ import { LocaleToggle } from "../../i18n/LocaleToggle";
 import { useI18n } from "../../i18n/I18nProvider";
 import * as Select from "@radix-ui/react-select";
 
+type ChatMessage = {
+  id: number;
+  message: string;
+  created_at: string;
+  username: string | null;
+};
+
+function getInboxReadStorageKey(username: string, workspace: string) {
+  return `inbox:lastRead:${username}:${workspace}`;
+}
+
 export const Sidebar: React.FC = () => {
   const { t } = useI18n();
   const router = useRouter();
@@ -51,6 +62,7 @@ export const Sidebar: React.FC = () => {
   >([]);
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
   const [inviteError, setInviteError] = useState<string | null>(null);
+  const [hasUnreadInbox, setHasUnreadInbox] = useState(false);
   const [respondingInviteId, setRespondingInviteId] = useState<number | null>(
     null,
   );
@@ -124,6 +136,81 @@ export const Sidebar: React.FC = () => {
     const root = document.querySelector(".ws-theme") as HTMLElement | null;
     setSelectPortalContainer(root);
   }, []);
+
+  const checkUnreadInbox = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    if (!user || !currentWorkspace) {
+      setHasUnreadInbox(false);
+      return;
+    }
+
+    const isInboxOpen =
+      (pathname ?? "").replace(/\/$/, "") ===
+      `/${user}/${currentWorkspace}/inbox`;
+
+    if (isInboxOpen) {
+      const key = getInboxReadStorageKey(user, currentWorkspace);
+      window.localStorage.setItem(key, new Date().toISOString());
+      setHasUnreadInbox(false);
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({
+        username: user,
+        workspace: currentWorkspace,
+      });
+      const response = await fetch(`/api/chat?${params.toString()}`);
+      if (!response.ok) {
+        setHasUnreadInbox(false);
+        return;
+      }
+
+      const data = (await response.json().catch(() => null)) as {
+        messages?: ChatMessage[];
+      } | null;
+
+      const messages = Array.isArray(data?.messages) ? data.messages : [];
+      const key = getInboxReadStorageKey(user, currentWorkspace);
+      const lastReadRaw = window.localStorage.getItem(key);
+      const lastReadAt = lastReadRaw ? new Date(lastReadRaw).getTime() : 0;
+      const threshold = Date.now() - 12 * 60 * 60 * 1000;
+
+      const hasUnread = messages.some((m) => {
+        const createdAt = new Date(m.created_at).getTime();
+        if (!Number.isFinite(createdAt)) return false;
+        return (
+          createdAt >= threshold &&
+          createdAt > lastReadAt &&
+          !!m.username &&
+          m.username !== user
+        );
+      });
+
+      setHasUnreadInbox(hasUnread);
+    } catch {
+      setHasUnreadInbox(false);
+    }
+  }, [currentWorkspace, pathname, user]);
+
+  React.useEffect(() => {
+    void checkUnreadInbox();
+
+    const intervalId = window.setInterval(() => {
+      void checkUnreadInbox();
+    }, 30000);
+
+    const onReadUpdated = () => {
+      void checkUnreadInbox();
+    };
+
+    window.addEventListener("inbox:read-updated", onReadUpdated);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("inbox:read-updated", onReadUpdated);
+    };
+  }, [checkUnreadInbox]);
 
   const Teams_Links = [
     {
@@ -560,6 +647,14 @@ export const Sidebar: React.FC = () => {
       <section className="flex flex-col gap-2 w-full">
         <Link
           href={`/${user}/${currentWorkspace}/inbox`}
+          onClick={() => {
+            setMobileMenuOpen(false);
+            if (typeof window === "undefined") return;
+            if (!user || !currentWorkspace) return;
+            const key = getInboxReadStorageKey(user, currentWorkspace);
+            window.localStorage.setItem(key, new Date().toISOString());
+            setHasUnreadInbox(false);
+          }}
           className="flex gap-2 items-center rounded-lg py-2 pl-2 pr-3 md:pr-10 hover:bg-(--ws-hover) cursor-pointer w-full"
         >
           <Image
@@ -570,6 +665,12 @@ export const Sidebar: React.FC = () => {
             height={16}
           />
           <span className="text-xs font-medium">{t("sidebar.inbox")}</span>
+          {hasUnreadInbox ? (
+            <span
+              aria-label="Unread group messages"
+              className="ml-auto inline-block h-2.5 w-2.5 rounded-full bg-(--ws-accent) ring-2 ring-(--ws-sidebar-bg)"
+            />
+          ) : null}
         </Link>
         <Link
           href={`/${user}/${currentWorkspace}/my-tasks`}
@@ -741,7 +842,7 @@ export const Sidebar: React.FC = () => {
   return (
     <div className="relative md:fixed flex flex-col items-start justify-start gap-3 md:gap-6 md:left-0 md:top-0 p-3 w-full md:w-48 h-auto md:h-full bg-(--ws-sidebar-bg) text-(--ws-fg) body-text z-50">
       <div className="w-full flex items-center justify-between md:block">
-        <Link href={"/"} onClick={() => setMobileMenuOpen(false)}>
+        <Link href="/?landing=1" onClick={() => setMobileMenuOpen(false)}>
           <Image
             src={Logo}
             alt="IncidentHub Logo"

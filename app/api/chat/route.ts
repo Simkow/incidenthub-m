@@ -174,3 +174,60 @@ export async function DELETE(req: Request) {
     return Response.json({ message: "Internal server error" }, { status: 500 });
   }
 }
+
+export async function PATCH(req: Request) {
+  try {
+    const body = (await req.json().catch(() => null)) as {
+      username?: unknown;
+      workspace?: unknown;
+      messageId?: unknown;
+      message?: unknown;
+    } | null;
+
+    const username = trimOrEmpty(body?.username);
+    const workspace = trimOrEmpty(body?.workspace);
+    const message = trimOrEmpty(body?.message);
+    const messageId =
+      typeof body?.messageId === "number"
+        ? body.messageId
+        : Number.parseInt(String(body?.messageId ?? ""), 10);
+
+    if (!username || !workspace || !message || !Number.isFinite(messageId)) {
+      return Response.json(
+        { message: "username, workspace, messageId, and message are required" },
+        { status: 400 },
+      );
+    }
+
+    const userId = await resolveUserId(username);
+    if (!userId) {
+      return Response.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const workspaceId = await resolveWorkspaceId(workspace, userId);
+    if (!workspaceId) {
+      return Response.json({ message: "Forbidden" }, { status: 403 });
+    }
+
+    const updated = await sql`
+      UPDATE chat_messages
+      SET message = ${message}
+      WHERE id = ${messageId}
+        AND user_id = ${userId}
+        AND workspace_id = ${workspaceId}
+      RETURNING id, message
+    `;
+
+    if (!updated.length) {
+      return Response.json({ message: "Not found" }, { status: 404 });
+    }
+
+    return Response.json({
+      updated: true,
+      message: (updated[0] as { message: string }).message,
+    });
+  } catch (error) {
+    console.error("chat PATCH error", error);
+    return Response.json({ message: "Internal server error" }, { status: 500 });
+  }
+}

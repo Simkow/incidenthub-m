@@ -20,6 +20,10 @@ type ChatMessage = {
   username: string | null;
 };
 
+function getInboxReadStorageKey(username: string, workspace: string) {
+  return `inbox:lastRead:${username}:${workspace}`;
+}
+
 function formatTimestamp(value: string) {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -36,11 +40,25 @@ export default function Inbox({ user, currentWorkspace }: Props) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [openActionMessageId, setOpenActionMessageId] = useState<number | null>(
+    null,
+  );
+  const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
+  const [editingMessageText, setEditingMessageText] = useState("");
   const [deleteConfirmMessageId, setDeleteConfirmMessageId] = useState<
     number | null
   >(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const shouldStickToBottomRef = useRef(true);
+
+  const markInboxAsRead = useCallback(() => {
+    if (typeof window === "undefined") return;
+    if (!user || !currentWorkspace) return;
+
+    const key = getInboxReadStorageKey(user, currentWorkspace);
+    window.localStorage.setItem(key, new Date().toISOString());
+    window.dispatchEvent(new Event("inbox:read-updated"));
+  }, [currentWorkspace, user]);
 
   const formattedMessages = useMemo(() => {
     return [...messages]
@@ -81,6 +99,40 @@ export default function Inbox({ user, currentWorkspace }: Props) {
     shouldStickToBottomRef.current = distanceFromBottom < 48;
   }
 
+  function handleMessagesWheel(e: React.WheelEvent<HTMLDivElement>) {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const canScroll = container.scrollHeight > container.clientHeight;
+    if (!canScroll) return;
+
+    container.scrollTop += e.deltaY;
+    e.preventDefault();
+  }
+
+  useEffect(() => {
+    if (openActionMessageId === null) return;
+
+    const handleOutsideClick = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const inMenu = !!target.closest("[data-chat-action-menu]");
+      const inTrigger = !!target.closest("[data-chat-action-trigger]");
+      if (!inMenu && !inTrigger) {
+        setOpenActionMessageId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+    };
+  }, [openActionMessageId]);
+
   const getMessages = useCallback(async () => {
     if (!user || !currentWorkspace) return;
     setIsLoading(true);
@@ -102,8 +154,9 @@ export default function Inbox({ user, currentWorkspace }: Props) {
     } | null;
 
     setMessages(data?.messages ?? []);
+    markInboxAsRead();
     setIsLoading(false);
-  }, [currentWorkspace, user]);
+  }, [currentWorkspace, markInboxAsRead, user]);
 
   async function SubmitMessage(e: React.FormEvent) {
     e.preventDefault();
@@ -151,21 +204,66 @@ export default function Inbox({ user, currentWorkspace }: Props) {
 
     setMessages((prev) => prev.filter((item) => item.id !== messageId));
     setDeleteConfirmMessageId(null);
+    setOpenActionMessageId(null);
+  }
+
+  function startEditingMessage(item: ChatMessage) {
+    setOpenActionMessageId(null);
+    setDeleteConfirmMessageId(null);
+    setEditingMessageId(item.id);
+    setEditingMessageText(item.message);
+  }
+
+  function cancelEditingMessage() {
+    setEditingMessageId(null);
+    setEditingMessageText("");
+  }
+
+  async function saveEditedMessage(messageId: number) {
+    if (!user || !currentWorkspace) return;
+    const trimmed = editingMessageText.trim();
+    if (!trimmed) return;
+
+    const response = await fetch("/api/chat", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messageId,
+        username: user,
+        workspace: currentWorkspace,
+        message: trimmed,
+      }),
+    });
+
+    if (!response.ok) {
+      console.log("Something went wrong");
+      return;
+    }
+
+    setMessages((prev) =>
+      prev.map((item) =>
+        item.id === messageId ? { ...item, message: trimmed } : item,
+      ),
+    );
+    cancelEditingMessage();
   }
 
   useEffect(() => {
     if (!user || !currentWorkspace) return;
 
+    markInboxAsRead();
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void getMessages();
     const intervalId = window.setInterval(() => {
+      if (editingMessageId !== null) return;
       void getMessages();
     }, 5000);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [currentWorkspace, getMessages, user]);
+  }, [currentWorkspace, editingMessageId, getMessages, markInboxAsRead, user]);
 
   return (
     <motion.div
@@ -173,10 +271,10 @@ export default function Inbox({ user, currentWorkspace }: Props) {
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.5 }}
     >
-      <div className="bg-[color:var(--ws-bg)] min-h-screen text-[color:var(--ws-fg)]">
-        <div className="p-4">
-          <div className="w-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm max-md:h-screen md:h-[800px]">
-            <div className="flex h-full flex-col gap-4">
+      <div className="bg-[color:var(--ws-bg)] h-dvh overflow-hidden text-[color:var(--ws-fg)]">
+        <div className="h-full p-4">
+          <div className="w-full h-full overflow-hidden rounded-2xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-4 shadow-sm">
+            <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h1 className="text-2xl font-semibold heading">
@@ -194,83 +292,158 @@ export default function Inbox({ user, currentWorkspace }: Props) {
               <div
                 ref={messagesContainerRef}
                 onScroll={handleMessagesScroll}
-                className="flex w-full flex-1 flex-col justify-end gap-4 overflow-y-auto pr-2"
+                onWheel={handleMessagesWheel}
+                className="w-full min-h-0 overflow-y-auto overscroll-contain pr-2"
+                style={{ WebkitOverflowScrolling: "touch" }}
               >
                 {formattedMessages.length === 0 ? (
                   <div className="w-full rounded-xl border border-dashed border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] p-4 text-sm text-[color:var(--ws-fg-muted)]">
                     {isLoading ? "Loading messages..." : "No messages yet."}
                   </div>
                 ) : (
-                  formattedMessages.map((item) => (
-                    <div
-                      key={item.id}
-                      className="relative w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] p-4"
-                    >
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between gap-3">
-                          <div
-                            className={`text-xs font-semibold ${
-                              user === item.username
-                                ? "text-[color:var(--ws-accent)]"
-                                : "text-[color:var(--ws-fg-muted)]"
-                            }`}
-                          >
-                            {item.username ?? "Unknown"}
-                          </div>
-                          {user === item.username ? (
-                            <div className="relative">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setDeleteConfirmMessageId((prev) =>
-                                    prev === item.id ? null : item.id,
-                                  )
-                                }
-                                className="text-[11px] cursor-pointer font-medium text-red-300 transition hover:text-red-400"
-                              >
-                                Delete
-                              </button>
-                              <div
-                                className={`${
-                                  deleteConfirmMessageId === item.id
-                                    ? "flex"
-                                    : "hidden"
-                                } absolute right-0 top-5 z-10 w-44 max-w-[calc(100vw-2rem)] flex-col items-center justify-center gap-2 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-3 text-center text-[11px] text-[color:var(--ws-fg-muted)] shadow-sm`}
-                                onClick={(e) => e.stopPropagation()}
-                                onMouseDown={(e) => e.stopPropagation()}
-                              >
-                                <span>Delete this message?</span>
-                                <div className="flex gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setDeleteConfirmMessageId(null)
-                                    }
-                                    className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] hover:bg-[color:var(--ws-hover)]"
+                  <div className="flex flex-col gap-4 pb-1">
+                    {formattedMessages.map((item) => (
+                      <div
+                        key={item.id}
+                        className="relative w-full rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] p-4"
+                      >
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center justify-between gap-3">
+                            <div
+                              className={`text-xs font-semibold ${
+                                user === item.username
+                                  ? "text-[color:var(--ws-accent)]"
+                                  : "text-[color:var(--ws-fg-muted)]"
+                              }`}
+                            >
+                              {item.username ?? "Unknown"}
+                            </div>
+                            {user === item.username ? (
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  data-chat-action-trigger
+                                  onClick={() =>
+                                    setOpenActionMessageId((prev) =>
+                                      prev === item.id ? null : item.id,
+                                    )
+                                  }
+                                  className="h-7 w-7 rounded-lg border border-[color:var(--ws-border)] text-[11px] text-[color:var(--ws-fg-muted)] hover:bg-[color:var(--ws-hover)]"
+                                >
+                                  ...
+                                </button>
+
+                                {openActionMessageId === item.id ? (
+                                  <div
+                                    data-chat-action-menu
+                                    className="absolute right-0 top-8 z-10 flex w-28 flex-col gap-1 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-1 shadow-sm"
                                   >
-                                    Cancel
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => deleteMessage(item.id)}
-                                    className="cursor-pointer rounded-lg border border-red-300 bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-red-300 hover:bg-[color:var(--ws-hover)] hover:text-red-400"
-                                  >
-                                    Delete
-                                  </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => startEditingMessage(item)}
+                                      className="rounded-lg px-2 py-1 text-left text-[11px] text-[color:var(--ws-fg-muted)] hover:bg-[color:var(--ws-hover)]"
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setOpenActionMessageId(null);
+                                        setDeleteConfirmMessageId((prev) =>
+                                          prev === item.id ? null : item.id,
+                                        );
+                                      }}
+                                      className="rounded-lg px-2 py-1 text-left text-[11px] text-red-300 hover:bg-[color:var(--ws-hover)]"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                ) : null}
+
+                                <div
+                                  className={`${
+                                    deleteConfirmMessageId === item.id
+                                      ? "flex"
+                                      : "hidden"
+                                  } absolute right-0 top-8 z-10 w-44 max-w-[calc(100vw-2rem)] flex-col items-center justify-center gap-2 rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] p-3 text-center text-[11px] text-[color:var(--ws-fg-muted)] shadow-sm`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                  <span>Delete this message?</span>
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setDeleteConfirmMessageId(null)
+                                      }
+                                      className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] hover:bg-[color:var(--ws-hover)]"
+                                    >
+                                      Cancel
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => deleteMessage(item.id)}
+                                      className="cursor-pointer rounded-lg border border-red-300 bg-[color:var(--ws-surface-2)] px-2 py-1 text-[11px] text-red-300 hover:bg-[color:var(--ws-hover)] hover:text-red-400"
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
+                            ) : null}
+                          </div>
+
+                          {editingMessageId === item.id ? (
+                            <div className="mt-2 flex flex-col gap-2">
+                              <textarea
+                                value={editingMessageText}
+                                onChange={(e) =>
+                                  setEditingMessageText(e.target.value)
+                                }
+                                onKeyDown={(e) => {
+                                  if (
+                                    e.key === "Enter" &&
+                                    (e.ctrlKey || e.metaKey)
+                                  ) {
+                                    e.preventDefault();
+                                    void saveEditedMessage(item.id);
+                                  }
+                                }}
+                                className="min-h-[70px] w-full resize-y rounded-xl border border-[color:var(--ws-border)] bg-[color:var(--ws-surface)] px-3 py-2 text-sm text-[color:var(--ws-fg)] outline-none"
+                              />
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={cancelEditingMessage}
+                                  className="rounded-lg border border-[color:var(--ws-border)] px-2 py-1 text-[11px] text-[color:var(--ws-fg-muted)] hover:bg-[color:var(--ws-hover)]"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void saveEditedMessage(item.id)
+                                  }
+                                  disabled={!editingMessageText.trim()}
+                                  className="rounded-lg border border-[color:var(--ws-border)] bg-[color:var(--ws-accent)] px-2 py-1 text-[11px] text-[color:var(--ws-accent-fg)] disabled:opacity-60"
+                                >
+                                  Save
+                                </button>
+                              </div>
                             </div>
-                          ) : null}
-                        </div>
-                        <div className="mt-2 whitespace-pre-wrap text-sm">
-                          {item.message}
-                        </div>
-                        <div className="mt-2 text-[11px] text-[color:var(--ws-fg-muted)]">
-                          {item.formattedDate}
+                          ) : (
+                            <div className="mt-2 whitespace-pre-wrap text-sm">
+                              {item.message}
+                            </div>
+                          )}
+
+                          <div className="mt-2 text-[11px] text-[color:var(--ws-fg-muted)]">
+                            {item.formattedDate}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
 
