@@ -7,11 +7,10 @@ import { CreatedFor } from "./home/CreatedFor";
 import { useEffect, useState } from "react";
 import { Sponsors } from "./home/Sponsors";
 import { Footer } from "./home/Footer";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [username] = useState(() => {
     if (typeof window === "undefined") return "";
     const users = window.localStorage.getItem("users");
@@ -24,14 +23,16 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const showLanding = searchParams.get("landing") === "1";
+    const showLanding =
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("landing") === "1";
 
     if (showLanding) return;
 
     if (localStorage.getItem("authToken")) {
       router.push(`/${username}/${workspace}/tasks`);
     }
-  }, [router, searchParams, username, workspace]);
+  }, [router, username, workspace]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
