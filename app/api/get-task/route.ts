@@ -68,7 +68,17 @@ export async function POST(req: Request) {
         FROM tasks t
         LEFT JOIN workspaces w ON t.workspace_id = w.id
         WHERE t.workspace_id = ${workspaceId}
-        ORDER BY t.is_finished, t.priority, t.assignee_id, t.id
+        ORDER BY
+          t.is_finished,
+          CASE t.priority
+            WHEN 'Urgent' THEN 1
+            WHEN 'High' THEN 2
+            WHEN 'Medium' THEN 3
+            WHEN 'Light' THEN 4
+            ELSE 5
+          END,
+          t.assignee_id,
+          t.id
       `;
 
       return Response.json({ tasks: data ?? [] }, { status: 200 });
