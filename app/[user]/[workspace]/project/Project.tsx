@@ -468,8 +468,12 @@ export const Project: React.FC = () => {
               <Image src={ProjectIcon} alt="Project" className="ws-icon w-20" />
             </div>
             <div className="w-full flex flex-col gap-2">
-              <div className="text-lg heading">{draft?.workspace_name || t("project.projectName")}</div>
-              <div className="text-xs text-(--ws-fg-muted)">{t("project.progressBar")}</div>
+              <div className="text-lg heading">
+                {draft?.workspace_name || t("project.projectName")}
+              </div>
+              <div className="text-xs text-(--ws-fg-muted)">
+                {t("project.progressBar")}
+              </div>
               <div className="w-full flex items-center gap-3">
                 <div className="flex-1 h-2 rounded-full bg-(--ws-bg) overflow-hidden">
                   <div
@@ -488,7 +492,7 @@ export const Project: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 lg:col-span-2 flex flex-col items-center gap-2">
                 <div className="text-xs text-(--ws-fg-muted) heading">
-                {t("project.projectName")}
+                  {t("project.projectName")}
                 </div>
                 <div className="w-full rounded-xl border border-(--ws-border) bg-(--ws-surface) px-6 py-5 text-center">
                   <input
@@ -515,7 +519,9 @@ export const Project: React.FC = () => {
               </div>
 
               <div className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 flex flex-col gap-2 justify-center">
-                <div className="text-xs text-(--ws-fg-muted) heading">{t("project.dueDate")}</div>
+                <div className="text-xs text-(--ws-fg-muted) heading">
+                  {t("project.dueDate")}
+                </div>
                 <div className="text-sm">{dueDateLabel}</div>
               </div>
             </div>
