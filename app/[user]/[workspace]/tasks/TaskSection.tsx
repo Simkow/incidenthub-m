@@ -58,6 +58,12 @@ export default function TaskSection({
   );
 
   useEffect(() => {
+    if (activeTaskId !== null) {
+      window.scrollTo({ top: 72, behavior: "smooth" });
+    }
+  }, [activeTaskId]);
+
+  useEffect(() => {
     if (openActionMenuTaskId === null) return;
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {

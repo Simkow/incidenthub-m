@@ -6,6 +6,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "../../../i18n/I18nProvider";
+import { useWorkspaceTheme } from "../WorkspaceThemeProvider";
+import { WorkspaceThemePicker } from "../../../components/WorkspaceThemePicker";
+import { LocaleToggle } from "../../../i18n/LocaleToggle";
 
 type Props = {
   user: string;
@@ -23,6 +26,7 @@ const NO_SPACES = /^\S+$/;
 export default function Profile({ user, workspace }: Props) {
   const router = useRouter();
   const { t } = useI18n();
+  const { theme, setTheme, themes } = useWorkspaceTheme();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -187,130 +191,114 @@ export default function Profile({ user, workspace }: Props) {
       className="w-full min-h-screen md:h-screen bg-(--ws-bg) flex"
     >
       <section className="py-2 w-full">
-        <main className="w-full md:h-full border-y border-l rounded-l-xl border-(--ws-border) bg-(--ws-surface) flex flex-col items-center p-4 gap-8 text-(--ws-fg) relative">
-          <div className="w-full md:h-screen text-(--ws-fg) body-text flex flex-col gap-2 items-center justify-center">
-            <Image
-              src={ProfileIcon}
-              alt={t("profile.alt.profileIcon")}
-              className="ws-icon w-28 h-28"
-            />
-            <span className="text-(--ws-fg) heading text-xl">
-              {t("profile.title")}
-            </span>
-            <div className="text-sm text-(--ws-fg-muted) body-text mb-3">
-              {workspace ? `${t("profile.workspaceLabel")}: ${workspace}` : ""}
-            </div>
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-4xl text-sm p-4 rounded-lg bg-(--ws-surface-2) border border-(--ws-border)">
-              <div className="flex flex-col items-start gap-4 min-w-0">
-                <div className="flex flex-col gap-1">
-                  <span className="text-(--ws-fg) font-medium">
-                    {t("profile.accountOverviewTitle")}
-                  </span>
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-(--ws-fg-muted) text-xs">
-                      {t("profile.usernameLabel")}
-                    </span>
-                    <span className="text-(--ws-fg)">
-                      {userData ? userData.name : ""}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <span className="text-(--ws-fg-muted) text-xs">
-                      {t("profile.emailLabel")}
-                    </span>
-                    <span className="text-(--ws-fg)">
-                      {userData?.email ?? ""}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <span className="text-(--ws-fg-muted) text-xs">
-                      {t("profile.userIdLabel")}
-                    </span>
-                    <span className="text-(--ws-fg)">
-                      {userData ? `#${userData.id}` : ""}
-                    </span>
-                  </div>
-                </div>
-
-                {loading && (
-                  <div className="text-xs text-(--ws-fg-muted)">
-                    {t("profile.loading")}
-                  </div>
-                )}
-                {error && <div className="text-xs text-red-400">{error}</div>}
+        <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-(--ws-border) bg-(--ws-surface) p-4 md:p-6 text-(--ws-fg)">
+          <div className="mx-auto w-full max-w-5xl flex flex-col gap-6">
+            <header className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 md:p-6 flex flex-col md:flex-row md:items-center gap-4">
+              <Image
+                src={ProfileIcon}
+                alt={t("profile.alt.profileIcon")}
+                className="ws-icon w-20 h-20"
+              />
+              <div className="min-w-0">
+                <h1 className="heading text-xl md:text-2xl">{t("profile.title")}</h1>
+                <p className="text-sm text-(--ws-fg-muted)">
+                  {workspace ? `${t("profile.workspaceLabel")}: ${workspace}` : ""}
+                </p>
               </div>
-              <div className="flex flex-col items-start gap-4 min-w-0">
-                <div className="flex flex-col gap-1">
-                  <span className="text-(--ws-fg) font-medium">
-                    {t("profile.accountSettingsTitle")}
-                  </span>
-                  <span className="text-xs text-(--ws-fg-muted) w-full max-w-sm">
-                    {t("profile.accountSettingsDesc")}
-                  </span>
-                </div>
+            </header>
 
-                <div className="w-full max-w-sm rounded-lg border border-(--ws-border) p-3">
-                  <div className="text-xs text-(--ws-fg)">
-                    {t("profile.notesTitle")}
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <article className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 lg:col-span-1">
+                <h2 className="text-sm font-semibold">{t("profile.accountOverviewTitle")}</h2>
+                <div className="mt-4 flex flex-col gap-3 text-sm">
+                  <div>
+                    <div className="text-xs text-(--ws-fg-muted)">{t("profile.usernameLabel")}</div>
+                    <div>{userData ? userData.name : ""}</div>
                   </div>
-                  <div className="mt-1 text-xs text-(--ws-fg-muted)">
-                    {t("profile.notesRedirect")}
+                  <div>
+                    <div className="text-xs text-(--ws-fg-muted)">{t("profile.emailLabel")}</div>
+                    <div>{userData?.email ?? ""}</div>
                   </div>
-                  <div className="mt-1 text-xs text-(--ws-fg-muted)">
-                    {t("profile.notesConsistency")}
+                  <div>
+                    <div className="text-xs text-(--ws-fg-muted)">{t("profile.userIdLabel")}</div>
+                    <div>{userData ? `#${userData.id}` : ""}</div>
                   </div>
                 </div>
+                {loading ? <div className="mt-3 text-xs text-(--ws-fg-muted)">{t("profile.loading")}</div> : null}
+                {error ? <div className="mt-2 text-xs text-red-400">{error}</div> : null}
+              </article>
 
-                <div className="flex flex-col gap-2 w-full max-w-sm">
-                  <span className="text-(--ws-fg-muted) text-xs">
-                    {t("profile.usernameLabel")}
-                  </span>
-                  <input
-                    type="text"
-                    value={draftName}
-                    onChange={(e) => setDraftName(e.target.value)}
-                    className="border w-full border-(--ws-border) text-(--ws-fg) placeholder:text-(--ws-fg-muted) rounded-lg px-2 py-1 bg-transparent focus:outline-none"
-                    placeholder={t("profile.usernamePlaceholder")}
-                  />
+              <article className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 lg:col-span-2">
+                <h2 className="text-sm font-semibold">{t("profile.accountSettingsTitle")}</h2>
+                <p className="mt-1 text-xs text-(--ws-fg-muted)">{t("profile.accountSettingsDesc")}</p>
+
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-(--ws-fg-muted)">{t("profile.usernameLabel")}</span>
+                    <input
+                      type="text"
+                      value={draftName}
+                      onChange={(e) => setDraftName(e.target.value)}
+                      className="border w-full border-(--ws-border) text-(--ws-fg) placeholder:text-(--ws-fg-muted) rounded-lg px-3 py-2 bg-transparent focus:outline-none"
+                      placeholder={t("profile.usernamePlaceholder")}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-(--ws-fg-muted)">{t("profile.emailLabel")}</span>
+                    <input
+                      type="email"
+                      value={draftEmail}
+                      onChange={(e) => setDraftEmail(e.target.value)}
+                      className="border w-full border-(--ws-border) text-(--ws-fg) placeholder:text-(--ws-fg-muted) rounded-lg px-3 py-2 bg-transparent focus:outline-none"
+                      placeholder={t("profile.emailPlaceholder")}
+                    />
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-2 w-full max-w-sm">
-                  <span className="text-(--ws-fg-muted) text-xs">
-                    {t("profile.emailLabel")}
-                  </span>
-                  <input
-                    type="email"
-                    value={draftEmail}
-                    onChange={(e) => setDraftEmail(e.target.value)}
-                    className="border w-full border-(--ws-border) text-(--ws-fg) placeholder:text-(--ws-fg-muted) rounded-lg px-2 py-1 bg-transparent focus:outline-none"
-                    placeholder={t("profile.emailPlaceholder")}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
+                <div className="mt-4 flex items-center gap-2 flex-wrap">
                   <button
                     type="button"
                     onClick={handleSave}
                     disabled={saving || !userData}
-                    className="px-3 py-1 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover) disabled:opacity-60"
+                    className="px-3 py-2 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover) disabled:opacity-60 text-sm"
                   >
                     {saving ? t("profile.saving") : t("profile.save")}
                   </button>
-                  {saveMessage && (
-                    <span className="text-xs text-emerald-400">
-                      {saveMessage}
-                    </span>
-                  )}
-                  {saveError && (
-                    <span className="text-xs text-red-400">{saveError}</span>
-                  )}
+                  {saveMessage ? <span className="text-xs text-emerald-400">{saveMessage}</span> : null}
+                  {saveError ? <span className="text-xs text-red-400">{saveError}</span> : null}
                 </div>
-              </div>
+
+                <div className="mt-4 rounded-lg border border-(--ws-border) p-3">
+                  <div className="text-xs text-(--ws-fg)">{t("profile.notesTitle")}</div>
+                  <div className="mt-1 text-xs text-(--ws-fg-muted)">{t("profile.notesRedirect")}</div>
+                  <div className="mt-1 text-xs text-(--ws-fg-muted)">{t("profile.notesConsistency")}</div>
+                </div>
+              </article>
+            </section>
+
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <article className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4">
+                <h2 className="text-sm font-semibold">{t("settings.title")}</h2>
+                <p className="mt-1 text-xs text-(--ws-fg-muted)">{t("settings.desc")}</p>
+
+                <div className="mt-4">
+                  <WorkspaceThemePicker value={theme} onChange={setTheme} themes={themes} />
+                </div>
+
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-xs text-(--ws-fg-muted)">{t("settings.current")}</span>
+                  <span className="text-xs px-2 py-1 rounded-lg border border-(--ws-border)">{theme}</span>
+                </div>
+              </article>
+
+              <article className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4">
+                <h2 className="text-sm font-semibold">{t("settings.toggle")}</h2>
+                <p className="mt-1 text-xs text-(--ws-fg-muted)">{t("settings.previewHint")}</p>
+                <div className="mt-4 inline-block rounded-lg border border-(--ws-border) p-2 bg-(--ws-surface)">
+                  <LocaleToggle />
+                </div>
+              </article>
             </section>
           </div>
         </main>

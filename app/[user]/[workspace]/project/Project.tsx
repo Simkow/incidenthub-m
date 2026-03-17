@@ -463,18 +463,17 @@ export const Project: React.FC = () => {
     >
       <section className="py-2 w-full">
         <main className="w-full md:min-h-full border-y border-l rounded-l-xl border-(--ws-border) bg-(--ws-surface) flex flex-col items-center p-4 md:p-6 gap-6 text-(--ws-fg) relative">
-          <div className="pt-6 flex flex-col items-center gap-4 w-full max-w-3xl">
-            <div className="flex items-center justify-center">
-              <Image src={ProjectIcon} alt="Project" className="ws-icon w-32" />
+          <div className="w-full max-w-4xl rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 md:p-5 flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex items-center justify-center shrink-0">
+              <Image src={ProjectIcon} alt="Project" className="ws-icon w-20" />
             </div>
             <div className="w-full flex flex-col gap-2">
-              <div className="text-xs text-(--ws-fg-muted) heading">
-                {t("project.progressBar")}
-              </div>
-              <div className="w-full flex items-center gap-4">
-                <div className="flex-1 h-2 rounded-full bg-(--ws-surface-2) overflow-hidden">
+              <div className="text-lg heading">{draft?.workspace_name || t("project.projectName")}</div>
+              <div className="text-xs text-(--ws-fg-muted)">{t("project.progressBar")}</div>
+              <div className="w-full flex items-center gap-3">
+                <div className="flex-1 h-2 rounded-full bg-(--ws-bg) overflow-hidden">
                   <div
-                    className="h-full bg-emerald-500"
+                    className="h-full bg-(--ws-accent)"
                     style={{ width: `${clampedPct}%` }}
                   />
                 </div>
@@ -485,32 +484,39 @@ export const Project: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-full max-w-3xl flex flex-col gap-5">
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-xs text-(--ws-fg-muted) heading">
+          <div className="w-full max-w-4xl flex flex-col gap-5">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 lg:col-span-2 flex flex-col items-center gap-2">
+                <div className="text-xs text-(--ws-fg-muted) heading">
                 {t("project.projectName")}
+                </div>
+                <div className="w-full rounded-xl border border-(--ws-border) bg-(--ws-surface) px-6 py-5 text-center">
+                  <input
+                    value={draft?.workspace_name ?? ""}
+                    spellCheck={false}
+                    disabled={!isWorkspaceOwner}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setDraft((prev) => {
+                        const base =
+                          prev ??
+                          ({
+                            workspace_name: "",
+                            description: null,
+                            due_date: null,
+                          } satisfies ProjectData);
+                        return { ...base, workspace_name: value };
+                      });
+                    }}
+                    placeholder={isLoading ? "Loading..." : ""}
+                    className="w-full bg-transparent text-2xl md:text-3xl font-semibold tracking-tight text-center text-(--ws-fg) placeholder:text-(--ws-fg-muted) outline-none disabled:opacity-60"
+                  />
+                </div>
               </div>
-              <div className="w-full max-w-sm rounded-xl border border-(--ws-border) bg-(--ws-surface-2) px-6 py-5 text-center">
-                <input
-                  value={draft?.workspace_name ?? ""}
-                  spellCheck={false}
-                  disabled={!isWorkspaceOwner}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setDraft((prev) => {
-                      const base =
-                        prev ??
-                        ({
-                          workspace_name: "",
-                          description: null,
-                          due_date: null,
-                        } satisfies ProjectData);
-                      return { ...base, workspace_name: value };
-                    });
-                  }}
-                  placeholder={isLoading ? "Loading..." : ""}
-                  className="w-full bg-transparent text-3xl font-semibold tracking-tight text-center text-(--ws-fg) placeholder:text-(--ws-fg-muted) outline-none disabled:opacity-60"
-                />
+
+              <div className="rounded-2xl border border-(--ws-border) bg-(--ws-surface-2) p-4 flex flex-col gap-2 justify-center">
+                <div className="text-xs text-(--ws-fg-muted) heading">{t("project.dueDate")}</div>
+                <div className="text-sm">{dueDateLabel}</div>
               </div>
             </div>
 
@@ -537,7 +543,7 @@ export const Project: React.FC = () => {
                 placeholder={
                   isLoading ? t("project.loading") : t("project.descriptionPh")
                 }
-                className="min-h-44 rounded-xl border border-(--ws-border) bg-(--ws-surface-2) px-5 py-4 text-sm text-(--ws-fg) placeholder:text-(--ws-fg-muted) whitespace-pre-wrap outline-none resize-none disabled:opacity-60"
+                className="min-h-44 rounded-xl border border-(--ws-border) bg-(--ws-surface-2) px-5 py-4 text-sm text-(--ws-fg) placeholder:text-(--ws-fg-muted) whitespace-pre-wrap outline-none resize-y disabled:opacity-60"
               />
             </div>
 
