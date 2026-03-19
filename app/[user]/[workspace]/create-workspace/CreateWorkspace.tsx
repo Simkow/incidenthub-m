@@ -18,6 +18,27 @@ function trimOrEmpty(value: string) {
   return value.trim();
 }
 
+function validateWorkspaceName(name: string) {
+  const isContainsForwardSlash = name.includes("/");
+  const isContainsBackslash = name.includes("\\");
+  const isEmpty = trimOrEmpty(name) === "";
+  const isContainsWhitespace = /\s/.test(name);
+
+  if (isEmpty) {
+    return "Workspace name is required.";
+  }
+
+  if (isContainsForwardSlash || isContainsBackslash) {
+    return "Workspace name cannot contain slashes.";
+  }
+
+  if (isContainsWhitespace) {
+    return WORKSPACE_SPACE_MESSAGE;
+  }
+
+  return null;
+}
+
 export const CreateWorkspace: React.FC<Props> = ({
   user,
   currentWorkspace,
@@ -46,6 +67,12 @@ export const CreateWorkspace: React.FC<Props> = ({
 
     if (!safeName) {
       setError("Workspace name is required");
+      return;
+    }
+
+    const validationError = validateWorkspaceName(safeName);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 

@@ -15,32 +15,8 @@ import {
 export const FirstWorkspace: React.FC = () => {
   const { t } = useI18n();
 
-  const [userName] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    const storedUser = window.localStorage.getItem("users");
-    if (!storedUser) return "";
-    try {
-      const parsed = JSON.parse(storedUser) as unknown;
-      return (typeof parsed === "string" ? parsed : storedUser)
-        .replace(/"/g, "")
-        .trim();
-    } catch {
-      return storedUser.replace(/"/g, "").trim();
-    }
-  });
-  const [userEmail] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    const storedMail = window.localStorage.getItem("userEmail");
-    if (!storedMail) return "";
-    try {
-      const parsed = JSON.parse(storedMail) as unknown;
-      return (typeof parsed === "string" ? parsed : storedMail)
-        .replace(/"/g, "")
-        .trim();
-    } catch {
-      return storedMail.replace(/"/g, "").trim();
-    }
-  });
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [isClicked, setIsClicked] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [error, setError] = useState("");
@@ -56,6 +32,26 @@ export const FirstWorkspace: React.FC = () => {
   );
 
   const trimmedProjectName = projectName.trim();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const readStoredValue = (key: "users" | "userEmail") => {
+      const stored = window.localStorage.getItem(key);
+      if (!stored) return "";
+      try {
+        const parsed = JSON.parse(stored) as unknown;
+        return (typeof parsed === "string" ? parsed : stored)
+          .replace(/"/g, "")
+          .trim();
+      } catch {
+        return stored.replace(/"/g, "").trim();
+      }
+    };
+
+    setUserName(readStoredValue("users"));
+    setUserEmail(readStoredValue("userEmail"));
+  }, []);
 
   const fetchInvites = useCallback(async () => {
     if (!userName) return;
@@ -251,7 +247,12 @@ export const FirstWorkspace: React.FC = () => {
         <span className="text-neutral-200">{userEmail}</span>
       </span>
       <main>
-        <section className="w-full h-full flex flex-col justify-center items-center gap-6">
+        <motion.section
+          initial={{ opacity: 0, filter: "blur(10px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          transition={{ duration: 0.5 }}
+          className="w-full h-full flex flex-col justify-center items-center gap-6"
+        >
           {pendingInvites.length ? (
             <div className="w-[92vw] max-w-md rounded-xl bg-white/5 border border-white/10 px-4 py-3">
               <h2 className="text-sm text-neutral-300">
@@ -266,7 +267,10 @@ export const FirstWorkspace: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                       <div className="truncate">
                         <span className="text-white/90">{inv.workspace}</span>
-                        <span className="text-white/50">  - · {inv.inviter}</span>
+                        <span className="text-white/50">
+                          {" "}
+                          - · {inv.inviter}
+                        </span>
                       </div>
                     </div>
                     <div className="mt-2 flex gap-2">
@@ -378,7 +382,7 @@ export const FirstWorkspace: React.FC = () => {
               </button>
             </motion.form>
           )}
-        </section>
+        </motion.section>
       </main>
     </div>
   );

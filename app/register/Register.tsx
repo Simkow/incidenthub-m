@@ -9,6 +9,11 @@ import { useRouter } from "next/navigation";
 import { useI18n } from "../i18n/I18nProvider";
 
 export const Register: React.FC = () => {
+  const NAME_MAX_LENGTH = 40;
+  const EMAIL_MAX_LENGTH = 40;
+  const PASSWORD_MIN_LENGTH = 8;
+  const PASSWORD_MAX_LENGTH = 24;
+
   const { t } = useI18n();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -40,6 +45,29 @@ export const Register: React.FC = () => {
     event.preventDefault();
     setError(null);
 
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim();
+
+    if (normalizedName.length > NAME_MAX_LENGTH) {
+      setError(t("auth.nameMaxLength"));
+      return;
+    }
+
+    if (normalizedEmail.length > EMAIL_MAX_LENGTH) {
+      setError(t("auth.emailMaxLength"));
+      return;
+    }
+
+    if (password.length < PASSWORD_MIN_LENGTH) {
+      setError(t("auth.passwordMinLength"));
+      return;
+    }
+
+    if (password.length > PASSWORD_MAX_LENGTH) {
+      setError(t("auth.passwordMaxLength"));
+      return;
+    }
+
     if (!isRulesConfirmed || !isPrivacyConfirmed) {
       setError(t("auth.legalConsentRequired"));
       return;
@@ -52,8 +80,8 @@ export const Register: React.FC = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
+          name: normalizedName,
+          email: normalizedEmail,
           password,
           isRulesConfirmed,
           isPrivacyConfirmed,
@@ -131,6 +159,7 @@ export const Register: React.FC = () => {
             onChange={handleNameChange}
             placeholder={t("auth.nameHint")}
             autoComplete="name"
+            maxLength={NAME_MAX_LENGTH}
             required
           />
         </div>
@@ -150,6 +179,7 @@ export const Register: React.FC = () => {
             onChange={handleEmailChange}
             placeholder="name@company.com"
             autoComplete="email"
+            maxLength={EMAIL_MAX_LENGTH}
             required
           />
         </div>
@@ -169,8 +199,13 @@ export const Register: React.FC = () => {
             onChange={handlePasswordChange}
             placeholder="********"
             autoComplete="new-password"
+            minLength={PASSWORD_MIN_LENGTH}
+            maxLength={PASSWORD_MAX_LENGTH}
             required
           />
+          <p className="text-xs text-neutral-500 font-light">
+            {t("auth.passwordLengthHint")}
+          </p>
         </div>
         <div className="w-full flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-4">
           <label className="flex items-start gap-3 text-sm text-neutral-300">
