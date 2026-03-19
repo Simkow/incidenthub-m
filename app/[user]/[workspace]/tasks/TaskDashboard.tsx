@@ -294,6 +294,7 @@ export const TaskDashboard: React.FC = () => {
             onClose={closeModal}
             workspace={currentWorkspace}
             createdBy={created_by}
+            paddingTop={200}
             onSuccessMessage={(m) => setSubmitMessage(m || null)}
             onErrorMessage={(m) => setSubmitError(m || null)}
             afterSuccess={() => {

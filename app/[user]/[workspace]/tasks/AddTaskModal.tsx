@@ -17,6 +17,7 @@ type Props = {
   onSuccessMessage?: (message: string) => void;
   onErrorMessage?: (message: string) => void;
   afterSuccess?: () => void;
+  paddingTop?: number;
 };
 
 export function AddTaskModal({
@@ -27,6 +28,7 @@ export function AddTaskModal({
   onSuccessMessage,
   onErrorMessage,
   afterSuccess,
+  paddingTop,
 }: Props) {
   const { t } = useI18n();
   const portalContainer = useWsPortalContainer();
@@ -151,6 +153,7 @@ export function AddTaskModal({
       initial={{ opacity: 0, filter: "blur(10px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 0.3 }}
+      style={{ paddingTop: paddingTop ?? 0 }}
       className="absolute inset-0 z-40 flex items-start pt-20 md:pt-52 justify-center bg-black/20 rounded-xl backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();

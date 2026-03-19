@@ -619,6 +619,7 @@ export default function TaskSection({
               onClose={() => setIsAddOpen(false)}
               workspace={workspace}
               createdBy={username}
+              paddingTop={20}
               onSuccessMessage={(m) => setSubmitMessage(m || null)}
               onErrorMessage={(m) => setSubmitError(m || null)}
             />
