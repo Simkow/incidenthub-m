@@ -18,6 +18,7 @@ import Image from "next/image";
 import type { Task } from "./types";
 import { ProjectCompletionModal } from "./ProjectCompletionBanner";
 import { useI18n } from "../../../i18n/I18nProvider";
+import { RoundedCheckbox } from "./RoundedCheckbox";
 
 type DeadlineTask = {
   id: string | number;
@@ -71,6 +72,7 @@ export const TaskDashboard: React.FC = () => {
   const [completionDismissed, setCompletionDismissed] = useState(false);
   const [deadlineCount, setDeadlineCount] = useState(0);
   const [deadlineTasks, setDeadlineTasks] = useState<DeadlineTask[]>([]);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [dismissedDeadlineTasks, setDismissedDeadlineTasks] = useState<
     Record<string, boolean>
   >({});
@@ -392,10 +394,29 @@ export const TaskDashboard: React.FC = () => {
               </span>
             </div>
 
-            <h2 className="heading text-lg">{t("tasks.tasksHeading")}</h2>
+            <div className="flex justify-between gap-2 mb-2">
+              <h2 className="heading text-lg">{t("tasks.tasksHeading")}</h2>
+              <button
+                type="button"
+                onClick={() => setSelectionMode((prev) => !prev)}
+                className={`rounded-lg border px-2 py-1 text-xs transition-colors flex items-center gap-2 ${
+                  selectionMode
+                    ? "border-(--ws-checkbox-border) bg-(--ws-hover) text-(--ws-fg)"
+                    : "border-(--ws-border) text-(--ws-fg-muted) hover:bg-(--ws-hover)"
+                }`}
+              >
+                <RoundedCheckbox
+                  checked={selectionMode}
+                  onCheckedChange={setSelectionMode}
+                  ariaLabel={t("tasks.multiSelectMode")}
+                  stopPropagation
+                />
+                {t("tasks.multiSelectMode")}
+              </button>
+            </div>
             <main className="border-t border-(--ws-border) w-full">
               {taskView === "All" ? (
-                <TaskSection search={search} />
+                <TaskSection search={search} isSelected={selectionMode} />
               ) : taskView === "Active" ? (
                 <ActiveTaskSection search={search} />
               ) : (

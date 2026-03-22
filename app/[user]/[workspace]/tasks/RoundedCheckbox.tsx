@@ -4,6 +4,7 @@ import * as React from "react";
 
 type RoundedCheckboxProps = {
   checked: boolean;
+  indeterminate?: boolean;
   onCheckedChange: (checked: boolean) => void;
   ariaLabel: string;
   disabled?: boolean;
@@ -13,18 +14,26 @@ type RoundedCheckboxProps = {
 
 export function RoundedCheckbox({
   checked,
+  indeterminate = false,
   onCheckedChange,
   ariaLabel,
   disabled,
   stopPropagation,
   className,
 }: RoundedCheckboxProps) {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+
   const stop = React.useCallback(
     (e: React.SyntheticEvent) => {
       if (stopPropagation) e.stopPropagation();
     },
     [stopPropagation],
   );
+
+  React.useEffect(() => {
+    if (!inputRef.current) return;
+    inputRef.current.indeterminate = indeterminate && !checked;
+  }, [checked, indeterminate]);
 
   return (
     <label
@@ -36,6 +45,7 @@ export function RoundedCheckbox({
       onMouseDown={stop}
     >
       <input
+        ref={inputRef}
         type="checkbox"
         checked={checked}
         onChange={(e) => onCheckedChange(e.target.checked)}
@@ -57,7 +67,9 @@ export function RoundedCheckbox({
           className={
             checked
               ? "h-2.5 w-1.5 rotate-45 border-b-2 border-r-2 border-(--ws-checkbox-check) mb-0.5"
-              : "hidden"
+              : indeterminate
+                ? "h-0.5 w-2.5 rounded bg-(--ws-checkbox-check)"
+                : "hidden"
           }
         />
       </span>

@@ -18,11 +18,13 @@ import { dateInputToDateOnly, toDateInputValue } from "./dateTime";
 type Props = {
   search?: string;
   scope?: "workspace" | "user";
+  isSelected?: boolean;
 };
 
 export default function TaskSection({
   search = "",
   scope = "workspace",
+  isSelected = false,
 }: Props) {
   const { t } = useI18n();
   const params = useParams();
@@ -45,6 +47,9 @@ export default function TaskSection({
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
@@ -296,6 +301,157 @@ export default function TaskSection({
     });
   }, [tasks, search]);
 
+  const taskSelectionKeys = useMemo(
+    () => filteredTasks.map((task) => String(task.id)),
+    [filteredTasks],
+  );
+
+  const selectedVisibleCount = useMemo(
+    () =>
+      taskSelectionKeys.reduce(
+        (count, key) => count + (selectedTaskIds.has(key) ? 1 : 0),
+        0,
+      ),
+    [taskSelectionKeys, selectedTaskIds],
+  );
+
+  const allVisibleSelected =
+    taskSelectionKeys.length > 0 &&
+    selectedVisibleCount === taskSelectionKeys.length;
+  const hasAnyVisibleSelected = selectedVisibleCount > 0;
+
+  useEffect(() => {
+    if (!isSelected && selectedTaskIds.size > 0) {
+      setSelectedTaskIds(new Set());
+    }
+  }, [isSelected, selectedTaskIds]);
+
+  useEffect(() => {
+    setSelectedTaskIds((prev) => {
+      if (prev.size === 0) return prev;
+      const validKeys = new Set(tasks.map((task) => String(task.id)));
+      const next = new Set<string>();
+      for (const key of prev) {
+        if (validKeys.has(key)) next.add(key);
+      }
+      return next.size === prev.size ? prev : next;
+    });
+  }, [tasks]);
+
+  const toggleTaskSelection = useCallback(
+    (taskId: Task["id"], checked: boolean) => {
+      const key = String(taskId);
+      setSelectedTaskIds((prev) => {
+        const next = new Set(prev);
+        if (checked) {
+          next.add(key);
+        } else {
+          next.delete(key);
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
+  const toggleSelectAllVisible = useCallback(
+    (checked: boolean) => {
+      setSelectedTaskIds((prev) => {
+        const next = new Set(prev);
+        if (checked) {
+          for (const key of taskSelectionKeys) {
+            next.add(key);
+          }
+        } else {
+          for (const key of taskSelectionKeys) {
+            next.delete(key);
+          }
+        }
+        return next;
+      });
+    },
+    [taskSelectionKeys],
+  );
+
+  const clearVisibleSelection = useCallback(() => {
+    setSelectedTaskIds((prev) => {
+      if (taskSelectionKeys.length === 0 || prev.size === 0) return prev;
+      const next = new Set(prev);
+      for (const key of taskSelectionKeys) {
+        next.delete(key);
+      }
+      return next;
+    });
+  }, [taskSelectionKeys]);
+
+  const handleDeleteSelected = useCallback(async () => {
+    const selectedKeys = taskSelectionKeys.filter((key) =>
+      selectedTaskIds.has(key),
+    );
+
+    if (selectedKeys.length === 0) return;
+
+    const confirmed =
+      typeof window === "undefined"
+        ? true
+        : window.confirm(
+            t("tasks.deleteSelectedConfirm", { count: selectedKeys.length }),
+          );
+
+    if (!confirmed) return;
+
+    const selectedIdSet = new Set(selectedKeys);
+    const snapshot = tasks;
+
+    setTasks((prev) =>
+      prev.filter((task) => !selectedIdSet.has(String(task.id))),
+    );
+    setSelectedTaskIds(new Set());
+
+    if (activeTaskId !== null && selectedIdSet.has(String(activeTaskId))) {
+      setActiveTaskId(null);
+    }
+
+    if (
+      deleteConfirmTaskId !== null &&
+      selectedIdSet.has(String(deleteConfirmTaskId))
+    ) {
+      setDeleteConfirmTaskId(null);
+    }
+
+    try {
+      const deleteResults = await Promise.all(
+        selectedKeys.map((taskId) =>
+          fetch("/api/delete-task", {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: taskId }),
+          }),
+        ),
+      );
+
+      const hasFailure = deleteResults.some((res) => !res.ok);
+      if (hasFailure) {
+        setTasks(snapshot);
+        return;
+      }
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("tasks:refresh"));
+      }
+    } catch (error) {
+      console.error("Error deleting selected tasks", error);
+      setTasks(snapshot);
+    }
+  }, [
+    activeTaskId,
+    deleteConfirmTaskId,
+    selectedTaskIds,
+    t,
+    taskSelectionKeys,
+    tasks,
+  ]);
+
   const groupedTasks = useMemo(() => {
     if (scope !== "user")
       return [] as Array<{ key: string; label: string; tasks: Task[] }>;
@@ -328,6 +484,7 @@ export default function TaskSection({
 
   const renderTaskRow = (task: Task) => {
     const isActionMenuOpen = openActionMenuTaskId === task.id;
+    const isTaskSelected = selectedTaskIds.has(String(task.id));
     const priorityLabel = task.priority || "Light";
     const priorityTone =
       priorityLabel === "Urgent"
@@ -344,13 +501,32 @@ export default function TaskSection({
         animate={{ opacity: 1, filter: "blur(0px)" }}
         transition={{ duration: 0.4 }}
         key={task.id}
-        className="relative grid grid-cols-1 md:grid-cols-[1fr_auto] body-text items-center gap-3 rounded-xl border border-(--ws-border) bg-(--ws-surface-2) hover:bg-(--ws-hover) px-4 py-3 cursor-pointer transition-colors"
+        className={`relative grid grid-cols-1 md:grid-cols-[1fr_auto] body-text items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-colors ${
+          isSelected && isTaskSelected
+            ? "border-(--ws-checkbox-border) bg-(--ws-hover)"
+            : "border-(--ws-border) bg-(--ws-surface-2) hover:bg-(--ws-hover)"
+        }`}
         role="button"
         tabIndex={0}
         aria-label={`${t("tasks.openDetails")} - ${task.title}`}
-        onClick={() => setActiveTaskId(task.id)}
+        onClick={() => {
+          if (isSelected) {
+            toggleTaskSelection(task.id, !selectedTaskIds.has(String(task.id)));
+            return;
+          }
+          setActiveTaskId(task.id);
+        }}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") setActiveTaskId(task.id);
+          if (e.key === "Enter" || e.key === " ") {
+            if (isSelected) {
+              toggleTaskSelection(
+                task.id,
+                !selectedTaskIds.has(String(task.id)),
+              );
+              return;
+            }
+            setActiveTaskId(task.id);
+          }
         }}
       >
         <div className="min-w-0 w-full flex flex-col gap-2">
@@ -494,21 +670,29 @@ export default function TaskSection({
               {task.is_finished ? t("tasks.done") : t("tasks.active")}
             </span>
           </div>
-
-          <button
-            type="button"
-            aria-label="Open task actions"
-            data-task-action-trigger
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenActionMenuTaskId((prev) =>
-                prev === task.id ? null : task.id,
-              );
-            }}
-            className="h-8 w-8 rounded-lg border border-(--ws-border) text-(--ws-fg-muted) hover:bg-(--ws-hover) text-sm"
-          >
-            ...
-          </button>
+          {isSelected ? (
+            <RoundedCheckbox
+              checked={isTaskSelected}
+              onCheckedChange={(next) => toggleTaskSelection(task.id, next)}
+              ariaLabel={t("tasks.selectTaskAria", { title: task.title })}
+              stopPropagation
+            />
+          ) : (
+            <button
+              type="button"
+              aria-label="Open task actions"
+              data-task-action-trigger
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpenActionMenuTaskId((prev) =>
+                  prev === task.id ? null : task.id,
+                );
+              }}
+              className="h-8 w-8 rounded-lg border border-(--ws-border) text-(--ws-fg-muted) hover:bg-(--ws-hover) text-sm"
+            >
+              ...
+            </button>
+          )}
 
           {isActionMenuOpen ? (
             <div
@@ -586,6 +770,47 @@ export default function TaskSection({
       transition={{ duration: 0.4 }}
       className="relative w-full min-h-125 flex flex-col justify-start gap-2"
     >
+      {isSelected ? (
+        <div className="mt-2 rounded-xl border border-(--ws-border) bg-(--ws-surface) px-3 py-2 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-(--ws-fg-muted)">
+            <RoundedCheckbox
+              checked={allVisibleSelected}
+              indeterminate={!allVisibleSelected && hasAnyVisibleSelected}
+              onCheckedChange={(next) => toggleSelectAllVisible(next)}
+              ariaLabel={t("tasks.selectAllVisible")}
+            />
+            <span>{t("tasks.selectAllVisible")}</span>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap justify-end">
+            <span className="text-xs text-(--ws-fg-muted)">
+              {t("tasks.selectionHint")}
+            </span>
+            <span className="text-xs text-(--ws-fg-muted)">
+              {t("tasks.selectedCount", { count: selectedVisibleCount })}
+            </span>
+            <button
+              type="button"
+              onClick={clearVisibleSelection}
+              disabled={!hasAnyVisibleSelected}
+              className="px-3 py-1.5 rounded-lg border border-(--ws-border) text-xs text-(--ws-fg-muted) disabled:opacity-50 disabled:cursor-not-allowed hover:bg-(--ws-hover)"
+            >
+              {t("tasks.clearSelection")}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                void handleDeleteSelected();
+              }}
+              disabled={!hasAnyVisibleSelected}
+              className="px-3 py-1.5 rounded-lg border border-red-300 text-xs text-red-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-800"
+            >
+              {t("tasks.deleteSelected")}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mt-2 flex flex-col gap-3">
         {tasks.length < 1 ? (
           <div className="text-(--ws-fg-muted) text-sm flex items-center gap-3 justify-center mt-3">
