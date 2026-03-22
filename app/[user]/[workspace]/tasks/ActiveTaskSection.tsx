@@ -8,6 +8,7 @@ import { RoundedCheckbox } from "./RoundedCheckbox";
 import { useWsPortalContainer } from "./useWsPortalContainer";
 import Image from "next/image";
 import Plus from "../../../../public/assets/plus.png";
+import { motion } from "motion/react";
 import { useParams } from "next/navigation";
 import { useI18n } from "../../../i18n/I18nProvider";
 
@@ -35,6 +36,9 @@ export default function ActiveTaskSection({
     return Array.isArray(raw) ? (raw[0] ?? "") : (raw ?? "");
   }, [params]);
   const [activeTaskId, setActiveTaskId] = useState<Task["id"] | null>(null);
+  const [openActionMenuTaskId, setOpenActionMenuTaskId] = useState<
+    Task["id"] | null
+  >(null);
   const [deleteConfirmTaskId, setDeleteConfirmTaskId] = useState<
     Task["id"] | null
   >(null);
@@ -52,6 +56,36 @@ export default function ActiveTaskSection({
     () => ["Light", "Medium", "High", "Urgent"],
     [],
   );
+
+  useEffect(() => {
+    if (activeTaskId !== null) {
+      window.scrollTo({ top: 72, behavior: "smooth" });
+    }
+  }, [activeTaskId]);
+
+  useEffect(() => {
+    if (openActionMenuTaskId === null) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      const clickedInMenu = !!target.closest("[data-task-action-menu]");
+      const clickedMenuTrigger = !!target.closest("[data-task-action-trigger]");
+
+      if (!clickedInMenu && !clickedMenuTrigger) {
+        setOpenActionMenuTaskId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, [openActionMenuTaskId]);
 
   const saveTimeoutsRef = useRef(new Map<Task["id"], number>());
 
@@ -293,212 +327,228 @@ export default function ActiveTaskSection({
   }, [filteredTasks, scope]);
 
   const renderTaskRow = (task: Task) => {
-    const selectPriorityValue = priorityOptions.includes(
-      task.priority as Priority,
-    )
-      ? (task.priority as Priority)
-      : ("" as const);
+    const isActionMenuOpen = openActionMenuTaskId === task.id;
+    const priorityLabel = task.priority || "Light";
+    const priorityTone =
+      priorityLabel === "Urgent"
+        ? "border-red-400/40 bg-red-500/10 text-(--ws-fg-muted)"
+        : priorityLabel === "High"
+          ? "border-amber-400/40 bg-amber-500/10 text-(--ws-fg-muted)"
+          : priorityLabel === "Medium"
+            ? "border-sky-400/40 bg-sky-500/10 text-(--ws-fg-muted)"
+            : "border-emerald-400/40 bg-emerald-500/10 text-(--ws-fg-muted)";
 
     return (
-      <section
+      <motion.section
+        initial={{ opacity: 0, filter: "blur(10px)" }}
+        animate={{ opacity: 1, filter: "blur(0px)" }}
+        transition={{ duration: 0.4 }}
         key={task.id}
-        className="grid grid-cols-1 md:grid-cols-8 items-center gap-y-2 md:gap-y-0 md:gap-x-5 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover) px-3 py-2"
+        className="relative grid grid-cols-1 md:grid-cols-[1fr_auto] body-text items-center gap-3 rounded-xl border border-(--ws-border) bg-(--ws-surface-2) hover:bg-(--ws-hover) px-4 py-3 cursor-pointer transition-colors"
         role="button"
         tabIndex={0}
+        aria-label={`${t("tasks.openDetails")} - ${task.title}`}
         onClick={() => setActiveTaskId(task.id)}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") setActiveTaskId(task.id);
         }}
       >
-        <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
-            {t("tasks.title")}
-          </div>
-          <input
-            value={task.title}
-            onChange={(e) => updateTask(task.id, "title", e.target.value)}
-            className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg) rounded-lg border border-(--ws-border) px-2 py-1 focus:outline-none"
-            placeholder={t("tasks.title")}
-          />
-        </div>
-
-        <div
-          className="min-w-0 w-full md:col-span-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
-            {t("tasks.description")}
-          </div>
-          <input
-            value={task.description}
-            onChange={(e) => updateTask(task.id, "description", e.target.value)}
-            className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg-muted) rounded-lg border border-(--ws-border) px-2 py-1 focus:outline-none"
-            placeholder={t("tasks.description")}
-          />
-        </div>
-
-        <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
-            {t("tasks.priority")}
-          </div>
-          <Select.Root
-            value={selectPriorityValue}
-            onValueChange={(value) => updateTask(task.id, "priority", value)}
-          >
-            <Select.Trigger className="text-(--ws-fg-muted) text-sm rounded-lg border border-(--ws-border) px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
-              <Select.Value placeholder={t("tasks.priority")} />
-              <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
-            </Select.Trigger>
-            <Select.Portal container={portalContainer ?? undefined}>
-              <Select.Content
-                position="popper"
-                sideOffset={6}
-                className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface) hover:cursor-pointer"
-              >
-                <Select.Viewport className="p-1">
-                  {priorityOptions.map((p) => (
-                    <Select.Item
-                      key={p}
-                      value={p}
-                      className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
-                    >
-                      <Select.ItemText>{p}</Select.ItemText>
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
-        </div>
-
-        <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
-            {t("tasks.dueDate")}
-          </div>
-          <input
-            type="date"
-            value={toDateInputValue(task.due_date)}
-            onChange={(e) =>
-              updateTask(
-                task.id,
-                "due_date",
-                dateInputToDateOnly(e.target.value),
-              )
-            }
-            onClick={(e) => {
-              e.stopPropagation();
-              try {
-                (
-                  e.currentTarget as HTMLInputElement & {
-                    showPicker?: () => void;
-                  }
-                ).showPicker?.();
-              } catch {
-                // ignore: some browsers require strict user-gesture activation
-              }
-            }}
-            className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg-muted) rounded-lg border border-(--ws-border) px-2 py-1 focus:outline-none no-date-icon"
-          />
-        </div>
-
-        <div className="min-w-0 w-full" onClick={(e) => e.stopPropagation()}>
-          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
-            {t("tasks.assignee")}
-          </div>
-          <Select.Root
-            value={(() => {
-              const current = String(task.assignee ?? "");
-              const options = assigneeOptions.includes(current)
-                ? assigneeOptions
-                : current
-                  ? [current, ...assigneeOptions]
-                  : assigneeOptions;
-              return options.includes(current) ? current : ("" as const);
-            })()}
-            onValueChange={(value) => updateTask(task.id, "assignee", value)}
-            disabled={assigneeLoading || assigneeOptions.length === 0}
-          >
-            <Select.Trigger className="text-(--ws-fg-muted) text-sm rounded-lg border border-(--ws-border) px-2 py-1 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
-              <Select.Value
-                placeholder={
-                  assigneeLoading
-                    ? t("tasks.assigneeLoading")
-                    : t("tasks.assignee")
-                }
+        <div className="min-w-0 w-full flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-3">
+            <div
+              className="min-w-0 w-full max-w-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                value={task.title}
+                onChange={(e) => updateTask(task.id, "title", e.target.value)}
+                className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg) rounded-lg border border-(--ws-border) px-2.5 py-1.5 focus:outline-none"
+                placeholder={t("tasks.title")}
               />
-              <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
-            </Select.Trigger>
-            <Select.Portal container={portalContainer ?? undefined}>
-              <Select.Content
-                position="popper"
-                sideOffset={6}
-                className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface) hover:cursor-pointer"
+            </div>
+
+            <span
+              className={`shrink-0 rounded-full border px-2 py-1 text-[11px] font-medium ${priorityTone}`}
+              aria-label={`${t("tasks.priority")}: ${priorityLabel}`}
+            >
+              {priorityLabel}
+            </span>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveTaskId(task.id);
+              }}
+              className="shrink-0 rounded-lg border border-(--ws-border) px-2 py-1 text-xs text-(--ws-fg-muted) hover:bg-(--ws-hover)"
+            >
+              {t("tasks.openDetails")}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="min-w-0" onClick={(e) => e.stopPropagation()}>
+              <input
+                type="date"
+                value={toDateInputValue(task.due_date)}
+                onChange={(e) =>
+                  updateTask(
+                    task.id,
+                    "due_date",
+                    dateInputToDateOnly(e.target.value),
+                  )
+                }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  try {
+                    (
+                      e.currentTarget as HTMLInputElement & {
+                        showPicker?: () => void;
+                      }
+                    ).showPicker?.();
+                  } catch {
+                    // ignore: some browsers require strict user-gesture activation
+                  }
+                }}
+                className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg-muted) rounded-lg border border-(--ws-border) px-2.5 py-1.5 focus:outline-none no-date-icon"
+              />
+            </div>
+
+            <div className="min-w-0" onClick={(e) => e.stopPropagation()}>
+              <Select.Root
+                value={(() => {
+                  const current = String(task.assignee ?? "");
+                  const options = assigneeOptions.includes(current)
+                    ? assigneeOptions
+                    : current
+                      ? [current, ...assigneeOptions]
+                      : assigneeOptions;
+                  return options.includes(current) ? current : ("" as const);
+                })()}
+                onValueChange={(value) =>
+                  updateTask(task.id, "assignee", value)
+                }
+                disabled={assigneeLoading || assigneeOptions.length === 0}
               >
-                <Select.Viewport className="p-1">
-                  {(() => {
-                    const current = String(task.assignee ?? "");
-                    const merged = assigneeOptions.includes(current)
-                      ? assigneeOptions
-                      : current
-                        ? [current, ...assigneeOptions]
-                        : assigneeOptions;
-                    return merged;
-                  })().map((name) => (
-                    <Select.Item
-                      key={name}
-                      value={name}
-                      className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
-                    >
-                      <Select.ItemText>{name}</Select.ItemText>
-                    </Select.Item>
-                  ))}
-                </Select.Viewport>
-              </Select.Content>
-            </Select.Portal>
-          </Select.Root>
+                <Select.Trigger className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg-muted) rounded-lg border border-(--ws-border) px-2.5 py-1.5 flex items-center justify-between focus:outline-none disabled:opacity-60">
+                  <Select.Value
+                    placeholder={
+                      assigneeLoading
+                        ? t("tasks.assigneeLoading")
+                        : t("tasks.assignee")
+                    }
+                  />
+                  <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
+                </Select.Trigger>
+                <Select.Portal container={portalContainer ?? undefined}>
+                  <Select.Content
+                    position="popper"
+                    sideOffset={6}
+                    className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface)"
+                  >
+                    <Select.Viewport className="p-1">
+                      {(() => {
+                        const current = String(task.assignee ?? "");
+                        const merged = assigneeOptions.includes(current)
+                          ? assigneeOptions
+                          : current
+                            ? [current, ...assigneeOptions]
+                            : assigneeOptions;
+                        return merged;
+                      })().map((name) => (
+                        <Select.Item
+                          key={name}
+                          value={name}
+                          className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
+                        >
+                          <Select.ItemText>{name}</Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.Viewport>
+                  </Select.Content>
+                </Select.Portal>
+              </Select.Root>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-(--ws-fg-muted)">
+            {t("tasks.openDetailsHint")}
+          </div>
         </div>
 
         <div
-          className="flex flex-col items-center justify-center"
+          className="relative flex items-center gap-2 md:self-stretch md:justify-end"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
-            {t("tasks.finished")}
+          <div className="flex items-center gap-2 rounded-lg border border-(--ws-border) bg-(--ws-surface) px-2 py-1">
+            <RoundedCheckbox
+              checked={task.is_finished}
+              onCheckedChange={(next) =>
+                updateTask(task.id, "is_finished", next)
+              }
+              ariaLabel="Mark task as finished"
+              stopPropagation
+              className="scale-125"
+            />
+            <span className="text-xs text-(--ws-fg-muted)">
+              {task.is_finished ? t("tasks.done") : t("tasks.active")}
+            </span>
           </div>
-          <RoundedCheckbox
-            checked={task.is_finished}
-            onCheckedChange={(next) => updateTask(task.id, "is_finished", next)}
-            ariaLabel="Mark task as finished"
-            stopPropagation
-          />
-        </div>
 
-        <div
-          className="flex flex-col items-center justify-center"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="md:hidden text-[10px] leading-4 text-(--ws-fg-muted) heading mb-1">
-            {t("tasks.delete")}
-          </div>
           <button
             type="button"
+            aria-label="Open task actions"
+            data-task-action-trigger
             onClick={(e) => {
               e.stopPropagation();
-              setDeleteConfirmTaskId((prev) =>
+              setOpenActionMenuTaskId((prev) =>
                 prev === task.id ? null : task.id,
               );
             }}
-            className="text-xs px-2 py-1 rounded-lg border text-red-300 border-(--ws-border) hover:bg-(--ws-hover)"
+            className="h-8 w-8 rounded-lg border border-(--ws-border) text-(--ws-fg-muted) hover:bg-(--ws-hover) text-sm"
           >
-            {t("tasks.delete")}
+            ...
           </button>
 
+          {isActionMenuOpen ? (
+            <div
+              data-task-action-menu
+              className="absolute right-0 top-10 z-20 w-32 rounded-lg border border-(--ws-border) bg-(--ws-surface) p-1 shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenActionMenuTaskId(null);
+                  setActiveTaskId(task.id);
+                }}
+                className="w-full rounded-md px-2 py-1.5 text-left text-xs text-(--ws-fg-muted) hover:bg-(--ws-hover)"
+              >
+                {t("tasks.edit")}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenActionMenuTaskId(null);
+                  setDeleteConfirmTaskId((prev) =>
+                    prev === task.id ? null : task.id,
+                  );
+                }}
+                className="w-full rounded-md px-2 py-1.5 text-left text-xs text-red-300 hover:bg-(--ws-hover)"
+              >
+                {t("tasks.delete")}
+              </button>
+            </div>
+          ) : null}
+
           <div
-            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-64 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-(--ws-surface) border border-(--ws-border) absolute mt-40 left-1/2 -translate-x-1/2 flex-col items-center justify-center p-4`}
+            className={`${deleteConfirmTaskId === task.id ? "flex" : "hidden"} w-44 max-w-[calc(100vw-2rem)] h-28 rounded-xl bg-(--ws-surface) border border-(--ws-border) absolute flex-col items-center justify-center p-4 backdrop-blur-sm`}
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            <span className="text-sm text-(--ws-fg-muted) font-light text-center">
+            <span className="text-xs text-(--ws-fg-muted) font-light text-center">
               {t("tasks.deleteConfirm")}
             </span>
             <div className="mt-2 flex gap-2">
@@ -508,7 +558,7 @@ export default function ActiveTaskSection({
                   e.stopPropagation();
                   setDeleteConfirmTaskId(null);
                 }}
-                className="border border-(--ws-border) text-sm text-(--ws-fg-muted) py-1 px-3 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover)"
+                className="border border-(--ws-border) text-xs text-(--ws-fg-muted) py-1 px-3 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover)"
               >
                 {t("tasks.cancel")}
               </button>
@@ -518,35 +568,28 @@ export default function ActiveTaskSection({
                   e.stopPropagation();
                   void handleDelete(task.id);
                 }}
-                className="border border-red-300 text-sm text-red-300 py-1 px-3 rounded-lg bg-(--ws-surface-2) hover:bg-(--ws-hover) hover:text-red-400"
+                className="border border-red-300 text-xs text-red-300 py-1 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-700 hover:text-red-400"
               >
                 {t("tasks.delete")}
               </button>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     );
   };
 
   return (
-    <div className="relative w-full min-h-125 flex flex-col justify-start gap-2">
-      <div className="hidden md:grid grid-cols-8 items-center gap-x-5 px-3 pt-2 text-xs font-medium text-(--ws-fg-muted)">
-        <span className="text-left">{t("tasks.title")}</span>
-        <span className="text-left md:col-span-2">
-          {t("tasks.description")}
-        </span>
-        <span className="text-center">{t("tasks.priority")}</span>
-        <span className="text-center">{t("tasks.dueDate")}</span>
-        <span className="text-center">{t("tasks.assignee")}</span>
-        <span className="text-center">{t("tasks.finished")}</span>
-        <span className="text-center">{t("tasks.delete")}</span>
-      </div>
-
+    <motion.div
+      initial={{ opacity: 0, filter: "blur(10px)" }}
+      animate={{ opacity: 1, filter: "blur(0px)" }}
+      transition={{ duration: 0.4 }}
+      className="relative w-full min-h-125 flex flex-col justify-start gap-2"
+    >
       <div className="mt-2 flex flex-col gap-3">
         {tasks.length < 1 ? (
           <div className="text-(--ws-fg-muted) text-sm flex items-center gap-3 justify-center mt-3">
-            <span className="text-base">Add first task</span>
+            <span className="text-base boxy-text">Add first task</span>
             <button
               type="button"
               onClick={() => {
@@ -559,7 +602,7 @@ export default function ActiveTaskSection({
               <Image
                 src={plusIcon}
                 alt="icon"
-                className="ws-icon w-4 h-4 group-hover:scale-115 transition-all"
+                className="w-4 h-4 group-hover:scale-115 transition-all ws-icon"
               />
             </button>
             {submitMessage && (
@@ -576,12 +619,13 @@ export default function ActiveTaskSection({
               onClose={() => setIsAddOpen(false)}
               workspace={workspace}
               createdBy={username}
+              paddingTop={20}
               onSuccessMessage={(m) => setSubmitMessage(m || null)}
               onErrorMessage={(m) => setSubmitError(m || null)}
             />
           </div>
         ) : filteredTasks.length < 1 ? (
-          <div className="text-neutral-400 text-sm flex items-center justify-center mt-3">
+          <div className="text-(--ws-fg-muted) text-sm flex items-center justify-center mt-3">
             No results
           </div>
         ) : (
@@ -590,9 +634,8 @@ export default function ActiveTaskSection({
         {scope === "user"
           ? groupedTasks.map((group) => (
               <div key={group.key} className="flex flex-col gap-3">
-                <div className="px-3 pt-3 text-xs text-neutral-400">
-                  Workspace:{" "}
-                  <span className="text-neutral-200">{group.label}</span>
+                <div className="px-3 pt-3 text-xs text-(--ws-fg-muted)">
+                  Workspace: <span className="opacity-90">{group.label}</span>
                 </div>
                 {group.tasks.map(renderTaskRow)}
               </div>
@@ -607,6 +650,6 @@ export default function ActiveTaskSection({
         onClose={() => setActiveTaskId(null)}
         onUpdate={updateTask}
       />
-    </div>
+    </motion.div>
   );
 }

@@ -7,6 +7,7 @@ import type { Priority, Task } from "./types";
 import { RoundedCheckbox } from "./RoundedCheckbox";
 import { dateInputToDateOnly, toDateInputValue } from "./dateTime";
 import { useWsPortalContainer } from "./useWsPortalContainer";
+import { useI18n } from "../../../i18n/I18nProvider";
 
 type Props = {
   open: boolean;
@@ -27,6 +28,7 @@ export function TaskModal({
   onClose,
   onUpdate,
 }: Props) {
+  const { t } = useI18n();
   const portalContainer = useWsPortalContainer();
   const workspaceForUsers = useMemo(() => {
     if (!task?.workspace_name) {
@@ -132,13 +134,13 @@ export function TaskModal({
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between px-4 py-3 border-b border-(--ws-border)">
-                  <h2 className="text-sm">Task details</h2>
+                  <h2 className="text-sm">{t("tasks.openDetails")}</h2>
                   <button
                     type="button"
                     onClick={onClose}
                     className="text-xs px-2 py-1 rounded-lg border border-(--ws-border) hover:bg-(--ws-hover)"
                   >
-                    Close
+                    {t("tasks.cancel")}
                   </button>
                 </div>
 
@@ -146,7 +148,7 @@ export function TaskModal({
                   <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <section className="md:col-span-2 flex flex-col gap-1">
                       <span className="text-xs text-(--ws-fg-muted)">
-                        Title
+                        {t("tasks.title")}
                       </span>
                       <input
                         value={task.title}
@@ -159,7 +161,7 @@ export function TaskModal({
 
                     <section className="md:col-span-2 flex flex-col gap-1">
                       <span className="text-xs text-(--ws-fg-muted)">
-                        Description
+                        {t("tasks.description")}
                       </span>
                       <textarea
                         value={task.description}
@@ -172,7 +174,7 @@ export function TaskModal({
 
                     <section className="flex flex-col gap-1">
                       <span className="text-xs text-(--ws-fg-muted)">
-                        Priority
+                        {t("tasks.priority")}
                       </span>
                       <Select.Root
                         value={selectPriorityValue}
@@ -181,8 +183,10 @@ export function TaskModal({
                         }
                       >
                         <Select.Trigger className="text-(--ws-fg) text-sm rounded-lg border border-(--ws-border) px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
-                          <Select.Value placeholder="Priority" />
-                          <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
+                          <Select.Value placeholder={t("tasks.priority")} />
+                          <Select.Icon className="text-(--ws-fg-muted)">
+                            v
+                          </Select.Icon>
                         </Select.Trigger>
                         <Select.Portal container={portalContainer ?? undefined}>
                           <Select.Content
@@ -208,7 +212,7 @@ export function TaskModal({
 
                     <section className="flex flex-col gap-1">
                       <span className="text-xs text-(--ws-fg-muted)">
-                        Due date
+                        {t("tasks.dueDate")}
                       </span>
                       <input
                         type="date"
@@ -237,7 +241,7 @@ export function TaskModal({
 
                     <section className="flex flex-col gap-1">
                       <span className="text-xs text-(--ws-fg-muted)">
-                        Assignee
+                        {t("tasks.assignee")}
                       </span>
                       <Select.Root
                         value={selectAssigneeValue}
@@ -251,10 +255,14 @@ export function TaskModal({
                         <Select.Trigger className="text-(--ws-fg) text-sm rounded-lg border border-(--ws-border) px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer disabled:opacity-60">
                           <Select.Value
                             placeholder={
-                              assigneeLoading ? "Loading..." : "Assignee"
+                              assigneeLoading
+                                ? t("tasks.assigneeLoading")
+                                : t("tasks.assignee")
                             }
                           />
-                          <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
+                          <Select.Icon className="text-(--ws-fg-muted)">
+                            v
+                          </Select.Icon>
                         </Select.Trigger>
                         <Select.Portal container={portalContainer ?? undefined}>
                           <Select.Content
@@ -280,9 +288,9 @@ export function TaskModal({
 
                     <section className="md:col-span-2 flex items-center justify-between rounded-lg border border-(--ws-border) px-3 py-3">
                       <div>
-                        <div className="text-sm">Finished</div>
+                        <div className="text-sm">{t("tasks.finished")}</div>
                         <div className="text-xs text-(--ws-fg-muted)">
-                          Mark task as finished
+                          {t("tasks.openDetailsHint")}
                         </div>
                       </div>
                       <RoundedCheckbox
@@ -290,7 +298,7 @@ export function TaskModal({
                         onCheckedChange={(next: boolean) =>
                           onUpdate(task.id, "is_finished", next)
                         }
-                        ariaLabel="Mark task as finished"
+                        ariaLabel={t("tasks.finished")}
                       />
                     </section>
                   </div>
