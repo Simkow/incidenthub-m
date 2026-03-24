@@ -8,6 +8,8 @@ import { RoundedCheckbox } from "./RoundedCheckbox";
 import { dateInputToDateOnly, toDateInputValue } from "./dateTime";
 import { useWsPortalContainer } from "./useWsPortalContainer";
 import { useI18n } from "../../../i18n/I18nProvider";
+import Enhance from "../../../../public/assets/enhance.png";
+import Image from "next/image";
 
 type Props = {
   open: boolean;
@@ -42,6 +44,7 @@ export function TaskModal({
   const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
   const [assigneeRefreshNonce, setAssigneeRefreshNonce] = useState(0);
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -98,6 +101,60 @@ export function TaskModal({
       cancelled = true;
     };
   }, [open, workspaceForUsers, task?.assignee, assigneeRefreshNonce]);
+
+  const enhanceDescription = async () => {
+    if (!task) return;
+
+    const currentDescription = String(task.description ?? "").trim();
+    if (!currentDescription) {
+      alert(t("tasks.enhanceDescriptionEmpty"));
+      return;
+    }
+
+    try {
+      setIsEnhancing(true);
+
+      const res = await fetch("/api/enhance-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: currentDescription,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as {
+          message?: unknown;
+        } | null;
+        throw new Error(
+          typeof data?.message === "string"
+            ? data.message
+            : `Request failed with status ${res.status}`,
+        );
+      }
+
+      const data = (await res.json().catch(() => null)) as {
+        enhancedDescription?: unknown;
+      } | null;
+
+      if (typeof data?.enhancedDescription === "string") {
+        onUpdate(task.id, "description", data.enhancedDescription);
+      } else {
+        throw new Error(
+          "Response does not contain a valid enhancedDescription",
+        );
+      }
+    } catch (error) {
+      console.error("Failed to enhance description:", error);
+      alert(
+        t("tasks.enhanceDescriptionFailed", {
+          message: error instanceof Error ? error.message : "Unknown error",
+        }),
+      );
+    } finally {
+      setIsEnhancing(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -160,14 +217,34 @@ export function TaskModal({
                     </section>
 
                     <section className="md:col-span-2 flex flex-col gap-1">
-                      <span className="text-xs text-(--ws-fg-muted)">
-                        {t("tasks.description")}
-                      </span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-(--ws-fg-muted)">
+                          {t("tasks.description")}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void enhanceDescription();
+                          }}
+                          disabled={isEnhancing}
+                          className="group inline-flex items-center gap-2 rounded-lg border border-(--ws-border) px-2.5 py-1 text-xs text-(--ws-fg-muted) hover:bg-(--ws-hover) disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          <Image
+                            src={Enhance}
+                            alt="Enhance"
+                            className={`ws-icon h-3.5 w-3.5 group-hover:scale-110 transition-transform ${isEnhancing ? "animate-pulse" : ""}`}
+                          />
+                          {isEnhancing
+                            ? t("tasks.enhancingDescription")
+                            : t("tasks.enhanceDescription")}
+                        </button>
+                      </div>
                       <textarea
                         value={task.description}
                         onChange={(e) =>
                           onUpdate(task.id, "description", e.target.value)
                         }
+                        disabled={isEnhancing}
                         className="bg-transparent text-sm rounded-lg border border-(--ws-border) px-3 py-2 h-32 resize-none focus:outline-none"
                       />
                     </section>

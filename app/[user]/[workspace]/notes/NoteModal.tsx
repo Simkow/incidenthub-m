@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useI18n } from "../../../i18n/I18nProvider";
 import type { Note } from "./types";
 import { RoundedCheckbox } from "../tasks/RoundedCheckbox";
+import Enhance from "../../../../public/assets/enhance.png";
+import Image from "next/image";
 
 type Props = {
   open: boolean;
@@ -31,6 +33,7 @@ export function NoteModal({
   const [isPinned, setIsPinned] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
   useEffect(() => {
     if (!note) return;
@@ -129,6 +132,54 @@ export function NoteModal({
     }
   }
 
+  async function enhanceContent() {
+    const currentContent = content.trim();
+    if (!currentContent) {
+      alert(t("notes.enhanceContentEmpty"));
+      return;
+    }
+
+    setIsEnhancing(true);
+    try {
+      const res = await fetch("/api/enhance-note", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note: currentContent }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as {
+          message?: unknown;
+        } | null;
+
+        throw new Error(
+          typeof data?.message === "string"
+            ? data.message
+            : `Request failed with status ${res.status}`,
+        );
+      }
+
+      const data = (await res.json().catch(() => null)) as {
+        enhancedNote?: unknown;
+      } | null;
+
+      if (typeof data?.enhancedNote === "string") {
+        setContent(data.enhancedNote);
+      } else {
+        throw new Error("Response does not contain a valid enhancedNote");
+      }
+    } catch (error) {
+      console.error("Failed to enhance note:", error);
+      alert(
+        t("notes.enhanceContentFailed", {
+          message: error instanceof Error ? error.message : "Unknown error",
+        }),
+      );
+    } finally {
+      setIsEnhancing(false);
+    }
+  }
+
   return (
     <AnimatePresence>
       {open && note ? (
@@ -175,12 +226,32 @@ export function NoteModal({
               </section>
 
               <section className="flex flex-col gap-1">
-                <span className="text-xs text-(--ws-fg-muted)">
-                  {t("notes.content")}
-                </span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs text-(--ws-fg-muted)">
+                    {t("notes.content")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void enhanceContent();
+                    }}
+                    disabled={isEnhancing}
+                    className="group inline-flex items-center gap-2 rounded-lg border border-(--ws-border) px-2.5 py-1 text-xs text-(--ws-fg-muted) hover:bg-(--ws-hover) disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <Image
+                      src={Enhance}
+                      alt="Enhance"
+                      className="ws-icon h-3.5 w-3.5 group-hover:scale-110 transition-transform"
+                    />
+                    {isEnhancing
+                      ? t("notes.enhancingContent")
+                      : t("notes.enhanceContent")}
+                  </button>
+                </div>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
+                  disabled={isEnhancing}
                   className="bg-transparent text-sm rounded-lg border border-(--ws-border) px-3 py-2 h-72 resize-none focus:outline-none"
                 />
               </section>

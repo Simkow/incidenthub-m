@@ -198,6 +198,10 @@ export const messages = {
       openDetails: "Open details",
       openDetailsHint: "Open task details to edit full content",
       edit: "Edit",
+      enhanceDescription: "Enhance",
+      enhancingDescription: "Enhancing...",
+      enhanceDescriptionEmpty: "Description is empty",
+      enhanceDescriptionFailed: "Failed to enhance description: {message}",
     },
     calendar: {
       title: "Calendar",
@@ -276,6 +280,10 @@ export const messages = {
       deleteFailed: "Failed to delete note",
       searchPh: "Search by title or content",
       empty: "No notes yet",
+      enhanceContent: "Enhance",
+      enhancingContent: "Enhancing...",
+      enhanceContentEmpty: "Content is empty",
+      enhanceContentFailed: "Failed to enhance content: {message}",
     },
     auth: {
       name: "Name:",
@@ -590,6 +598,10 @@ export const messages = {
       openDetails: "Szczegóły",
       openDetailsHint: "Otwórz szczegóły taska, aby edytować pełną zawartość",
       edit: "Edytuj",
+      enhanceDescription: "Ulepsz",
+      enhancingDescription: "Ulepszanie...",
+      enhanceDescriptionEmpty: "Opis jest pusty",
+      enhanceDescriptionFailed: "Nie udało się ulepszyć opisu: {message}",
     },
     calendar: {
       title: "Kalendarz",
@@ -668,6 +680,10 @@ export const messages = {
       deleteFailed: "Nie udało się usunąć notatki",
       searchPh: "Szukaj po tytule lub treści",
       empty: "Brak notatek",
+      enhanceContent: "Ulepsz",
+      enhancingContent: "Ulepszanie...",
+      enhanceContentEmpty: "Treść jest pusta",
+      enhanceContentFailed: "Nie udało się ulepszyć treści: {message}",
     },
     auth: {
       name: "Nazwa:",

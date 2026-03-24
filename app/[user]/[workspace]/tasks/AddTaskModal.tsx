@@ -6,6 +6,8 @@ import * as Select from "@radix-ui/react-select";
 import { useI18n } from "../../../i18n/I18nProvider";
 import { dateInputToDateOnly } from "./dateTime";
 import { useWsPortalContainer } from "./useWsPortalContainer";
+import Enhance from "../../../../public/assets/enhance.png";
+import Image from "next/image";
 
 type Priority = "Light" | "Medium" | "High" | "Urgent";
 
@@ -40,7 +42,60 @@ export function AddTaskModal({
   const [assigneeLoading, setAssigneeLoading] = useState(false);
   const [priority, setPriority] = useState<Priority | "">("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const [error, setError] = useState("");
+
+  async function enhanceDescription() {
+    const currentDescription = description.trim();
+    if (!currentDescription) {
+      onErrorMessage?.(t("tasks.enhanceDescriptionEmpty"));
+      setError(t("tasks.enhanceDescriptionEmpty"));
+      return;
+    }
+
+    onErrorMessage?.("");
+    setError("");
+    setIsEnhancing(true);
+
+    try {
+      const res = await fetch("/api/enhance-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: currentDescription }),
+      });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as {
+          message?: unknown;
+        } | null;
+
+        throw new Error(
+          typeof data?.message === "string"
+            ? data.message
+            : `Request failed with status ${res.status}`,
+        );
+      }
+
+      const data = (await res.json().catch(() => null)) as {
+        enhancedDescription?: unknown;
+      } | null;
+
+      if (typeof data?.enhancedDescription === "string") {
+        setDescription(data.enhancedDescription);
+      } else {
+        throw new Error(
+          "Response does not contain a valid enhancedDescription",
+        );
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : t("tasks.networkError");
+      onErrorMessage?.(t("tasks.enhanceDescriptionFailed", { message }));
+      setError(t("tasks.enhanceDescriptionFailed", { message }));
+    } finally {
+      setIsEnhancing(false);
+    }
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -185,7 +240,9 @@ export function AddTaskModal({
                 >
                   <Select.Trigger className="text-(--ws-fg) rounded-md border border-(--ws-border) px-2 py-2 w-full md:w-48 flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
                     <Select.Value placeholder={t("tasks.priorityPh")} />
-                    <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
+                    <Select.Icon className="text-(--ws-fg-muted)">
+                      v
+                    </Select.Icon>
                   </Select.Trigger>
                   <Select.Portal container={portalContainer ?? undefined}>
                     <Select.Content
@@ -213,10 +270,30 @@ export function AddTaskModal({
             </div>
             <div className="flex flex-col md:flex-row gap-3">
               <section className="flex flex-col gap-1 w-full">
-                <span className="text-xs">{t("tasks.description")}</span>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs">{t("tasks.description")}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void enhanceDescription();
+                    }}
+                    disabled={isEnhancing || isSubmitting}
+                    className="group inline-flex items-center gap-2 rounded-lg border border-(--ws-border) px-2.5 py-1 text-xs text-(--ws-fg-muted) hover:bg-(--ws-hover) disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <Image
+                      src={Enhance}
+                      alt="Enhance"
+                      className="ws-icon h-3.5 w-3.5 group-hover:scale-110 transition-transform"
+                    />
+                    {isEnhancing
+                      ? t("tasks.enhancingDescription")
+                      : t("tasks.enhanceDescription")}
+                  </button>
+                </div>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  disabled={isEnhancing || isSubmitting}
                   className="text-(--ws-fg) rounded-md border border-(--ws-border) p-2 w-full md:w-72 h-40 bg-transparent focus:outline-none"
                   placeholder={t("tasks.descriptionPh")}
                 />
@@ -258,7 +335,9 @@ export function AddTaskModal({
                           : t("tasks.assigneePh")
                       }
                     />
-                    <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
+                    <Select.Icon className="text-(--ws-fg-muted)">
+                      v
+                    </Select.Icon>
                   </Select.Trigger>
                   <Select.Portal container={portalContainer ?? undefined}>
                     <Select.Content
