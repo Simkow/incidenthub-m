@@ -5,6 +5,8 @@ export type Task = {
   id: string | number;
   title: string;
   priority: string;
+  status_id?: number | null;
+  status_name?: string | null;
   description: string;
   due_date: string;
   is_finished: boolean;

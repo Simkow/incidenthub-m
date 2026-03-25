@@ -14,6 +14,13 @@ import { useI18n } from "../../../i18n/I18nProvider";
 
 import type { Priority, Task } from "./types";
 import { dateInputToDateOnly, toDateInputValue } from "./dateTime";
+import {
+  DEFAULT_TASK_STATUS_OPTIONS,
+  DONE_STATUS_ID,
+  TODO_STATUS_ID,
+  formatTaskStatusName,
+  statusNameToDone,
+} from "./statusOptions";
 
 type Props = {
   search?: string;
@@ -56,6 +63,8 @@ export default function ActiveTaskSection({
     () => ["Light", "Medium", "High", "Urgent"],
     [],
   );
+
+  const statusOptions = DEFAULT_TASK_STATUS_OPTIONS;
 
   useEffect(() => {
     if (activeTaskId !== null) {
@@ -204,6 +213,58 @@ export default function ActiveTaskSection({
     });
   };
 
+  const updateTaskStatus = useCallback(
+    async (taskId: Task["id"], statusId: number) => {
+      const nextStatus = statusOptions.find((option) => option.id === statusId);
+      if (!nextStatus) return;
+
+      let previousTask: Task | null = null;
+
+      setTasks((prev) =>
+        prev.map((task) => {
+          if (task.id !== taskId) return task;
+          previousTask = task;
+          return {
+            ...task,
+            status_id: nextStatus.id,
+            status_name: nextStatus.name,
+            is_finished: statusNameToDone(nextStatus.name),
+          };
+        }),
+      );
+
+      if (!previousTask) return;
+
+      try {
+        const res = await fetch("/api/update-task-status", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: taskId,
+            status_id: statusId,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Request failed with status ${res.status}`);
+        }
+
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("tasks:refresh"));
+        }
+      } catch (error) {
+        console.error("Failed to update task status", error);
+        setTasks((prev) =>
+          prev.map((task) => {
+            if (task.id !== taskId || !previousTask) return task;
+            return previousTask;
+          }),
+        );
+      }
+    },
+    [statusOptions],
+  );
+
   const handleDelete = async (taskId: Task["id"]) => {
     const snapshot = tasks;
 
@@ -329,6 +390,12 @@ export default function ActiveTaskSection({
   const renderTaskRow = (task: Task) => {
     const isActionMenuOpen = openActionMenuTaskId === task.id;
     const priorityLabel = task.priority || "Light";
+    const currentStatusId =
+      typeof task.status_id === "number"
+        ? task.status_id
+        : task.is_finished
+          ? DONE_STATUS_ID
+          : TODO_STATUS_ID;
     const priorityTone =
       priorityLabel === "Urgent"
         ? "border-red-400/40 bg-red-500/10 text-(--ws-fg-muted)"
@@ -469,6 +536,43 @@ export default function ActiveTaskSection({
                 </Select.Portal>
               </Select.Root>
             </div>
+
+            <div className="min-w-0" onClick={(e) => e.stopPropagation()}>
+              <Select.Root
+                value={String(currentStatusId)}
+                onValueChange={(value) => {
+                  const nextStatusId = Number(value);
+                  if (!Number.isFinite(nextStatusId)) return;
+                  void updateTaskStatus(task.id, nextStatusId);
+                }}
+              >
+                <Select.Trigger className="min-w-0 w-full bg-transparent text-sm text-(--ws-fg-muted) rounded-lg border border-(--ws-border) px-2.5 py-1.5 flex items-center justify-between focus:outline-none">
+                  <Select.Value placeholder={t("tasks.status")} />
+                  <Select.Icon className="text-(--ws-fg-muted)">v</Select.Icon>
+                </Select.Trigger>
+                <Select.Portal container={portalContainer ?? undefined}>
+                  <Select.Content
+                    position="popper"
+                    sideOffset={6}
+                    className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface)"
+                  >
+                    <Select.Viewport className="p-1">
+                      {statusOptions.map((status) => (
+                        <Select.Item
+                          key={status.id}
+                          value={String(status.id)}
+                          className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
+                        >
+                          <Select.ItemText>
+                            {formatTaskStatusName(status.name)}
+                          </Select.ItemText>
+                        </Select.Item>
+                      ))}
+                    </Select.Viewport>
+                  </Select.Content>
+                </Select.Portal>
+              </Select.Root>
+            </div>
           </div>
 
           <div className="text-[11px] text-(--ws-fg-muted)">
@@ -483,9 +587,12 @@ export default function ActiveTaskSection({
           <div className="flex items-center gap-2 rounded-lg border border-(--ws-border) bg-(--ws-surface) px-2 py-1">
             <RoundedCheckbox
               checked={task.is_finished}
-              onCheckedChange={(next) =>
-                updateTask(task.id, "is_finished", next)
-              }
+              onCheckedChange={(next) => {
+                void updateTaskStatus(
+                  task.id,
+                  next ? DONE_STATUS_ID : TODO_STATUS_ID,
+                );
+              }}
               ariaLabel="Mark task as finished"
               stopPropagation
               className="scale-125"
@@ -649,6 +756,7 @@ export default function ActiveTaskSection({
         priorities={priorityOptions}
         onClose={() => setActiveTaskId(null)}
         onUpdate={updateTask}
+        onStatusChange={updateTaskStatus}
       />
     </motion.div>
   );

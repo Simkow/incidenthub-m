@@ -202,6 +202,7 @@ export const messages = {
       enhancingDescription: "Enhancing...",
       enhanceDescriptionEmpty: "Description is empty",
       enhanceDescriptionFailed: "Failed to enhance description: {message}",
+      updateStatusFailed: "Failed to update status: {message}",
     },
     calendar: {
       title: "Calendar",
@@ -602,6 +603,7 @@ export const messages = {
       enhancingDescription: "Ulepszanie...",
       enhanceDescriptionEmpty: "Opis jest pusty",
       enhanceDescriptionFailed: "Nie udało się ulepszyć opisu: {message}",
+      updateStatusFailed: "Nie udało się zaktualizować statusu: {message}",
     },
     calendar: {
       title: "Kalendarz",

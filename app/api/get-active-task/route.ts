@@ -58,6 +58,8 @@ export async function POST(req: Request) {
           t.id,
           t.title,
           t.priority,
+          t.status_id,
+          ts.name AS status_name,
           t.description,
           to_char(t.due_date::date, 'YYYY-MM-DD') AS due_date,
           t.assignee,
@@ -67,6 +69,7 @@ export async function POST(req: Request) {
           w.workspace_name
         FROM tasks t
         LEFT JOIN workspaces w ON t.workspace_id = w.id
+        LEFT JOIN task_statuses ts ON ts.id = t.status_id
         WHERE t.workspace_id = ${workspaceId} AND t.is_finished = false
         ORDER BY t.is_finished, t.assignee_id, t.id
       `;
@@ -79,6 +82,8 @@ export async function POST(req: Request) {
         t.id,
         t.title,
         t.priority,
+        t.status_id,
+        ts.name AS status_name,
         t.description,
         to_char(t.due_date::date, 'YYYY-MM-DD') AS due_date,
         t.assignee,
@@ -88,6 +93,7 @@ export async function POST(req: Request) {
         w.workspace_name
       FROM tasks t
       LEFT JOIN workspaces w ON t.workspace_id = w.id
+      LEFT JOIN task_statuses ts ON ts.id = t.status_id
       WHERE t.assignee_id = ${userId} AND t.is_finished = false
         ORDER BY t.is_finished, t.assignee_id, t.id
     `;

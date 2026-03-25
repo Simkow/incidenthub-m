@@ -10,6 +10,13 @@ import { useWsPortalContainer } from "./useWsPortalContainer";
 import { useI18n } from "../../../i18n/I18nProvider";
 import Enhance from "../../../../public/assets/enhance.png";
 import Image from "next/image";
+import {
+  DEFAULT_TASK_STATUS_OPTIONS,
+  DONE_STATUS_ID,
+  TODO_STATUS_ID,
+  formatTaskStatusName,
+  statusNameToDone,
+} from "./statusOptions";
 
 type Props = {
   open: boolean;
@@ -21,6 +28,7 @@ type Props = {
     key: K,
     value: Task[K],
   ) => void;
+  onStatusChange: (taskId: Task["id"], statusId: number) => Promise<void>;
 };
 
 export function TaskModal({
@@ -29,6 +37,7 @@ export function TaskModal({
   priorities,
   onClose,
   onUpdate,
+  onStatusChange,
 }: Props) {
   const { t } = useI18n();
   const portalContainer = useWsPortalContainer();
@@ -52,6 +61,23 @@ export function TaskModal({
     window.addEventListener("workspace-users:refresh", handler);
     return () => window.removeEventListener("workspace-users:refresh", handler);
   }, []);
+
+  const statusOptions = DEFAULT_TASK_STATUS_OPTIONS;
+
+  const submitStatusChange = async (statusId: number) => {
+    if (!task) return;
+
+    try {
+      await onStatusChange(task.id, statusId);
+    } catch (error) {
+      console.error("Failed to update task status:", error);
+      alert(
+        t("tasks.updateStatusFailed", {
+          message: error instanceof Error ? error.message : "Unknown error",
+        }),
+      );
+    }
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -169,6 +195,13 @@ export function TaskModal({
             task && assigneeOptions.includes(String(task.assignee))
               ? String(task.assignee)
               : ("" as const);
+
+          const currentStatusId =
+            typeof task?.status_id === "number"
+              ? task.status_id
+              : task?.is_finished
+                ? DONE_STATUS_ID
+                : TODO_STATUS_ID;
 
           return (
             <motion.div
@@ -363,6 +396,48 @@ export function TaskModal({
                       </Select.Root>
                     </section>
 
+                    <section className="flex flex-col gap-1">
+                      <span className="text-xs text-(--ws-fg-muted)">
+                        {t("tasks.status")}
+                      </span>
+                      <Select.Root
+                        value={String(currentStatusId)}
+                        onValueChange={(value) => {
+                          const nextStatusId = Number(value);
+                          if (!Number.isFinite(nextStatusId)) return;
+                          void submitStatusChange(nextStatusId);
+                        }}
+                      >
+                        <Select.Trigger className="text-(--ws-fg) text-sm rounded-lg border border-(--ws-border) px-3 py-2 w-full flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
+                          <Select.Value placeholder={t("tasks.status")} />
+                          <Select.Icon className="text-(--ws-fg-muted)">
+                            v
+                          </Select.Icon>
+                        </Select.Trigger>
+                        <Select.Portal container={portalContainer ?? undefined}>
+                          <Select.Content
+                            position="popper"
+                            sideOffset={6}
+                            className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface)"
+                          >
+                            <Select.Viewport className="p-1">
+                              {statusOptions.map((status) => (
+                                <Select.Item
+                                  key={status.id}
+                                  value={String(status.id)}
+                                  className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
+                                >
+                                  <Select.ItemText>
+                                    {formatTaskStatusName(status.name)}
+                                  </Select.ItemText>
+                                </Select.Item>
+                              ))}
+                            </Select.Viewport>
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
+                    </section>
+
                     <section className="md:col-span-2 flex items-center justify-between rounded-lg border border-(--ws-border) px-3 py-3">
                       <div>
                         <div className="text-sm">{t("tasks.finished")}</div>
@@ -372,9 +447,24 @@ export function TaskModal({
                       </div>
                       <RoundedCheckbox
                         checked={task.is_finished}
-                        onCheckedChange={(next: boolean) =>
-                          onUpdate(task.id, "is_finished", next)
-                        }
+                        onCheckedChange={(next: boolean) => {
+                          const nextStatus = next
+                            ? DONE_STATUS_ID
+                            : (() => {
+                                const statusName =
+                                  typeof task.status_name === "string"
+                                    ? task.status_name
+                                    : "";
+                                if (
+                                  statusName &&
+                                  !statusNameToDone(statusName)
+                                ) {
+                                  return currentStatusId;
+                                }
+                                return TODO_STATUS_ID;
+                              })();
+                          void submitStatusChange(nextStatus);
+                        }}
                         ariaLabel={t("tasks.finished")}
                       />
                     </section>

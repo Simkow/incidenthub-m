@@ -8,6 +8,11 @@ import { dateInputToDateOnly } from "./dateTime";
 import { useWsPortalContainer } from "./useWsPortalContainer";
 import Enhance from "../../../../public/assets/enhance.png";
 import Image from "next/image";
+import {
+  DEFAULT_TASK_STATUS_OPTIONS,
+  TODO_STATUS_ID,
+  formatTaskStatusName,
+} from "./statusOptions";
 
 type Priority = "Light" | "Medium" | "High" | "Urgent";
 
@@ -41,6 +46,7 @@ export function AddTaskModal({
   const [assigneeOptions, setAssigneeOptions] = useState<string[]>([]);
   const [assigneeLoading, setAssigneeLoading] = useState(false);
   const [priority, setPriority] = useState<Priority | "">("");
+  const [statusId, setStatusId] = useState<number>(TODO_STATUS_ID);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [error, setError] = useState("");
@@ -168,6 +174,7 @@ export function AddTaskModal({
           description,
           due_date: dueDateOnly,
           assignee,
+          status_id: statusId,
           workspace,
           ...(createdBy ? { created_by: createdBy } : {}),
         }),
@@ -186,6 +193,7 @@ export function AddTaskModal({
       setTitle("");
       setDescription("");
       setPriority("");
+      setStatusId(TODO_STATUS_ID);
       setDueDate("");
       setAssignee("");
 
@@ -353,6 +361,46 @@ export function AddTaskModal({
                             className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
                           >
                             <Select.ItemText>{name}</Select.ItemText>
+                          </Select.Item>
+                        ))}
+                      </Select.Viewport>
+                    </Select.Content>
+                  </Select.Portal>
+                </Select.Root>
+              </section>
+              <section className="flex flex-col gap-1 w-full">
+                <span className="text-xs">{t("tasks.status")}</span>
+                <Select.Root
+                  value={String(statusId)}
+                  onValueChange={(value) => {
+                    const nextStatusId = Number(value);
+                    if (Number.isFinite(nextStatusId)) {
+                      setStatusId(nextStatusId);
+                    }
+                  }}
+                >
+                  <Select.Trigger className="text-(--ws-fg) rounded-md border border-(--ws-border) px-2 py-2 w-full md:w-72 flex items-center justify-between bg-transparent focus:outline-none hover:cursor-pointer">
+                    <Select.Value placeholder={t("tasks.status")} />
+                    <Select.Icon className="text-(--ws-fg-muted)">
+                      v
+                    </Select.Icon>
+                  </Select.Trigger>
+                  <Select.Portal container={portalContainer ?? undefined}>
+                    <Select.Content
+                      position="popper"
+                      sideOffset={6}
+                      className="z-50 overflow-hidden rounded-md border border-(--ws-border) bg-(--ws-surface) hover:cursor-pointer"
+                    >
+                      <Select.Viewport className="p-1">
+                        {DEFAULT_TASK_STATUS_OPTIONS.map((status) => (
+                          <Select.Item
+                            key={status.id}
+                            value={String(status.id)}
+                            className="text-xs select-none rounded px-2 py-2 text-(--ws-fg) outline-none data-highlighted:bg-(--ws-hover) data-[state=checked]:bg-(--ws-hover)"
+                          >
+                            <Select.ItemText>
+                              {formatTaskStatusName(status.name)}
+                            </Select.ItemText>
                           </Select.Item>
                         ))}
                       </Select.Viewport>
