@@ -1,4 +1,3 @@
-import { sql } from "../../lib/db";
 import OpenAI from "openai";
 
 const openai = new OpenAI({

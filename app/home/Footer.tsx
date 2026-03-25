@@ -74,12 +74,12 @@ export const Footer = () => {
           >
             {t("footer.dashboard")}
           </Link>
-          <a
+          <Link
             className="text-sm text-neutral-300 hover:text-white transition-colors"
             href="/contact"
           >
             {t("footer.contact")}
-          </a>
+          </Link>
         </div>
         <div className="grid gap-3">
           <span className="text-sm uppercase tracking-[0.2em] text-neutral-500">
@@ -103,12 +103,12 @@ export const Footer = () => {
       <div className="px-6 md:px-12 lg:px-56 py-6 border-t border-neutral-800/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <span className="text-xs text-neutral-500">{t("footer.rights")}</span>
         <div className="flex items-center gap-4 text-xs text-neutral-500">
-          <a className="hover:text-white transition-colors" href="/contact">
+          <Link className="hover:text-white transition-colors" href="/contact">
             {t("footer.support")}
-          </a>
-          <a className="hover:text-white transition-colors" href="/home">
+          </Link>
+          <Link className="hover:text-white transition-colors" href="/home">
             {t("footer.status")}
-          </a>
+          </Link>
         </div>
       </div>
     </footer>
