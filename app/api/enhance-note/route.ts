@@ -5,7 +5,6 @@ const openai = new OpenAI({
 });
 
 export const dynamic = "force-dynamic";
-//edit
 
 export async function POST(req: Request) {
   try {
