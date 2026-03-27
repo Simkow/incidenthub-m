@@ -359,7 +359,7 @@ export const FirstWorkspace: React.FC = () => {
                   readOnly
                   type="text"
                   id="workspaceUrl"
-                  value={`http://localhost:5173/${userName}/${trimmedProjectName || "<workspace>"}`}
+                  value={`https://incidenthub.online/${userName}/${trimmedProjectName || "<workspace>"}`}
                   name="workspaceUrl"
                   className="text-neutral-400 bg-neutral-900/40 border border-neutral-800 rounded-lg px-4 py-2 w-full text-sm"
                   placeholder={t("firstWorkspace.workspaceUrlPh")}
