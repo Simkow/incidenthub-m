@@ -50,6 +50,14 @@ export const Hero: FC = () => {
     }
   };
 
+  const scrollToFeatures = () => {
+    if (window.innerWidth < 768) {
+      window.scrollTo({ top: 600, left: 0, behavior: "smooth" });
+    } else {
+      window.scrollTo({ top: 1200, left: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <main className="w-full max-md:max-h-screen max-md:justify-center md:min-h-screen bg-[#090909] overflow-hidden relative gap-8 flex flex-col pt-44 md:pt-32 px-6 md:px-12 lg:px-56 body-text text-center text-neutral-100 pb-20 md:pb-8">
       <div className="w-full h-full z-0">
@@ -117,6 +125,7 @@ export const Hero: FC = () => {
             initial={{ opacity: 0, filter: "blur(10px)" }}
             animate={{ opacity: 1, filter: "blur(0px)" }}
             transition={{ duration: 2 }}
+            onClick={scrollToFeatures}
             className="group text-neutral-300 rounded-xl w-full sm:w-48 py-2 hover:bg-neutral-700 transition-all duration-300 cursor-pointer font-bold"
           >
             {t("hero.learnMore")}

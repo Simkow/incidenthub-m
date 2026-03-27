@@ -41,7 +41,7 @@ export const Presentation = () => {
           <span className="heading max-md:text-base text-xl text-neutral-400">
             {t("presentation.kicker")}
           </span>
-          <h2 className="max-md:text-3xl text-5xl heading font-bold">
+          <h2 id="features" className="max-md:text-3xl text-5xl heading font-bold">
             {t("presentation.title")}
           </h2>
           <div className="max-md:w-[90%] md:w-[400px] h-[1px] bg-gradient-to-r from-20%-transparent via-neutral-400 to-80%-transparent mt-3"></div>
