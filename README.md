@@ -1,46 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IncidentHub
+
+A modern incident management platform for teams and individual operators. Log incidents, assign tasks, track progress, and collaborate — all in one clean workspace.
+
+---
+
+## Features
+
+- **Workspaces & roles** — Create workspaces, invite team members, and manage access control
+- **Tasks** — Create, assign, and track tasks with priorities, due dates, and status updates. AI-powered description enhancement included
+- **Projects** — Set project goals, track overall completion progress, and manage deadlines
+- **Calendar** — Schedule events, link them to tasks, and sync across the workspace
+- **Notes** — Capture incident notes and insights with pinning and AI content enhancement
+- **Inbox** — Centralized notifications for deadline alerts, invitations, and status changes
+- **Themes** — 7 workspace themes (dark/light variants: Default, Blue, Beige, Orange, Purple)
+- **i18n** — Full English and Polish localization
+- **JWT auth** — Secure cookie-based authentication with middleware route protection
+
+## Tech Stack
+
+| Layer | Tech |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 |
+| Database | Neon (serverless PostgreSQL) |
+| Auth | JWT via `jose`, bcrypt password hashing |
+| AI | OpenAI API (task/note enhancement) |
+| Animations | Motion (Framer Motion) |
+| UI | Radix UI |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- A [Neon](https://neon.tech) PostgreSQL database
+- An OpenAI API key (for AI enhancement features)
+
+### Installation
+
+```bash
+git clone https://github.com/your-username/incidenthub-m.git
+cd incidenthub-m
+npm install
+```
+
+### Environment Variables
+
+Copy `.env.example` and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+DATABASE_URL=postgres://...   # Neon connection string
+JWT_SECRET=your-secret-key    # Random secret for JWT signing
+```
+
+### Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-## Environment Variables
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Create a `.env.local` file in the project root with:
+### Build for production
 
 ```bash
-DATABASE_URL=postgres://...
+npm run build
+npm run start
 ```
 
-You can copy `.env.example` as a starting point.
+## Project Structure
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```
+app/
+├── [user]/[workspace]/     # Authenticated workspace routes
+│   ├── tasks/              # Task management
+│   ├── project/            # Project overview & settings
+│   ├── calendar/           # Calendar & event scheduling
+│   ├── notes/              # Notes & insights
+│   ├── inbox/              # Notifications & invitations
+│   ├── members/            # Team member management
+│   ├── profile/            # User profile settings
+│   └── settings/           # Workspace theme settings
+├── api/                    # Next.js API routes (REST)
+├── home/                   # Landing page components
+├── i18n/                   # EN / PL localization
+├── login/ & register/      # Auth pages
+└── lib/db.ts               # Database connection
+middleware.ts               # JWT route protection
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The easiest way to deploy is via [Vercel](https://vercel.com):
 
-## Learn More
+1. Push your repository to GitHub
+2. Import the project in Vercel
+3. Set environment variables (`DATABASE_URL`, `JWT_SECRET`, `OPENAI_API_KEY`) in the Vercel dashboard
+4. Deploy
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
